@@ -1,0 +1,26 @@
+{
+  "name": "ritsu.js",
+  "version": "0.1.0-beta",
+  "description": "HTML form validation",
+  "devDependencies": {
+    "grunt": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-cssmin": "^1.0.1",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NYPD/ritsu"
+  },
+  "bugs": {
+    "url": "https://github.com/NYPD/ritsu/issues"
+  },
+  "contributors": [
+    {
+      "name": "NYPD"
+    }
+  ],
+  "license": "MIT"
+}

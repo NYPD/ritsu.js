@@ -1,0 +1,20 @@
+
+#################
+## Grunt Stuff ##
+#################
+node_modules
+.sass-cache
+
+######################
+## Windows detritus ##
+######################
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Mac crap
+.DS_Store
+/target/
