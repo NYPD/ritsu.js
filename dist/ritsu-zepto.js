@@ -88,304 +88,319 @@ var RegexUtil = new function() {
 
 };
 
-var FormUtil = new function() {
-	this.storeInitialFormValues = function storeInitialFormValues($selector){
+var ritsu = new function () {
 
-		var $defaultSelector = $('input, textarea');
+  this.useBootstrap3Stlying = false;
 
-		$selector ? $selector: $selector = $defaultSelector;
+  this.initialize = function (parameters) {
 
-		$selector.each(function() {
+    var invalidParams = typeof parameters !== "object";
+    if (invalidParams) throw "Invalid parameters to initialize ritsu.js";
 
-			var $this = $(this);
+		this.useBootstrap3Stlying = parameters.useBootstrap3Stlying === undefined? false: parameters.useBootstrap3Stlying;
 
-			var isCheckbox = $this.is('input[type="checkbox"]');
+		return this;
+  };
+
+  this.storeInitialFormValues = function ($selector) {
+
+    var $defaultSelector = $('input,textarea,select');
+
+    $selector ? $selector : $selector = $defaultSelector;
+
+    $selector.each(function () {
+
+      var $this = $(this);
+
+      var isCheckbox = $this.is('input[type="checkbox"]');
       var isRadio = $this.is('input[type="radio"]');
 
-			if(isCheckbox || isRadio){
-				$this.data('initialValue', $this.is(':checked'));
-			}else{
-				$this.data('initialValue', $this.val());
-			}
+      if (isCheckbox || isRadio) {
+        $this.data('initialValue', $this.is(':checked'));
+      } else {
+        $this.data('initialValue', $this.val());
+      }
 
-		});
-	};
+    });
 
-	this.checkIfFormValuesIsDirty = function checkIfFormValuesIsDirty($selector){
-		var isDirty = false;
+		return this;
+  };
 
-		var $defaultSelector = $('input, textarea');
+  this.isFormDirty = function ($selector) {
+    var isDirty = false;
 
-		$selector ? $selector: $selector = $defaultSelector;
+    var $defaultSelector = $('input,textarea,select');
 
-		$selector.each(function () {
+    $selector ? $selector : $selector = $defaultSelector;
 
-			var $this = $(this);
+    $selector.each(function () {
 
-			var noInitialValue = $this.data('initialValue') === undefined;
-			if(noInitialValue) return true;
+      var $this = $(this);
 
-			var isCheckbox = $this.is('input[type="checkbox"]');
-			var isRadio = $this.is('input[type="radio"]');
+      var noInitialValue = $this.data('initialValue') === undefined;
+      if (noInitialValue) return true;
 
-			var valueChanged = false;
+      var isCheckbox = $this.is('input[type="checkbox"]');
+      var isRadio = $this.is('input[type="radio"]');
 
-			if(isCheckbox || isRadio){
-				valueChanged = $this.data('initialValue') != $this.is(':checked');
-			}else{
-				valueChanged = $this.data('initialValue') != $this.val();
-			}
+      var valueChanged = false;
 
-	        if(valueChanged){
-	            isDirty = true;
-	            return false;
-	        }
+      if (isCheckbox || isRadio) {
+        valueChanged = $this.data('initialValue') != $this.is(':checked');
+      } else {
+        valueChanged = $this.data('initialValue') != $this.val();
+      }
 
-	    });
+      if (valueChanged) {
+        isDirty = true;
+        return false;
+      }
 
-	   return isDirty;
-	};
+    });
 
-	this.validateFormValues = function validateFormValues($selector, highlightFields, displayErrorMessage) {
+    return isDirty;
+  };
 
-		var noSelectorPassedIn = $selector === undefined;
-		if(noSelectorPassedIn) throw "No selector passed in";
+  this.validate = function ($selector, highlightFields, displayErrorMessage) {
 
-		//TODO instead of passing parameters in, make them separate functions
-		highlightFields = highlightFields === undefined? true: highlightFields; //Make this true by default if a value is not passed in
-		displayErrorMessage = highlightFields === undefined? false: displayErrorMessage; //Make this false by default if a value is not passed in
+    var noSelectorPassedIn = $selector === undefined;
+    if (noSelectorPassedIn) throw "No selector passed in";
 
-		var isNotInputs = !$selector.is('input,textarea');
-		if(isNotInputs) $selector = $selector.find('input,textarea');
+    //TODO instead of passing parameters in, make them separate functions
+    highlightFields = highlightFields === undefined ? true : highlightFields; //Make this true by default if a value is not passed in
+    displayErrorMessage = highlightFields === undefined ? false : displayErrorMessage; //Make this false by default if a value is not passed in
 
-		var isValid = true;
+    var isNotInputs = !$selector.is('input[type="text"],textarea,select');
+    if (isNotInputs) $selector = $selector.find('input,textarea');
 
-		//Loops through all the jQuery inputs
-		$selector.filter('textarea, input[type="text"]').each(function(){
+    var isValid = true;
 
-			var $input = $(this);
-			var inputIsDisabled = $input.prop('disabled') === true;
+    //Loops through all the jQuery inputs
+    $selector.filter('textarea, input[type="text"]').each(function () {
 
-			if(inputIsDisabled) return true;
+      var $input = $(this);
+      var inputIsDisabled = $input.prop('disabled') === true;
 
-			var isAlpha = $input.hasClass("alpha");
-			var isNumeric = $input.hasClass("numeric");
-			var isOptional = $input.hasClass("optional");
+      if (inputIsDisabled) return true;
 
-			var fieldValue = $input.val();
-			var isEmpty = $.trim(fieldValue) === "" || fieldValue === undefined;
+      var isAlpha = $input.hasClass("alpha");
+      var isNumeric = $input.hasClass("numeric");
+      var isOptional = $input.hasClass("optional");
 
-			var valueIsMissing = isEmpty && !isOptional;
-			var noValidationNeeded = isEmpty && isOptional;
+      var fieldValue = $input.val();
+      var isEmpty = $.trim(fieldValue) === "" || fieldValue === undefined;
 
-			var invalidInput = noValidationNeeded? false : valueIsMissing;
-			var furtherValidationIsNeeded = !noValidationNeeded && !valueIsMissing;
+      var valueIsMissing = isEmpty && !isOptional;
+      var noValidationNeeded = isEmpty && isOptional;
 
-			//If its a valid input, further verify it. If it is invalid, no reason to validate more
-			if(furtherValidationIsNeeded && isAlpha) invalidInput = validateAlphaField($input);
-		    if(furtherValidationIsNeeded && isNumeric) invalidInput = validateNumericField($input);
+      var invalidInput = noValidationNeeded ? false : valueIsMissing;
+      var furtherValidationIsNeeded = !noValidationNeeded && !valueIsMissing;
 
-			//Sets the entire form to false, just because the was at least 1 invalid field
-			if(invalidInput) {
-				isValid = false;
-				$input.data('invalid', true);
+      //If its a valid input, further verify it. If it is invalid, no reason to validate more
+      if (furtherValidationIsNeeded && isAlpha) invalidInput = validateAlphaField($input);
+      if (furtherValidationIsNeeded && isNumeric) invalidInput = validateNumericField($input);
 
-				if(highlightFields) $input.addClass("errorMsgInput");
-				if(displayErrorMessage) showErrorMessage($input);
-			}else {
-				$input.removeClass("errorMsgInput");
-				$input.data('invalid', false);
+      //Sets the entire form to false, just because the was at least 1 invalid field
+      if (invalidInput) {
+        isValid = false;
+        $input.data('invalid', true);
 
-				removeErrorMessage($input);
-				$input.parent('td').find('.error-label').remove();
-			}
+        if (highlightFields) $input.addClass("errorMsgInput");
+        if (displayErrorMessage) showErrorMessage($input);
+      } else {
+        $input.removeClass("errorMsgInput");
+        $input.data('invalid', false);
 
-		});
+        removeErrorMessage($input);
+        $input.parent('td').find('.error-label').remove();
+      }
 
-		$selector.filter('select').each(function() {
+    });
 
-			var $dropdown = $(this);
+    $selector.filter('select').each(function () {
 
-			var dropdownIsDisabled = $dropdown.prop('disabled') === true;
-			if(dropdownIsDisabled) return true;
+      var $dropdown = $(this);
 
-			var valueSelected = $dropdown.val();
-			var isNotOptional = !$dropdown.hasClass('optional');
+      var dropdownIsDisabled = $dropdown.prop('disabled') === true;
+      if (dropdownIsDisabled) return true;
 
-			var isEmpty = isNotOptional && (valueSelected === "" || valueSelected === undefined || valueSelected === null);
+      var valueSelected = $dropdown.val();
+      var isNotOptional = !$dropdown.hasClass('optional');
 
-			if(isEmpty) {
-				isValid = false;
-				if(highlightFields) $dropdown.addClass("errorMsgInput");
-				$dropdown.data('invalid', true);
-			}else {
-				$dropdown.removeClass("errorMsgInput");
-				$dropdown.data('invalid', false);
-			}
+      var isEmpty = isNotOptional && (valueSelected === "" || valueSelected === undefined || valueSelected === null);
 
-		});
+      if (isEmpty) {
+        isValid = false;
+        if (highlightFields) $dropdown.addClass("errorMsgInput");
+        $dropdown.data('invalid', true);
+      } else {
+        $dropdown.removeClass("errorMsgInput");
+        $dropdown.data('invalid', false);
+      }
 
-		return isValid;
-	};
+    });
 
-	var validateNumericField = function validateNumericField($input) {
+    return isValid;
+  };
 
-		var invalidNumeric = false;
+  var validateNumericField = function ($input) {
 
-		var fieldValue = $input.val();
+    var invalidNumeric = false;
 
-		var isNumericWholeInput = $input.hasClass("numeric-whole");
-		var isNumericMonetaryInput = $input.hasClass("numeric-monetary");
-		var isNumericDecimalInput = $input.hasClass("numeric-decimal");
-		var isNumericFullYear = $input.hasClass("numeric-full-year");
-		var isNumericDatePicker = $input.hasClass("numeric-date-picker");
+    var fieldValue = $input.val();
 
-		if(isNumericWholeInput) {
-			invalidNumeric = !RegexUtil.getNumericWholeRegex().test(fieldValue);
-		}else if(isNumericMonetaryInput) {
-			invalidNumeric = !RegexUtil.getNumericMonetaryRegex().test(fieldValue);
-		}else if(isNumericDecimalInput) {
-			invalidNumeric = !RegexUtil.getNumericDecimalRegexString($input.data('decimal-max')).test(fieldValue);
-		}else if(isNumericFullYear) {
-			invalidNumeric = !RegexUtil.getNumericFullYearRegex().test(fieldValue);
-		}else if(isNumericDatePicker) {
-			invalidNumeric = !RegexUtil.getNumericDatePickerRegex().test(fieldValue);
+    var isNumericWholeInput = $input.hasClass("numeric-whole");
+    var isNumericMonetaryInput = $input.hasClass("numeric-monetary");
+    var isNumericDecimalInput = $input.hasClass("numeric-decimal");
+    var isNumericFullYear = $input.hasClass("numeric-full-year");
+    var isNumericDatePicker = $input.hasClass("numeric-date-picker");
 
-			var isNoPastDate = $input[0].hasAttribute('data-no-past-date');
-			if(isNoPastDate && !invalidNumeric) invalidNumeric = new Date().getTime() > new Date(fieldValue);
+    if (isNumericWholeInput) {
+      invalidNumeric = !RegexUtil.getNumericWholeRegex().test(fieldValue);
+    } else if (isNumericMonetaryInput) {
+      invalidNumeric = !RegexUtil.getNumericMonetaryRegex().test(fieldValue);
+    } else if (isNumericDecimalInput) {
+      invalidNumeric = !RegexUtil.getNumericDecimalRegexString($input.data('decimal-max')).test(fieldValue);
+    } else if (isNumericFullYear) {
+      invalidNumeric = !RegexUtil.getNumericFullYearRegex().test(fieldValue);
+    } else if (isNumericDatePicker) {
+      invalidNumeric = !RegexUtil.getNumericDatePickerRegex().test(fieldValue);
 
-		}
+      var isNoPastDate = $input[0].hasAttribute('data-no-past-date');
+      if (isNoPastDate && !invalidNumeric) invalidNumeric = new Date().getTime() > new Date(fieldValue);
 
-		var hasMinLimit = $input.attr('min') !== undefined;
-		var hasMaxLimit = $input.attr('max') !== undefined;
+    }
 
-		if(!invalidNumeric) {
+    var hasMinLimit = $input.attr('min') !== undefined;
+    var hasMaxLimit = $input.attr('max') !== undefined;
 
-			if(hasMinLimit && hasMaxLimit) {
-				invalidNumeric = fieldValue < $input.attr('min') || fieldValue > $input.attr('max');
-			}else if(hasMinLimit) {
-				invalidNumeric = fieldValue < $input.attr('min');
-			}else if(hasMaxLimit) {
-				invalidNumeric = fieldValue > $input.attr('max');
-			}
-		}
+    if (!invalidNumeric) {
 
+      if (hasMinLimit && hasMaxLimit) {
+        invalidNumeric = fieldValue < $input.attr('min') || fieldValue > $input.attr('max');
+      } else if (hasMinLimit) {
+        invalidNumeric = fieldValue < $input.attr('min');
+      } else if (hasMaxLimit) {
+        invalidNumeric = fieldValue > $input.attr('max');
+      }
+    }
 
-		return invalidNumeric;
-	};
 
-	var validateAlphaField = function validateAlphaField($input) {
+    return invalidNumeric;
+  };
 
-		var invalidAlphaInput = false;
+  var validateAlphaField = function ($input) {
 
-		var fieldValue = $input.val();
+    var invalidAlphaInput = false;
 
-		var isAlphaAll = $input.hasClass("alpha-all");//We dont check for this via regex, but it is nice to state that u dont care what the user enters here
-		var isAlphaOnly = $input.hasClass("alpha-only");
-		var isAlphaZip = $input.hasClass("alpha-zip");
-		var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
-		var isAlphaNumeric = $input.hasClass("alpha-numeric");
+    var fieldValue = $input.val();
 
-		if(isAlphaOnly) {
-			invalidAlphaInput = !RegexUtil.getAlphaOnlyRegex().test(fieldValue);
-		}else if(isAlphaZip) {
-			invalidAlphaInput = !RegexUtil.getAlphaZipRegex().test(fieldValue);
-		}else if(isAlphaJqueryDate) {
-			invalidAlphaInput = $input.datepicker("getDate") === null;
-		}else if(isAlphaNumeric) {
-			invalidAlphaInput = !RegexUtil.getAlphaNumericRegex().test(fieldValue);
-		}
+    var isAlphaAll = $input.hasClass("alpha-all"); //We dont check for this via regex, but it is nice to state that u dont care what the user enters here
+    var isAlphaOnly = $input.hasClass("alpha-only");
+    var isAlphaZip = $input.hasClass("alpha-zip");
+    var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
+    var isAlphaNumeric = $input.hasClass("alpha-numeric");
 
-		return invalidAlphaInput;
-	};
+    if (isAlphaOnly) {
+      invalidAlphaInput = !RegexUtil.getAlphaOnlyRegex().test(fieldValue);
+    } else if (isAlphaZip) {
+      invalidAlphaInput = !RegexUtil.getAlphaZipRegex().test(fieldValue);
+    } else if (isAlphaJqueryDate) {
+      invalidAlphaInput = $input.datepicker("getDate") === null;
+    } else if (isAlphaNumeric) {
+      invalidAlphaInput = !RegexUtil.getAlphaNumericRegex().test(fieldValue);
+    }
 
-	var removeErrorMessage = function removeErrorMessage($input) {
+    return invalidAlphaInput;
+  };
 
-		var $labelParent = $input.closest('.error-label-container');
-		if($labelParent.length == 0) $labelParent = $input.parent();
+  var removeErrorMessage = function ($input) {
 
-		$labelParent.find('.error-label, .warning-label').remove();
+    var $labelParent = $input.closest('.error-label-container');
+    if ($labelParent.length == 0) $labelParent = $input.parent();
 
-	}
+    $labelParent.find('.error-label, .warning-label').remove();
 
-	var showErrorMessage = function showErrorMessage($input) {
+  }
 
-		var $labelParent = $input.closest('.error-label-container');
-		if($labelParent.length == 0) $labelParent = $input.parent();
+  var showErrorMessage = function ($input) {
 
-		var id = $input.attr('id');
-		var errorMessage = getErrorMessageForInput($input);
+    var $labelParent = $input.closest('.error-label-container');
+    if ($labelParent.length == 0) $labelParent = $input.parent();
 
-		var noErrorMessage = errorMessage === null;
-		if(noErrorMessage) return;
+    var id = $input.attr('id');
+    var errorMessage = getErrorMessageForInput($input);
 
-		$labelParent.find('.error-label, .warning-label').remove();
-		$labelParent.append('<label class="error-label"' + (id ? ' for="' + id + '"' : '') + '>' + errorMessage + '</label>');
+    var noErrorMessage = errorMessage === null;
+    if (noErrorMessage) return;
 
-	}
+    $labelParent.find('.error-label, .warning-label').remove();
+    $labelParent.append('<label class="error-label"' + (id ? ' for="' + id + '"' : '') + '>' + errorMessage + '</label>');
 
-	var getErrorMessageForInput =  function getErrorMessageForInput($input) {
+  }
 
-		var isAlpha = $input.hasClass("alpha");
+  var getErrorMessageForInput = function ($input) {
 
-		if(isAlpha) {
+    var isAlpha = $input.hasClass("alpha");
 
-			var isAlphaAll = $input.hasClass("alpha-all");
-			if(isAlphaAll) return null;
+    if (isAlpha) {
 
-			var isAlphaOnly = $input.hasClass("alpha-only");
-			if(isAlphaOnly) return "Please enter only letters";
+      var isAlphaAll = $input.hasClass("alpha-all");
+      if (isAlphaAll) return null;
 
-			var isAlphaZip = $input.hasClass("alpha-zip");
-			if(isAlphaZip) return "Please enter a valid zip code";
+      var isAlphaOnly = $input.hasClass("alpha-only");
+      if (isAlphaOnly) return "Please enter only letters";
 
-			var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
-			if(isAlphaJqueryDate) return "Please select a date from the datepicker";
+      var isAlphaZip = $input.hasClass("alpha-zip");
+      if (isAlphaZip) return "Please enter a valid zip code";
 
-			var isAlphaNumeric = $input.hasClass("alpha-numeric");
-			if(isAlphaNumeric) return "Please enter only alphanumeric characters";
-		}
+      var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
+      if (isAlphaJqueryDate) return "Please select a date from the datepicker";
 
-		var isNumeric = $input.hasClass("numeric");
+      var isAlphaNumeric = $input.hasClass("alpha-numeric");
+      if (isAlphaNumeric) return "Please enter only alphanumeric characters";
+    }
 
-		if(isNumeric) {
+    var isNumeric = $input.hasClass("numeric");
 
-			var errorMessage;
+    if (isNumeric) {
 
-			var isNumericWholeInput = $input.hasClass("numeric-whole");
-			if(isNumericWholeInput) errorMessage =  "Please enter a whole number";
+      var errorMessage;
 
-			var isNumericMonetaryInput = $input.hasClass("numeric-monetary");
-			if(isNumericMonetaryInput) errorMessage = "Please enter a monetary value";
+      var isNumericWholeInput = $input.hasClass("numeric-whole");
+      if (isNumericWholeInput) errorMessage = "Please enter a whole number";
 
-			var isNumericDecimalInput = $input.hasClass("numeric-decimal");
-			if(isNumericDecimalInput) errorMessage = "Please enter a number";
+      var isNumericMonetaryInput = $input.hasClass("numeric-monetary");
+      if (isNumericMonetaryInput) errorMessage = "Please enter a monetary value";
 
-			var isNumericFullYear = $input.hasClass("numeric-full-year");
-			if(isNumericFullYear) errorMessage = "Please enter a 4 digit year";
+      var isNumericDecimalInput = $input.hasClass("numeric-decimal");
+      if (isNumericDecimalInput) errorMessage = "Please enter a number";
 
+      var isNumericFullYear = $input.hasClass("numeric-full-year");
+      if (isNumericFullYear) errorMessage = "Please enter a 4 digit year";
 
-			var hasMinLimit = $input.attr('min') !== undefined;
-			var hasMaxLimit = $input.attr('max') !== undefined;
-			var hasDecimalMax = $input.data('decimal-max') !== undefined;
 
-			if(hasDecimalMax) errorMessage += " with " + $input.data('decimal-max') + " decimal places max";
+      var hasMinLimit = $input.attr('min') !== undefined;
+      var hasMaxLimit = $input.attr('max') !== undefined;
+      var hasDecimalMax = $input.data('decimal-max') !== undefined;
 
-			if(hasMinLimit && hasMaxLimit) {
-				errorMessage = errorMessage + " between " + $input.attr('min') + " and " + $input.attr('max');
-			}else if(hasMinLimit) {
-				errorMessage = errorMessage + " greater or equal to " + $input.attr('min');
-			}else if(hasMaxLimit) {
-				errorMessage = errorMessage + " lesser or equal to " + $input.attr('max');
-			}
+      if (hasDecimalMax) errorMessage += " with " + $input.data('decimal-max') + " decimal places max";
 
-			errorMessage += ".";
+      if (hasMinLimit && hasMaxLimit) {
+        errorMessage = errorMessage + " between " + $input.attr('min') + " and " + $input.attr('max');
+      } else if (hasMinLimit) {
+        errorMessage = errorMessage + " greater or equal to " + $input.attr('min');
+      } else if (hasMaxLimit) {
+        errorMessage = errorMessage + " lesser or equal to " + $input.attr('max');
+      }
 
-			return errorMessage;
+      errorMessage += ".";
 
-		}
+      return errorMessage;
 
-		return "Invalid Value";
+    }
 
-	}
+    return "Invalid Value";
+
+  }
 };

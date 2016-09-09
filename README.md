@@ -5,7 +5,7 @@ HTML form validation
 A dumb and simple little HTML form validator. It relies heavily on HTML classes to make it very simple to validate input fields.
 
 ## Why?
-This all started as a need to easily validate my own forms without relying on someone else's validation plug-in. Plus it allowed me to create validation best suited for my projects.
+This all started as a need to easily validate my own forms without being able to use someone else's validation plug-in. The result was a mini validation library that has worked pretty well for my projects.
 
 Perhaps someone else will find this useful.
 

@@ -12,7 +12,7 @@ module.exports = function(grunt) {
       },
       target: {
         files: {
-          'dist/min/ritsu.min.css': ['src/ritsu.css']
+          'dist/min/ritsu.min.css': ['dist/ritsu.css']
         }
       }
     },
@@ -42,11 +42,11 @@ module.exports = function(grunt) {
    /* Concat Task **************************************************************/
     concat: {
       base: {
-        src: ['src/rules.js', 'src/ritsu.js'],
+        src: ['src/rules.js', 'src/core.js'],
         dest: 'dist/ritsu.js'
       },
       zepto: {
-        src: ['vendor/zepto.min.js', 'src/rules.js', 'src/ritsu.js'],
+        src: ['vendor/zepto.min.js', 'src/rules.js', 'src/core.js'],
         dest: 'dist/ritsu-zepto.js'
       }
     },
@@ -56,7 +56,7 @@ module.exports = function(grunt) {
       main: {
         files: [
           {
-            src:  'src/ritsu.css',
+            src:  'src/validation-styles.css',
             dest: 'dist/ritsu.css'
           }
         ]
