@@ -20,19 +20,28 @@ module.exports = function(grunt) {
     /* Uglify Task *************************************************************/
     uglify: {
         options: {
-          preserveComments: false,
-          banner: '/* <%= pkg.name %> v<%= pkg.version %> \n' +
-                  ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-                  ' * Licensed under the <%= pkg.license %> license\n' +
-                  ' * Source coude can be found here: <%= pkg.repository.url %> \n' +
-                  ' */\n'
+          preserveComments: false
         },
         base: {
+          options: {
+            banner: '/* ritsu.js v<%= pkg.version %> \n' +
+                    ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+                    ' * Licensed under the <%= pkg.license %> license\n' +
+                    ' * Source coude can be found here: <%= pkg.repository.url %> \n' +
+                    ' */\n'
+          },
           files: {
             'dist/min/ritsu.min.js': ['dist/ritsu.js']
           }
         },
         zepto: {
+          options: {
+            banner: '/* ritsu-zepto.js v<%= pkg.version %> \n' +
+                    ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+                    ' * Licensed under the <%= pkg.license %> license\n' +
+                    ' * Source coude can be found here: <%= pkg.repository.url %> \n' +
+                    ' */\n'
+          },
           files: {
             'dist/min/ritsu-zepto.min.js': ['dist/ritsu-zepto.js']
           }
@@ -67,7 +76,7 @@ module.exports = function(grunt) {
     watch: {
   	  configFiles: {
           files: ['Gruntfile.js'],
-          tasks: ['uglify','concat','cssmin','copy']
+          tasks: ['concat','uglify','cssmin','copy']
         },
   	  css: {
   		    files: ['src/*.css'],
@@ -75,7 +84,7 @@ module.exports = function(grunt) {
   	  },
       scripts: {
           files: ['src/*.js'],
-          tasks: ['uglify','concat','copy']
+          tasks: ['concat','uglify','copy']
         }
 	  }
   });

@@ -1,4 +1,4 @@
-var RegexUtil = new function() {
+var rules = new function () {
 
   /*
    * Matches all Canadian or American postal codes with different formats. For USA it is:
@@ -9,79 +9,79 @@ var RegexUtil = new function() {
    * e.g. 19608 | 19608-8911 | A9C1A1 | A9C 1A1
    *
    */
-	this.getAlphaZipRegex = function getAlphaZipRegex() {
-		return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/;
-	};
+  this.getAlphaZipRegex = function () {
+    return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/;
+  };
 
-	/*
-	 * Any case insensitive Roman character with periods, dashes, and spaces.
-	 *
-	 * e.g. cool | cool-beans | cool beans | beans.
-	 */
-	this.getAlphaOnlyRegex = function getAlphaOnlyRegex() {
-		return /^([A-Za-z\s\.\-])+$/;
-	};
+  /*
+   * Any case insensitive Roman character with periods, dashes, and spaces.
+   *
+   * e.g. cool | cool-beans | cool beans | beans.
+   */
+  this.getAlphaOnlyRegex = function () {
+    return /^([A-Za-z\s\.\-])+$/;
+  };
 
-	/*
-	 * Any case insensitive Roman character and digit
-	 *
-	 * e.g. Cool | C00l
-	 */
-	this.getAlphaNumericRegex = function getAlphaNumericRegex() {
-		return /^([a-zA-Z0-9]+)$/;
-	};
+  /*
+   * Any case insensitive Roman character and digit
+   *
+   * e.g. Cool | C00l
+   */
+  this.getAlphaNumericRegex = function () {
+    return /^([a-zA-Z0-9]+)$/;
+  };
 
-	/*
-	 *  A negative or non negative number with optional thousands commas
-	 *
-	 *  e.g. 54 | -54 | -54,000 | 54000
-	 */
-	this.getNumericWholeRegex = function getNumericWholeRegex() {
-		return /^[-]?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/;
-	};
+  /*
+   *  A negative or non negative number with optional thousands commas
+   *
+   *  e.g. 54 | -54 | -54,000 | 54000
+   */
+  this.getNumericWholeRegex = function () {
+    return /^[-]?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/;
+  };
 
-	/*
-	 * A negative or non negative monetary amount with optional thousands commas and optional hundreds decimal place
-	 *
-	 * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
-	 */
-	this.getNumericMonetaryRegex = function getNumericMonetaryRegex() {
-		return /^((-?[\d]{1,3}(,[\d]{3})*(\.[\d]{2})*)|-?[\d]+(\.[\d]{2})?)$/;
-	};
+  /*
+   * A negative or non negative monetary amount with optional thousands commas and optional hundreds decimal place
+   *
+   * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
+   */
+  this.getNumericMonetaryRegex = function () {
+    return /^((-?[\d]{1,3}(,[\d]{3})*(\.[\d]{2})*)|-?[\d]+(\.[\d]{2})?)$/;
+  };
 
-	/*
-	 * Taking an optional decimalPlaces integer (defaults to 2 if not provided), any negative or non negative number amount with
-	 * optional thousands commas and optional hundreds decimal place
-	 *
-	 * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
-	 */
-	this.getNumericDecimalRegexString = function getNumericDecimalRegexString(decimalPlaces) {
+  /*
+   * Taking an optional decimalPlaces integer (defaults to 2 if not provided), any negative or non negative number amount with
+   * optional thousands commas and optional hundreds decimal place
+   *
+   * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
+   */
+  this.getNumericDecimalRegexString = function (decimalPlaces) {
 
-		var decimalPlacesUndefined = decimalPlaces === undefined;
-		if(decimalPlacesUndefined) decimalPlaces = 2;
+    var decimalPlacesUndefined = decimalPlaces === undefined;
+    if (decimalPlacesUndefined) decimalPlaces = 2;
 
-		var numericDecimalRegexString = "^((([\\d]{1,3}(,[\\d]{3})*)?(\\.[\\d]{1,decimalPlaces})?)|[\\d]*(\\.[\\d]{1,decimalPlaces})?)$";
-		var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalPlaces));
+    var numericDecimalRegexString = "^((([\\d]{1,3}(,[\\d]{3})*)?(\\.[\\d]{1,decimalPlaces})?)|[\\d]*(\\.[\\d]{1,decimalPlaces})?)$";
+    var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalPlaces));
 
-		return numericDecimalRegex;
-	};
+    return numericDecimalRegex;
+  };
 
-	/*
-	 * A four digit number
-	 *
-	 * e.g. 1999 | 2010 | 0000
-	 */
-	this.getNumericFullYearRegex = function getNumericFullYearRegex() {
-		return /^(\d{4})$/;
-	};
+  /*
+   * A four digit number
+   *
+   * e.g. 1999 | 2010 | 0000
+   */
+  this.getNumericFullYearRegex = function () {
+    return /^(\d{4})$/;
+  };
 
-	/*
-	 * A date String in the format of MM/dd/YYYY. It DOES NOT check for validity of the month or day number.
-	 *
-	 * e.g. 10/02/1990 | 12/12/2014 | 84/65/1990
-	 */
-	this.getNumericDatePickerRegex = function() {
-		return /^(\d{2}\/\d{2}\/\d{4})$/;
-	}
+  /*
+   * A date String in the format of MM/dd/YYYY. It DOES NOT check for validity of the month or day number.
+   *
+   * e.g. 10/02/1990 | 12/12/2014 | 84/65/1990
+   */
+  this.getNumericDatePickerRegex = function () {
+    return /^(\d{2}\/\d{2}\/\d{4})$/;
+  }
 
 };
