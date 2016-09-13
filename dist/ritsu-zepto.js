@@ -117,9 +117,24 @@ var ritsu = new function () {
 
       var isCheckbox = $this.is('input[type="checkbox"]');
       var isRadio = $this.is('input[type="radio"]');
+      var isFile = $this.is('input[type="file"]');
 
       if (isCheckbox || isRadio) {
         $this.data('initialValue', $this.is(':checked'));
+      } else if (isFile) {
+
+        var hasSimpleFileHash = $this.data('simple-file-hash') !== undefined;
+
+        if (hasSimpleFileHash) {
+          $this.data('initialValue', $this.data('simple-file-hash'));
+          return true;
+        }
+
+        var hasFileAttached = this.files.length > 0;
+        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : "";
+
+        $this.data('initialValue', initialValue);
+
       } else {
         $this.data('initialValue', $this.val());
       }
@@ -145,11 +160,15 @@ var ritsu = new function () {
 
       var isCheckbox = $this.is('input[type="checkbox"]');
       var isRadio = $this.is('input[type="radio"]');
+      var isFile = $this.is('input[type="file"]');
 
       var valueChanged = false;
 
       if (isCheckbox || isRadio) {
         valueChanged = $this.data('initialValue') != $this.is(':checked');
+      } else if (isFile) {
+        var hasFileAttached = this.files.length > 0;
+        valueChanged = $this.data('initialValue') != (hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : $this.data('simple-file-hash'));
       } else {
         valueChanged = $this.data('initialValue') != $this.val();
       }
