@@ -1,22 +1,22 @@
-var ritsu = new function () {
+var ritsu = (function () {
 
-  this.useBootstrap3Stlying = false;
-  this.autoMarkInvalidFields = true;
-  this.autoShowErrorMessages = false;
+  var useBootstrap3Stlying = false;
+  var autoMarkInvalidFields = true;
+  var autoShowErrorMessages = false;
 
-  this.initialize = function (parameters) {
+  var initialize = function (options) {
 
-    var invalidParams = typeof parameters !== "object";
-    if (invalidParams) throw "Invalid parameters to initialize ritsu.js";
+    var invalidOptions = typeof options !== "object";
+    if (invalidOptions) throw "Invalid options to initialize ritsu.js";
 
-    this.useBootstrap3Stlying = parameters.useBootstrap3Stlying === undefined ? false : parameters.useBootstrap3Stlying;
-    this.autoMarkInvalidFields = parameters.autoMarkInvalidFields === undefined ? true : parameters.autoMarkInvalidFields;
-    this.autoShowErrorMessages = parameters.autoShowErrorMessages === undefined ? false : parameters.autoShowErrorMessages;
+    useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
+    autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
+    autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
 
     return this;
   };
 
-  this.storeInitialFormValues = function ($selector) {
+  var storeInitialFormValues = function ($selector) {
 
     var selectorUndefined = $selector === undefined;
     if (selectorUndefined) $selector = $('input, textarea, select');
@@ -54,7 +54,7 @@ var ritsu = new function () {
     return this;
   };
 
-  this.isFormDirty = function ($selector) {
+  var isFormDirty = function ($selector) {
 
     var isDirty = false;
 
@@ -93,7 +93,7 @@ var ritsu = new function () {
     return isDirty;
   };
 
-  this.validate = function ($selector) {
+  var validate = function ($selector) {
 
     var noSelectorPassedIn = $selector === undefined;
     if (noSelectorPassedIn) throw "No selector passed in";
@@ -125,8 +125,8 @@ var ritsu = new function () {
       var furtherValidationIsNeeded = !noValidationNeeded && !valueIsMissing;
 
       //If its a valid input, further verify it. If it is invalid, no reason to validate more
-      if (furtherValidationIsNeeded && isAlpha) invalidInput = validateAlphaField($input);
-      if (furtherValidationIsNeeded && isNumeric) invalidInput = validateNumericField($input);
+      if (furtherValidationIsNeeded && isAlpha) invalidInput = _validateAlphaField($input);
+      if (furtherValidationIsNeeded && isNumeric) invalidInput = _validateNumericField($input);
 
       //Sets the entire form to false, just because the was at least 1 invalid field
       if (invalidInput) {
@@ -134,7 +134,7 @@ var ritsu = new function () {
         $input.data('invalid', true);
       } else {
         $input.data('invalid', false);
-        removeErrorMessage($input);
+        _removeErrorMessage($input);
         $input.parent('td').find('.error-label').remove();
       }
 
@@ -161,13 +161,13 @@ var ritsu = new function () {
 
     });
 
-    if (this.autoMarkInvalidFields) this.markInvalidFields($selector);
-    if (this.autoShowErrorMessages) this.showErrorMessages($selector);
+    if (autoMarkInvalidFields) markInvalidFields($selector);
+    if (autoShowErrorMessages) showErrorMessages($selector);
 
     return isValid;
   };
 
-  this.markInvalidFields = function ($selector) {
+  var markInvalidFields = function ($selector) {
 
     var noSelectorPassedIn = $selector === undefined;
     if (noSelectorPassedIn) throw "No selector passed in";
@@ -178,7 +178,7 @@ var ritsu = new function () {
     $selector.each(function () {
 
       var $this = $(this);
-      var $errorSelector = ritsu.useBootstrap3Stlying ? $this.closest('.form-group') : $this;
+      var $errorSelector = useBootstrap3Stlying ? $this.closest('.form-group') : $this;
 
       var isInvalid = $this.data('invalid');
 
@@ -193,7 +193,7 @@ var ritsu = new function () {
     return this;
   };
 
-  this.showErrorMessages = function ($selector) {
+  var showErrorMessages = function ($selector) {
 
     var noSelectorPassedIn = $selector === undefined;
     if (noSelectorPassedIn) throw "No selector passed in";
@@ -205,9 +205,9 @@ var ritsu = new function () {
 
       var $this = $(this);
       var isInvalid = $this.data('invalid');
-      var errorMessage = getErrorMessageForInput($this);
+      var errorMessage = _getErrorMessageForInput($this);
 
-      if (ritsu.useBootstrap3Stlying) {
+      if (useBootstrap3Stlying) {
         var $formGroup = $this.closest('.form-group');
         $formGroup.find('.help-block').remove();
 
@@ -226,7 +226,9 @@ var ritsu = new function () {
     return this;
   };
 
-  var validateNumericField = function ($input) {
+  //Private Methods ************************************************************
+
+  var _validateNumericField = function ($input) {
 
     var invalidNumeric = false;
 
@@ -271,7 +273,7 @@ var ritsu = new function () {
     return invalidNumeric;
   };
 
-  var validateAlphaField = function ($input) {
+  var _validateAlphaField = function ($input) {
 
     var invalidAlphaInput = false;
 
@@ -296,9 +298,9 @@ var ritsu = new function () {
     return invalidAlphaInput;
   };
 
-  var removeErrorMessage = function ($input) {
+  var _removeErrorMessage = function ($input) {
 
-    if (this.useBootstrap3Stlying) {
+    if (useBootstrap3Stlying) {
       $input.closest('.form-group').find('.help-block').remove();
       return;
     }
@@ -309,7 +311,7 @@ var ritsu = new function () {
 
   };
 
-  var getErrorMessageForInput = function ($input) {
+  var _getErrorMessageForInput = function ($input) {
 
     var isAlpha = $input.hasClass("alpha");
 
@@ -373,4 +375,13 @@ var ritsu = new function () {
 
   };
 
-};
+  return {
+    initialize: initialize,
+    storeInitialFormValues: storeInitialFormValues,
+    isFormDirty: isFormDirty,
+    validate: validate,
+    markInvalidFields: markInvalidFields,
+    showErrorMessages: showErrorMessages
+  };
+
+})();
