@@ -258,10 +258,10 @@ var ritsu = (function () {
 
   var markInvalidFields = function ($selector) {
 
-    var noSelectorPassedIn = $selector === undefined;
-    if (noSelectorPassedIn) throw "No selector passed in";
+    var selectorUndefined = $selector === undefined;
+    if (selectorUndefined) $selector = $('input, textarea, select');
 
-    var isNotInputs = !$selector.is('input[type="text"], textarea, select');
+    var isNotInputs = !$selector.is('input, textarea, select');
     if (isNotInputs) $selector = $selector.find('input, textarea, select');
 
     $selector.each(function () {
@@ -284,10 +284,10 @@ var ritsu = (function () {
 
   var showErrorMessages = function ($selector) {
 
-    var noSelectorPassedIn = $selector === undefined;
-    if (noSelectorPassedIn) throw "No selector passed in";
+    var selectorUndefined = $selector === undefined;
+    if (selectorUndefined) $selector = $('input, textarea, select');
 
-    var isNotInputs = !$selector.is('input[type="text"], textarea, select');
+    var isNotInputs = !$selector.is('input, textarea, select');
     if (isNotInputs) $selector = $selector.find('input, textarea, select');
 
     $selector.each(function () {
