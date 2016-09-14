@@ -83,6 +83,7 @@ var ritsu = (function () {
         valueChanged = $this.data('initialValue') != $this.val();
       }
 
+      //If one value has changed, mark the entire form dirty and return right away
       if (valueChanged) {
         isDirty = true;
         return false;
@@ -95,10 +96,10 @@ var ritsu = (function () {
 
   var validate = function ($selector) {
 
-    var noSelectorPassedIn = $selector === undefined;
-    if (noSelectorPassedIn) throw "No selector passed in";
+    var selectorUndefined = $selector === undefined;
+    if (selectorUndefined) $selector = $('input, textarea, select');
 
-    var isNotInputs = !$selector.is('input[type="text"], textarea, select');
+    var isNotInputs = !$selector.is('input, textarea, select');
     if (isNotInputs) $selector = $selector.find('input, textarea, select');
 
     var isValid = true;
@@ -128,7 +129,7 @@ var ritsu = (function () {
       if (furtherValidationIsNeeded && isAlpha) invalidInput = _validateAlphaField($input);
       if (furtherValidationIsNeeded && isNumeric) invalidInput = _validateNumericField($input);
 
-      //Sets the entire form to false, just because the was at least 1 invalid field
+      //Sets the entire form to false, just because their was at least 1 invalid field
       if (invalidInput) {
         isValid = false;
         $input.data('invalid', true);
