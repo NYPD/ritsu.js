@@ -1,4 +1,4 @@
-var rules = new function () {
+var rules = (function () {
 
   /*
    * Matches all Canadian or American postal codes with different formats. For USA it is:
@@ -9,7 +9,7 @@ var rules = new function () {
    * e.g. 19608 | 19608-8911 | A9C1A1 | A9C 1A1
    *
    */
-  this.getAlphaZipRegex = function () {
+  var getAlphaZipRegex = function () {
     return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/;
   };
 
@@ -18,7 +18,7 @@ var rules = new function () {
    *
    * e.g. cool | cool-beans | cool beans | beans.
    */
-  this.getAlphaOnlyRegex = function () {
+  var getAlphaOnlyRegex = function () {
     return /^([A-Za-z\s\.\-])+$/;
   };
 
@@ -27,7 +27,7 @@ var rules = new function () {
    *
    * e.g. Cool | C00l
    */
-  this.getAlphaNumericRegex = function () {
+  var getAlphaNumericRegex = function () {
     return /^([a-zA-Z0-9]+)$/;
   };
 
@@ -36,7 +36,7 @@ var rules = new function () {
    *
    *  e.g. 54 | -54 | -54,000 | 54000
    */
-  this.getNumericWholeRegex = function () {
+  var getNumericWholeRegex = function () {
     return /^[-]?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/;
   };
 
@@ -45,7 +45,7 @@ var rules = new function () {
    *
    * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
    */
-  this.getNumericMonetaryRegex = function () {
+  var getNumericMonetaryRegex = function () {
     return /^((-?[\d]{1,3}(,[\d]{3})*(\.[\d]{2})*)|-?[\d]+(\.[\d]{2})?)$/;
   };
 
@@ -55,7 +55,7 @@ var rules = new function () {
    *
    * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
    */
-  this.getNumericDecimalRegexString = function (decimalPlaces) {
+  var getNumericDecimalRegexString = function (decimalPlaces) {
 
     var decimalPlacesUndefined = decimalPlaces === undefined;
     if (decimalPlacesUndefined) decimalPlaces = 2;
@@ -71,7 +71,7 @@ var rules = new function () {
    *
    * e.g. 1999 | 2010 | 0000
    */
-  this.getNumericFullYearRegex = function () {
+  var getNumericFullYearRegex = function () {
     return /^(\d{4})$/;
   };
 
@@ -80,8 +80,19 @@ var rules = new function () {
    *
    * e.g. 10/02/1990 | 12/12/2014 | 84/65/1990
    */
-  this.getNumericDatePickerRegex = function () {
+  var getNumericDatePickerRegex = function () {
     return /^(\d{2}\/\d{2}\/\d{4})$/;
-  }
+  };
 
-};
+  return {
+    getAlphaZipRegex: getAlphaZipRegex,
+    getAlphaOnlyRegex: getAlphaOnlyRegex,
+    getAlphaNumericRegex: getAlphaNumericRegex,
+    getNumericWholeRegex: getNumericWholeRegex,
+    getNumericMonetaryRegex: getNumericMonetaryRegex,
+    getNumericDecimalRegexString: getNumericDecimalRegexString,
+    getNumericFullYearRegex: getNumericFullYearRegex,
+    getNumericDatePickerRegex: getNumericDatePickerRegex
+  };
+
+})();
