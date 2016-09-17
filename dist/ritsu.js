@@ -356,17 +356,28 @@ var ritsu = (function () {
 
     }
 
-    var hasMinLimit = $input.attr('min') !== undefined;
-    var hasMaxLimit = $input.attr('max') !== undefined;
-
     if (!invalidNumeric) {
 
+      /*
+       * I know javascript auto converts strings into numbers when using "non stirct equality" operators,
+       * but do this excplicity to show intention. (This is prob overkill idk)
+       *
+       * This won't work in locales that use commas as decimal places.
+       */
+      var fieldValueAsNum = Number(fieldValue.replace(',', ''));
+
+      var minLimit = $.trim($input.attr('min')) === "" ? null : Number($input.attr('min'));
+      var maxLimit = $.trim($input.attr('max')) === "" ? null : Number($input.attr('max'));
+
+      var hasMinLimit = minLimit !== null;
+      var hasMaxLimit = maxLimit !== null;
+
       if (hasMinLimit && hasMaxLimit) {
-        invalidNumeric = fieldValue < $input.attr('min') || fieldValue > $input.attr('max');
+        invalidNumeric = fieldValue < minLimit || fieldValue > maxLimit;
       } else if (hasMinLimit) {
-        invalidNumeric = fieldValue < $input.attr('min');
+        invalidNumeric = fieldValue < minLimit;
       } else if (hasMaxLimit) {
-        invalidNumeric = fieldValue > $input.attr('max');
+        invalidNumeric = fieldValue > maxLimit;
       }
     }
 
