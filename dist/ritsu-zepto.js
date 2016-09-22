@@ -471,7 +471,7 @@ var ritsu = (function () {
       if (hasDecimalMax) errorMessage += " with " + $input.data('decimal-max') + " decimal places max";
 
       if (hasMinLimit && hasMaxLimit) {
-        errorMessage = errorMessage + " between " + $input.attr('min') + " and " + $input.attr('max');
+        errorMessage = errorMessage + " from " + $input.attr('min') + " to " + $input.attr('max');
       } else if (hasMinLimit) {
         errorMessage = errorMessage + " greater or equal to " + $input.attr('min');
       } else if (hasMaxLimit) {

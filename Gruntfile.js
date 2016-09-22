@@ -76,7 +76,7 @@ module.exports = function(grunt) {
     watch: {
   	  configFiles: {
           files: ['Gruntfile.js'],
-          tasks: ['concat','uglify','cssmin','copy']
+          tasks: ['concat','uglify','copy','cssmin']
         },
   	  css: {
   		    files: ['src/*.css'],
