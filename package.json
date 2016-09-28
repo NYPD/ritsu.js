@@ -1,6 +1,6 @@
 {
   "name": "ritsu.js",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.1",
   "description": "HTML form validation",
   "devDependencies": {
     "grunt": "^1.0.0",

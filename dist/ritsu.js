@@ -32,6 +32,16 @@ var rules = (function () {
   };
 
   /*
+   * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
+   * It does not check tld and special chacter validity.
+   *
+   * e.g. a@a.a | bob@google.com | cool-beans@beans.com.uk | $#%@$%@$.com
+   */
+  var getAlphaEmailRegex = function () {
+    return /^(\S+@\S+\.\S+)$/;
+  };
+
+  /*
    *  A negative or non negative number with optional thousands commas
    *
    *  e.g. 54 | -54 | -54,000 | 54000
@@ -87,6 +97,7 @@ var rules = (function () {
   return {
     getAlphaZipRegex: getAlphaZipRegex,
     getAlphaOnlyRegex: getAlphaOnlyRegex,
+    getAlphaEmailRegex: getAlphaEmailRegex,
     getAlphaNumericRegex: getAlphaNumericRegex,
     getNumericWholeRegex: getNumericWholeRegex,
     getNumericMonetaryRegex: getNumericMonetaryRegex,
@@ -401,6 +412,7 @@ var ritsu = (function () {
     var isAlphaZip = $input.hasClass("alpha-zip");
     var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
     var isAlphaNumeric = $input.hasClass("alpha-numeric");
+    var isAlphaEmail = $input.hasClass("alpha-email");
 
     if (isAlphaOnly) {
       invalidAlphaInput = !rules.getAlphaOnlyRegex().test(fieldValue);
@@ -410,6 +422,8 @@ var ritsu = (function () {
       invalidAlphaInput = $input.datepicker("getDate") === null;
     } else if (isAlphaNumeric) {
       invalidAlphaInput = !rules.getAlphaNumericRegex().test(fieldValue);
+    } else if (isAlphaEmail) {
+      invalidAlphaInput = !rules.getAlphaEmailRegex().test(fieldValue);
     }
 
     return invalidAlphaInput;

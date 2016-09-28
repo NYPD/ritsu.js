@@ -32,6 +32,16 @@ var rules = (function () {
   };
 
   /*
+   * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
+   * It does not check tld and special chacter validity.
+   *
+   * e.g. a@a.a | bob@google.com | cool-beans@beans.com.uk | $#%@$%@$.com
+   */
+  var getAlphaEmailRegex = function () {
+    return /^(\S+@\S+\.\S+)$/;
+  };
+
+  /*
    *  A negative or non negative number with optional thousands commas
    *
    *  e.g. 54 | -54 | -54,000 | 54000
@@ -87,6 +97,7 @@ var rules = (function () {
   return {
     getAlphaZipRegex: getAlphaZipRegex,
     getAlphaOnlyRegex: getAlphaOnlyRegex,
+    getAlphaEmailRegex: getAlphaEmailRegex,
     getAlphaNumericRegex: getAlphaNumericRegex,
     getNumericWholeRegex: getNumericWholeRegex,
     getNumericMonetaryRegex: getNumericMonetaryRegex,
