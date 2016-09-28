@@ -21,6 +21,9 @@ var ritsu = (function () {
     var selectorUndefined = $selector === undefined;
     if (selectorUndefined) $selector = $('input, textarea, select');
 
+    var isNotInputs = !$selector.is('input, textarea, select');
+    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+
     $selector.each(function () {
 
       var $this = $(this);
@@ -60,6 +63,9 @@ var ritsu = (function () {
 
     var selectorUndefined = $selector === undefined;
     if (selectorUndefined) $selector = $('input, textarea, select');
+
+    var isNotInputs = !$selector.is('input, textarea, select');
+    if (isNotInputs) $selector = $selector.find('input, textarea, select');
 
     $selector.each(function () {
 
