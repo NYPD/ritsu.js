@@ -27,7 +27,7 @@ module.exports = function(grunt) {
             banner: '/* ritsu.js v<%= pkg.version %> \n' +
                     ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
                     ' * Licensed under the <%= pkg.license %> license\n' +
-                    ' * Source coude can be found here: <%= pkg.repository.url %> \n' +
+                    ' * Source code can be found here: <%= pkg.repository.url %> \n' +
                     ' */\n'
           },
           files: {
@@ -39,7 +39,7 @@ module.exports = function(grunt) {
             banner: '/* ritsu-zepto.js v<%= pkg.version %> \n' +
                     ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
                     ' * Licensed under the <%= pkg.license %> license\n' +
-                    ' * Source coude can be found here: <%= pkg.repository.url %> \n' +
+                    ' * Source code can be found here: <%= pkg.repository.url %> \n' +
                     ' */\n'
           },
           files: {
