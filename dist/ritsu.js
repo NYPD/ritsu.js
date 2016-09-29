@@ -1,3 +1,9 @@
+/* ritsu.js v0.1.1 
+ * Created 2016-09-29
+ * Licensed under the MIT license
+ * Source code can be found here: https://github.com/NYPD/ritsu 
+ */
+
 var rules = (function () {
 
   /*
@@ -29,6 +35,16 @@ var rules = (function () {
    */
   var getAlphaNumericRegex = function () {
     return /^([a-zA-Z0-9]+)$/;
+  };
+
+  /*
+   * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
+   * It does not check tld and special chacter validity.
+   *
+   * e.g. a@a.a | bob@google.com | cool-beans@beans.com.uk | $#%@$%@$.com
+   */
+  var getAlphaEmailRegex = function () {
+    return /^(\S+@\S+\.\S+)$/;
   };
 
   /*
@@ -87,6 +103,7 @@ var rules = (function () {
   return {
     getAlphaZipRegex: getAlphaZipRegex,
     getAlphaOnlyRegex: getAlphaOnlyRegex,
+    getAlphaEmailRegex: getAlphaEmailRegex,
     getAlphaNumericRegex: getAlphaNumericRegex,
     getNumericWholeRegex: getNumericWholeRegex,
     getNumericMonetaryRegex: getNumericMonetaryRegex,
@@ -96,6 +113,10 @@ var rules = (function () {
   };
 
 })();
+
+if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+  throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
+}
 
 var ritsu = (function () {
 
@@ -401,6 +422,7 @@ var ritsu = (function () {
     var isAlphaZip = $input.hasClass("alpha-zip");
     var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
     var isAlphaNumeric = $input.hasClass("alpha-numeric");
+    var isAlphaEmail = $input.hasClass("alpha-email");
 
     if (isAlphaOnly) {
       invalidAlphaInput = !rules.getAlphaOnlyRegex().test(fieldValue);
@@ -410,6 +432,8 @@ var ritsu = (function () {
       invalidAlphaInput = $input.datepicker("getDate") === null;
     } else if (isAlphaNumeric) {
       invalidAlphaInput = !rules.getAlphaNumericRegex().test(fieldValue);
+    } else if (isAlphaEmail) {
+      invalidAlphaInput = !rules.getAlphaEmailRegex().test(fieldValue);
     }
 
     return invalidAlphaInput;

@@ -1,3 +1,7 @@
+if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+  throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
+}
+
 var ritsu = (function () {
 
   var useBootstrap3Stlying = false;
@@ -302,6 +306,7 @@ var ritsu = (function () {
     var isAlphaZip = $input.hasClass("alpha-zip");
     var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
     var isAlphaNumeric = $input.hasClass("alpha-numeric");
+    var isAlphaEmail = $input.hasClass("alpha-email");
 
     if (isAlphaOnly) {
       invalidAlphaInput = !rules.getAlphaOnlyRegex().test(fieldValue);
@@ -311,6 +316,8 @@ var ritsu = (function () {
       invalidAlphaInput = $input.datepicker("getDate") === null;
     } else if (isAlphaNumeric) {
       invalidAlphaInput = !rules.getAlphaNumericRegex().test(fieldValue);
+    } else if (isAlphaEmail) {
+      invalidAlphaInput = !rules.getAlphaEmailRegex().test(fieldValue);
     }
 
     return invalidAlphaInput;
