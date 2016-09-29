@@ -1,3 +1,7 @@
+if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+  throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
+}
+
 var ritsu = (function () {
 
   var useBootstrap3Stlying = false;
