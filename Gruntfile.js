@@ -3,6 +3,23 @@ module.exports = function(grunt) {
   grunt.initConfig({
 
     pkg: grunt.file.readJSON('package.json'),
+    banner: '/* ritsu.js v<%= pkg.version %> \n' +
+      ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+      ' * Licensed under the <%= pkg.license %> license\n' +
+      ' * Source code can be found here: <%= pkg.repository.url %> \n' +
+      ' */\n',
+
+    /* grunt stamp ************************************************************/
+    stamp: {
+      options: {
+        banner: '<%= banner %>'
+      },
+      yourTarget: {
+        files: {
+          src: 'dist/**'
+        }
+      }
+    },
 
     /* css minify Task ********************************************************/
     cssmin: {
@@ -19,74 +36,49 @@ module.exports = function(grunt) {
 
     /* Uglify Task *************************************************************/
     uglify: {
-        options: {
-          preserveComments: false
-        },
-        base: {
-          options: {
-            banner: '/* ritsu.js v<%= pkg.version %> \n' +
-                    ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-                    ' * Licensed under the <%= pkg.license %> license\n' +
-                    ' * Source code can be found here: <%= pkg.repository.url %> \n' +
-                    ' */\n'
-          },
-          files: {
-            'dist/min/ritsu.min.js': ['dist/ritsu.js']
-          }
-        },
-        zepto: {
-          options: {
-            banner: '/* ritsu-zepto.js v<%= pkg.version %> \n' +
-                    ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-                    ' * Licensed under the <%= pkg.license %> license\n' +
-                    ' * Source code can be found here: <%= pkg.repository.url %> \n' +
-                    ' */\n'
-          },
-          files: {
-            'dist/min/ritsu-zepto.min.js': ['dist/ritsu-zepto.js']
-          }
+      options: {
+        preserveComments: false
+      },
+      base: {
+        files: {
+          'dist/min/ritsu.min.js': ['dist/ritsu.js']
         }
+      }
     },
 
-   /* Concat Task **************************************************************/
+    /* Concat Task **************************************************************/
     concat: {
       base: {
         src: ['src/rules.js', 'src/core.js'],
         dest: 'dist/ritsu.js'
-      },
-      zepto: {
-        src: ['vendor/zepto.min.js', 'src/rules.js', 'src/core.js'],
-        dest: 'dist/ritsu-zepto.js'
       }
     },
 
     /* Copy Task **************************************************************/
     copy: {
       main: {
-        files: [
-          {
-            src:  'src/validation-styles.css',
-            dest: 'dist/ritsu.css'
-          }
-        ]
+        files: [{
+          src: 'src/validation-styles.css',
+          dest: 'dist/ritsu.css'
+        }]
       },
     },
 
     /* Watch Task **************************************************************/
     watch: {
-  	  configFiles: {
-          files: ['Gruntfile.js'],
-          tasks: ['concat','uglify','copy','cssmin']
-        },
-  	  css: {
-  		    files: ['src/*.css'],
-  		    tasks: ['cssmin','copy']
-  	  },
+      configFiles: {
+        files: ['Gruntfile.js'],
+        tasks: ['concat', 'uglify', 'copy', 'cssmin', 'stamp']
+      },
+      css: {
+        files: ['src/*.css'],
+        tasks: ['cssmin', 'copy', 'stamp']
+      },
       scripts: {
-          files: ['src/*.js'],
-          tasks: ['concat','uglify','copy']
-        }
-	  }
+        files: ['src/*.js'],
+        tasks: ['concat', 'uglify', 'copy', 'stamp']
+      }
+    }
   });
 
   // Load dem plugins
@@ -95,8 +87,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-stamp');
 
   //Register dem tasks
-  grunt.registerTask('default',['watch']);
-  grunt.registerTask('build',['copy','concat','uglify','cssmin']);
+  grunt.registerTask('default', ['watch']);
+  grunt.registerTask('build', ['copy', 'concat', 'uglify', 'cssmin', 'stamp']);
 };
