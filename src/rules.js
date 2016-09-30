@@ -1,4 +1,4 @@
-var rules = (function () {
+var rules = (function() {
 
   /*
    * Matches all Canadian or American postal codes with different formats. For USA it is:
@@ -9,7 +9,7 @@ var rules = (function () {
    * e.g. 19608 | 19608-8911 | A9C1A1 | A9C 1A1
    *
    */
-  var getAlphaZipRegex = function () {
+  var getAlphaZipRegex = function() {
     return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/;
   };
 
@@ -18,7 +18,7 @@ var rules = (function () {
    *
    * e.g. cool | cool-beans | cool beans | beans.
    */
-  var getAlphaOnlyRegex = function () {
+  var getAlphaOnlyRegex = function() {
     return /^([A-Za-z\s\.\-])+$/;
   };
 
@@ -27,7 +27,7 @@ var rules = (function () {
    *
    * e.g. Cool | C00l
    */
-  var getAlphaNumericRegex = function () {
+  var getAlphaNumericRegex = function() {
     return /^([a-zA-Z0-9]+)$/;
   };
 
@@ -37,7 +37,7 @@ var rules = (function () {
    *
    * e.g. a@a.a | bob@google.com | cool-beans@beans.com.uk | $#%@$%@$.com
    */
-  var getAlphaEmailRegex = function () {
+  var getAlphaEmailRegex = function() {
     return /^(\S+@\S+\.\S+)$/;
   };
 
@@ -46,7 +46,7 @@ var rules = (function () {
    *
    *  e.g. 54 | -54 | -54,000 | 54000
    */
-  var getNumericWholeRegex = function () {
+  var getNumericWholeRegex = function() {
     return /^[-]?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/;
   };
 
@@ -55,7 +55,7 @@ var rules = (function () {
    *
    * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
    */
-  var getNumericMonetaryRegex = function () {
+  var getNumericMonetaryRegex = function() {
     return /^((-?[\d]{1,3}(,[\d]{3})*(\.[\d]{2})*)|-?[\d]+(\.[\d]{2})?)$/;
   };
 
@@ -65,7 +65,7 @@ var rules = (function () {
    *
    * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
    */
-  var getNumericDecimalRegexString = function (decimalPlaces) {
+  var getNumericDecimalRegexString = function(decimalPlaces) {
 
     var decimalPlacesUndefined = decimalPlaces === undefined;
     if (decimalPlacesUndefined) decimalPlaces = 2;
@@ -81,7 +81,7 @@ var rules = (function () {
    *
    * e.g. 1999 | 2010 | 0000
    */
-  var getNumericFullYearRegex = function () {
+  var getNumericFullYearRegex = function() {
     return /^(\d{4})$/;
   };
 
@@ -90,7 +90,7 @@ var rules = (function () {
    *
    * e.g. 10/02/1990 | 12/12/2014 | 84/65/1990
    */
-  var getNumericDatePickerRegex = function () {
+  var getNumericDatePickerRegex = function() {
     return /^(\d{2}\/\d{2}\/\d{4})$/;
   };
 
