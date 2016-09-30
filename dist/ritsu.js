@@ -178,7 +178,6 @@ var validation = (function() {
 
     var fieldValue = $element.val();
 
-    var isAlphaAll = $element.hasClass("alpha-all"); //We dont check for this via regex, but it is nice to state that u dont care what the user enters here
     var isAlphaOnly = $element.hasClass("alpha-only");
     var isAlphaZip = $element.hasClass("alpha-zip");
     var isAlphaNumeric = $element.hasClass("alpha-numeric");
