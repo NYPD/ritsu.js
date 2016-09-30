@@ -2,13 +2,13 @@ if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
   throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
 }
 
-var ritsu = (function () {
+var ritsu = (function() {
 
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
   var autoShowErrorMessages = false;
 
-  var initialize = function (options) {
+  var initialize = function(options) {
 
     var invalidOptions = typeof options !== "object";
     if (invalidOptions) throw "Invalid options to initialize ritsu.js";
@@ -20,7 +20,7 @@ var ritsu = (function () {
     return this;
   };
 
-  var storeInitialFormValues = function ($selector) {
+  var storeInitialFormValues = function($selector) {
 
     var selectorUndefined = $selector === undefined;
     if (selectorUndefined) $selector = $('input, textarea, select');
@@ -28,7 +28,7 @@ var ritsu = (function () {
     var isNotInputs = !$selector.is('input, textarea, select');
     if (isNotInputs) $selector = $selector.find('input, textarea, select');
 
-    $selector.each(function () {
+    $selector.each(function() {
 
       var $this = $(this);
 
@@ -61,7 +61,7 @@ var ritsu = (function () {
     return this;
   };
 
-  var isFormDirty = function ($selector) {
+  var isFormDirty = function($selector) {
 
     var isDirty = false;
 
@@ -71,7 +71,7 @@ var ritsu = (function () {
     var isNotInputs = !$selector.is('input, textarea, select');
     if (isNotInputs) $selector = $selector.find('input, textarea, select');
 
-    $selector.each(function () {
+    $selector.each(function() {
 
       var $this = $(this);
 
@@ -104,7 +104,7 @@ var ritsu = (function () {
     return isDirty;
   };
 
-  var validate = function ($selector) {
+  var validate = function($selector) {
 
     var selectorUndefined = $selector === undefined;
     if (selectorUndefined) $selector = $('input, textarea, select');
@@ -114,60 +114,18 @@ var ritsu = (function () {
 
     var isValid = true;
 
-    //Loops through all the jQuery inputs
-    $selector.filter('textarea, input[type="text"]').each(function () {
+    $selector.each(function() {
 
-      var $input = $(this);
-      var inputIsDisabled = $input.prop('disabled') === true;
-
-      if (inputIsDisabled) return true;
-
-      var isAlpha = $input.hasClass("alpha");
-      var isNumeric = $input.hasClass("numeric");
-      var isOptional = $input.hasClass("optional");
-
-      var fieldValue = $input.val();
-      var isEmpty = $.trim(fieldValue) === "" || fieldValue === undefined;
-
-      var valueIsMissing = isEmpty && !isOptional;
-      var noValidationNeeded = isEmpty && isOptional;
-
-      var invalidInput = noValidationNeeded ? false : valueIsMissing;
-      var furtherValidationIsNeeded = !noValidationNeeded && !valueIsMissing;
-
-      //If its a valid input, further verify it. If it is invalid, no reason to validate more
-      if (furtherValidationIsNeeded && isAlpha) invalidInput = _validateAlphaField($input);
-      if (furtherValidationIsNeeded && isNumeric) invalidInput = _validateNumericField($input);
+      var $element = $(this);
+      var invalidElement = !validation.validateElement(this);
 
       //Sets the entire form to false, just because their was at least 1 invalid field
-      if (invalidInput) {
+      if (invalidElement) {
         isValid = false;
-        $input.data('invalid', true);
+        $element.data('invalid', true);
       } else {
-        $input.data('invalid', false);
-        _removeErrorMessage($input);
-        $input.parent('td').find('.error-label').remove();
-      }
-
-    });
-
-    $selector.filter('select').each(function () {
-
-      var $dropdown = $(this);
-
-      var dropdownIsDisabled = $dropdown.prop('disabled') === true;
-      if (dropdownIsDisabled) return true;
-
-      var valueSelected = $dropdown.val();
-      var isNotOptional = !$dropdown.hasClass('optional');
-
-      var invalidDropdown = isNotOptional && (valueSelected === "" || valueSelected === undefined || valueSelected === null);
-
-      if (invalidDropdown) {
-        isValid = false;
-        $dropdown.data('invalid', true);
-      } else {
-        $dropdown.data('invalid', false);
+        $element.data('invalid', false);
+        _removeErrorMessage($element);
       }
 
     });
@@ -178,7 +136,7 @@ var ritsu = (function () {
     return isValid;
   };
 
-  var markInvalidFields = function ($selector) {
+  var markInvalidFields = function($selector) {
 
     var selectorUndefined = $selector === undefined;
     if (selectorUndefined) $selector = $('input, textarea, select');
@@ -186,7 +144,7 @@ var ritsu = (function () {
     var isNotInputs = !$selector.is('input, textarea, select');
     if (isNotInputs) $selector = $selector.find('input, textarea, select');
 
-    $selector.each(function () {
+    $selector.each(function() {
 
       var $this = $(this);
       var $errorSelector = useBootstrap3Stlying ? $this.closest('.form-group') : $this;
@@ -204,7 +162,7 @@ var ritsu = (function () {
     return this;
   };
 
-  var showErrorMessages = function ($selector) {
+  var showErrorMessages = function($selector) {
 
     var selectorUndefined = $selector === undefined;
     if (selectorUndefined) $selector = $('input, textarea, select');
@@ -212,24 +170,28 @@ var ritsu = (function () {
     var isNotInputs = !$selector.is('input, textarea, select');
     if (isNotInputs) $selector = $selector.find('input, textarea, select');
 
-    $selector.each(function () {
+    $selector.each(function() {
 
       var $this = $(this);
-      var isInvalid = $this.data('invalid');
+
+      _removeErrorMessage($this); //Remove any previous old error messages
+
+      var isValid = !$this.data('invalid');
+      if (isValid) return true;
+
       var errorMessage = _getErrorMessageForInput($this);
 
       if (useBootstrap3Stlying) {
-        var $formGroup = $this.closest('.form-group');
-        $formGroup.find('.help-block').remove();
 
-        if (isInvalid) $formGroup.append('<span class="help-block">' + errorMessage + '</span>');
+        var $formGroup = $this.closest('.form-group');
+        $formGroup.append('<span class="help-block">' + errorMessage + '</span>');
 
       } else {
+
         var id = $this.attr('id');
         var $errorContainer = $this.closest('.error-label-container').length === 0 ? $this.parent() : $this.closest('.error-label-container');
-        $errorContainer.find('.error-label, .warning-label').remove();
+        $errorContainer.append('<label class="error-label"' + (id ? ' for="' + id + '"' : '') + '>' + errorMessage + '</label>');
 
-        if (isInvalid) $errorContainer.append('<label class="error-label"' + (id ? ' for="' + id + '"' : '') + '>' + errorMessage + '</label>');
       }
 
     });
@@ -238,92 +200,9 @@ var ritsu = (function () {
   };
 
   //Private Methods ************************************************************
+  var _removeErrorMessage = function($input) {
 
-  var _validateNumericField = function ($input) {
-
-    var invalidNumeric = false;
-
-    var fieldValue = $input.val();
-
-    var isNumericWholeInput = $input.hasClass("numeric-whole");
-    var isNumericMonetaryInput = $input.hasClass("numeric-monetary");
-    var isNumericDecimalInput = $input.hasClass("numeric-decimal");
-    var isNumericFullYear = $input.hasClass("numeric-full-year");
-    var isNumericDatePicker = $input.hasClass("numeric-date-picker");
-
-    if (isNumericWholeInput) {
-      invalidNumeric = !rules.getNumericWholeRegex().test(fieldValue);
-    } else if (isNumericMonetaryInput) {
-      invalidNumeric = !rules.getNumericMonetaryRegex().test(fieldValue);
-    } else if (isNumericDecimalInput) {
-      invalidNumeric = !rules.getNumericDecimalRegexString($input.data('decimal-max')).test(fieldValue);
-    } else if (isNumericFullYear) {
-      invalidNumeric = !rules.getNumericFullYearRegex().test(fieldValue);
-    } else if (isNumericDatePicker) {
-      invalidNumeric = !rules.getNumericDatePickerRegex().test(fieldValue);
-
-      var isNoPastDate = $input[0].hasAttribute('data-no-past-date');
-      if (isNoPastDate && !invalidNumeric) invalidNumeric = new Date().getTime() > new Date(fieldValue);
-
-    }
-
-    if (!invalidNumeric) {
-
-      /*
-       * I know javascript auto converts strings into numbers when using "non stirct equality" operators,
-       * but do this excplicity to show intention. (This is prob overkill idk)
-       *
-       * This won't work in locales that use commas as decimal places.
-       */
-      var fieldValueAsNum = Number(fieldValue.replace(',', ''));
-
-      var minLimit = $.trim($input.attr('min')) === "" ? null : Number($input.attr('min'));
-      var maxLimit = $.trim($input.attr('max')) === "" ? null : Number($input.attr('max'));
-
-      var hasMinLimit = minLimit !== null;
-      var hasMaxLimit = maxLimit !== null;
-
-      if (hasMinLimit && hasMaxLimit) {
-        invalidNumeric = fieldValue < minLimit || fieldValue > maxLimit;
-      } else if (hasMinLimit) {
-        invalidNumeric = fieldValue < minLimit;
-      } else if (hasMaxLimit) {
-        invalidNumeric = fieldValue > maxLimit;
-      }
-    }
-
-    return invalidNumeric;
-  };
-
-  var _validateAlphaField = function ($input) {
-
-    var invalidAlphaInput = false;
-
-    var fieldValue = $input.val();
-
-    var isAlphaAll = $input.hasClass("alpha-all"); //We dont check for this via regex, but it is nice to state that u dont care what the user enters here
-    var isAlphaOnly = $input.hasClass("alpha-only");
-    var isAlphaZip = $input.hasClass("alpha-zip");
-    var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
-    var isAlphaNumeric = $input.hasClass("alpha-numeric");
-    var isAlphaEmail = $input.hasClass("alpha-email");
-
-    if (isAlphaOnly) {
-      invalidAlphaInput = !rules.getAlphaOnlyRegex().test(fieldValue);
-    } else if (isAlphaZip) {
-      invalidAlphaInput = !rules.getAlphaZipRegex().test(fieldValue);
-    } else if (isAlphaJqueryDate) {
-      invalidAlphaInput = $input.datepicker("getDate") === null;
-    } else if (isAlphaNumeric) {
-      invalidAlphaInput = !rules.getAlphaNumericRegex().test(fieldValue);
-    } else if (isAlphaEmail) {
-      invalidAlphaInput = !rules.getAlphaEmailRegex().test(fieldValue);
-    }
-
-    return invalidAlphaInput;
-  };
-
-  var _removeErrorMessage = function ($input) {
+    $input.closest('td').find('.error-label').remove();
 
     if (useBootstrap3Stlying) {
       $input.closest('.form-group').find('.help-block').remove();
@@ -336,7 +215,7 @@ var ritsu = (function () {
 
   };
 
-  var _getErrorMessageForInput = function ($input) {
+  var _getErrorMessageForInput = function($input) {
 
     var isAlpha = $input.hasClass("alpha");
 
