@@ -58,7 +58,7 @@ var validation = (function() {
   var _validateAlphaField = function(element) {
 
     var $element = $(element);
-    var validAlphaInput = false;
+    var validAlpha = false;
 
     var fieldValue = $element.val();
 
@@ -70,18 +70,18 @@ var validation = (function() {
     var isAlphaEmail = $element.hasClass("alpha-email");
 
     if (isAlphaOnly) {
-      validAlphaInput = rules.getAlphaOnlyRegex().test(fieldValue);
+      validAlpha = rules.getAlphaOnlyRegex().test(fieldValue);
     } else if (isAlphaZip) {
-      validAlphaInput = rules.getAlphaZipRegex().test(fieldValue);
+      validAlpha = rules.getAlphaZipRegex().test(fieldValue);
     } else if (isAlphaJqueryDate) {
-      validAlphaInput = $element.datepicker("getDate") === null;
+      validAlpha = $element.datepicker("getDate") !== null;
     } else if (isAlphaNumeric) {
-      validAlphaInput = rules.getAlphaNumericRegex().test(fieldValue);
+      validAlpha = rules.getAlphaNumericRegex().test(fieldValue);
     } else if (isAlphaEmail) {
-      validAlphaInput = rules.getAlphaEmailRegex().test(fieldValue);
+      validAlpha = rules.getAlphaEmailRegex().test(fieldValue);
     }
 
-    return validAlphaInput;
+    return validAlpha;
   };
 
   var _validateNumericField = function (element) {
@@ -108,8 +108,12 @@ var validation = (function() {
     } else if (isNumericDatePicker) {
       validNumeric = rules.getNumericDatePickerRegex().test(fieldValue);
 
-      var isNoPastDate = $element[0].hasAttribute('data-no-past-date');
-      if (isNoPastDate && !invalidNumeric) invalidNumeric = new Date().getTime() > new Date(fieldValue);
+      var isNoPastDate = element.hasAttribute('data-no-past-date');
+      if (isNoPastDate && validNumeric) {
+        var date = new Date();
+        var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        validNumeric = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
+      }
 
     }
 
@@ -123,18 +127,18 @@ var validation = (function() {
        */
       var fieldValueAsNum = Number(fieldValue.replace(',', ''));
 
-      var minLimit = $.trim($input.attr('min')) === "" ? null : Number($input.attr('min'));
-      var maxLimit = $.trim($input.attr('max')) === "" ? null : Number($input.attr('max'));
+      var minLimit = $.trim($element.attr('min')) === "" ? null : Number($element.attr('min'));
+      var maxLimit = $.trim($element.attr('max')) === "" ? null : Number($element.attr('max'));
 
       var hasMinLimit = minLimit !== null;
       var hasMaxLimit = maxLimit !== null;
 
       if (hasMinLimit && hasMaxLimit) {
-        validNumeric = fieldValue < minLimit || fieldValue > maxLimit;
+        validNumeric = fieldValue >= minLimit || fieldValue <= maxLimit;
       } else if (hasMinLimit) {
-        validNumeric = fieldValue < minLimit;
+        validNumeric = fieldValue >= minLimit;
       } else if (hasMaxLimit) {
-        validNumeric = fieldValue > maxLimit;
+        validNumeric = fieldValue <= maxLimit;
       }
     }
 
