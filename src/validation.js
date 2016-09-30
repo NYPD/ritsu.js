@@ -58,14 +58,13 @@ var validation = (function() {
   var _validateAlphaField = function(element) {
 
     var $element = $(element);
-    var validAlpha = false;
+    var validAlpha = true;
 
     var fieldValue = $element.val();
 
     var isAlphaAll = $element.hasClass("alpha-all"); //We dont check for this via regex, but it is nice to state that u dont care what the user enters here
     var isAlphaOnly = $element.hasClass("alpha-only");
     var isAlphaZip = $element.hasClass("alpha-zip");
-    var isAlphaJqueryDate = $element.hasClass("alpha-jquery-date");
     var isAlphaNumeric = $element.hasClass("alpha-numeric");
     var isAlphaEmail = $element.hasClass("alpha-email");
 
@@ -73,8 +72,6 @@ var validation = (function() {
       validAlpha = rules.getAlphaOnlyRegex().test(fieldValue);
     } else if (isAlphaZip) {
       validAlpha = rules.getAlphaZipRegex().test(fieldValue);
-    } else if (isAlphaJqueryDate) {
-      validAlpha = $element.datepicker("getDate") !== null;
     } else if (isAlphaNumeric) {
       validAlpha = rules.getAlphaNumericRegex().test(fieldValue);
     } else if (isAlphaEmail) {
@@ -87,7 +84,7 @@ var validation = (function() {
   var _validateNumericField = function (element) {
 
     var $element = $(element);
-    var validNumeric = false;
+    var validNumeric = true;
 
     var fieldValue = $element.val();
 
@@ -95,7 +92,7 @@ var validation = (function() {
     var isNumericMonetaryInput = $element.hasClass("numeric-monetary");
     var isNumericDecimalInput = $element.hasClass("numeric-decimal");
     var isNumericFullYear = $element.hasClass("numeric-full-year");
-    var isNumericDatePicker = $element.hasClass("numeric-date-picker");
+    var isNumericDatePicker = $element.hasClass("numeric-jquery-date");
 
     if (isNumericWholeInput) {
       validNumeric = rules.getNumericWholeRegex().test(fieldValue);
@@ -106,9 +103,10 @@ var validation = (function() {
     } else if (isNumericFullYear) {
       validNumeric = rules.getNumericFullYearRegex().test(fieldValue);
     } else if (isNumericDatePicker) {
-      validNumeric = rules.getNumericDatePickerRegex().test(fieldValue);
 
+      validNumeric = $element.datepicker("getDate") !== null;
       var isNoPastDate = element.hasAttribute('data-no-past-date');
+
       if (isNoPastDate && validNumeric) {
         var date = new Date();
         var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
