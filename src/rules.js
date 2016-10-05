@@ -110,7 +110,7 @@ var rules = (function(element) {
   var _Rule = function(ruleType, ruleClass, validationFunction) {
     this.ruleType = ruleType;
     this.ruleClass = ruleClass;
-    this.validate = ruleType;
+    this.validate = validationFunction;
   };
 
   var _rules = [
