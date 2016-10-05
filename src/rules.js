@@ -1,27 +1,5 @@
 var rules = (function(element) {
 
-  /**
-   * Tries to find and return  the specific rule for ruleClasses paramter
-   *
-   * @param  {(string | string[])} ruleClasses - Can take an array of class strings or just a singular class string
-   * @return {object} - The rule object if found, otherwise null;
-   */
-  var getRuleByRuleClass = function(ruleClasses) {
-
-    var isArray = Array.isArray(ruleClasses);
-    var rule = null;
-
-    for (var i = 0; i < _rules.length; i++) {
-
-      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClass;
-      if (ruleDoesNotMatch) continue;
-
-      rule = _rules[i];
-      break;
-    }
-    return rule;
-  };
-
   //Private Methods ************************************************************
   var _validateAlphaOnly = function(element) {
     /*
@@ -129,10 +107,10 @@ var rules = (function(element) {
     return isValid;
   };
 
-  var _Rule = function(primaryClass, ruleClass, validationFunction) {
-    this.primaryClass = primaryClass;
+  var _Rule = function(ruleType, ruleClass, validationFunction) {
+    this.ruleType = ruleType;
     this.ruleClass = ruleClass;
-    this.validate = validationFunction;
+    this.validate = ruleType;
   };
 
   var _rules = [
@@ -147,8 +125,47 @@ var rules = (function(element) {
     new _Rule("numeric", "numeric-jquery-date", _validateNumericJqueryDatePicker)
   ];
 
+  //Public Methods *************************************************************
+  var getRuleByRuleClass = function(ruleClasses) {
+
+    var isArray = Array.isArray(ruleClasses);
+    var rule = null;
+
+    for (var i = 0; i < _rules.length; i++) {
+
+      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClass;
+      if (ruleDoesNotMatch) continue;
+
+      rule = _rules[i];
+      break;
+    }
+    return rule;
+  };
+
+  var overrideValidationRule = function(ruleClass, validationFunction) {
+    var rule = getRuleByRuleClass(ruleClass);
+    if (rule !== null) rule.validate = validationFunction;
+  };
+
+  var addValidationRule = function(ruleType, ruleClass, validationFunction) {
+
+    if (ruleType !== "alpha" && ruleType !==  "numeric")
+      throw new Error('The rule type for a new validation rule must be either "alpha" or ""');
+
+    if (typeof ruleClass !== "string")
+      throw new Error('The rule class for a new validation rule is missing or is not of type string');
+
+    if (typeof validationFunction !== "function")
+      throw new Error('The validation function for a new validation rule is missing or is not of type function');
+
+    var rule = new _Rule(ruleType, ruleClass, validationFunction);
+    _rules.push(rule);
+  };
+
   return {
-    getRuleByRuleClass: getRuleByRuleClass
+    getRuleByRuleClass: getRuleByRuleClass,
+    overrideValidationRule: overrideValidationRule,
+    addValidationRule: addValidationRule
   };
 
 })();
