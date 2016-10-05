@@ -58,10 +58,9 @@ var validation = (function() {
   var _validateAlphaField = function(element) {
     var validAlpha = true;
 
-    var $element = $(element);
-    var elementClassString = $element.attr('class');
+    var elementClassString = element.getAttribute('class');
 
-    var elementHasNoClasses = elementClassString === undefined;
+    var elementHasNoClasses = elementClassString === null;
     if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
 
     var elementClasses = elementClassString.split(' ');
@@ -69,59 +68,41 @@ var validation = (function() {
     var rule = rules.getRuleByRuleClass(elementClasses);
     if (rule === null) return validAlpha; //No rule found, so just exit
 
-    var fieldValue = $element.val();
-
-    validAlpha = rule.validate(fieldValue);
+    validAlpha = rule.validate(element);
 
     return validAlpha;
   };
 
   var _validateNumericField = function(element) {
 
-    var $element = $(element);
     var validNumeric = true;
 
-    var fieldValue = $element.val();
+    var elementClassString = element.getAttribute('class');
 
-    var isNumericWholeInput = $element.hasClass("numeric-whole");
-    var isNumericMonetaryInput = $element.hasClass("numeric-monetary");
-    var isNumericDecimalInput = $element.hasClass("numeric-decimal");
-    var isNumericFullYear = $element.hasClass("numeric-full-year");
-    var isNumericDatePicker = $element.hasClass("numeric-jquery-date");
+    var elementHasNoClasses = elementClassString === null;
+    if (elementHasNoClasses) return validNumeric; //No need to validate just exit early
 
-    if (isNumericWholeInput) {
-      validNumeric = rules.getNumericWholeRegex().test(fieldValue);
-    } else if (isNumericMonetaryInput) {
-      validNumeric = rules.getNumericMonetaryRegex().test(fieldValue);
-    } else if (isNumericDecimalInput) {
-      validNumeric = rules.getNumericDecimalRegexString($element.data('decimal-max')).test(fieldValue);
-    } else if (isNumericFullYear) {
-      validNumeric = rules.getNumericFullYearRegex().test(fieldValue);
-    } else if (isNumericDatePicker) {
+    var elementClasses = elementClassString.split(' ');
 
-      validNumeric = $element.datepicker("getDate") !== null;
-      var isNoPastDate = element.hasAttribute('data-no-past-date');
+    var rule = rules.getRuleByRuleClass(elementClasses);
+    if (rule === null) return validNumeric; //No rule found, so just exit
 
-      if (isNoPastDate && validNumeric) {
-        var date = new Date();
-        var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        validNumeric = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
-      }
-
-    }
+    validNumeric = rule.validate(element);
 
     if (validNumeric) {
-
       /*
        * I know javascript auto converts strings into numbers when using "non stirct equality" operators,
        * but do this excplicity to show intention. (This is prob overkill idk)
        *
        * This won't work in locales that use commas as decimal places.
        */
-      var fieldValueAsNum = Number(fieldValue.replace(',', ''));
+      var fieldValueAsNum = Number(element.value.replace(',', ''));
 
-      var minLimit = $.trim($element.attr('min')) === "" ? null : Number($element.attr('min'));
-      var maxLimit = $.trim($element.attr('max')) === "" ? null : Number($element.attr('max'));
+      var minAttr = $.trim(element.getAttribute("min"));
+      var maxAttr = $.trim(element.getAttribute("max"));
+
+      var minLimit = (minAttr === "" || minAttr === null) ? null : Number(minAttr);
+      var maxLimit = (maxAttr === "" || maxAttr === null) ? null : Number(maxAttr);
 
       var hasMinLimit = minLimit !== null;
       var hasMaxLimit = maxLimit !== null;
