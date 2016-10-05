@@ -56,31 +56,27 @@ var validation = (function() {
   };
 
   var _validateAlphaField = function(element) {
+    var validAlpha = true;
 
     var $element = $(element);
-    var validAlpha = true;
+    var elementClassString = $element.attr('class');
+
+    var elementHasNoClasses = elementClassString === undefined;
+    if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
+
+    var elementClasses = elementClassString.split(' ');
+
+    var rule = rules.getRuleByRuleClass(elementClasses);
+    if (rule === null) return validAlpha; //No rule found, so just exit
 
     var fieldValue = $element.val();
 
-    var isAlphaOnly = $element.hasClass("alpha-only");
-    var isAlphaZip = $element.hasClass("alpha-zip");
-    var isAlphaNumeric = $element.hasClass("alpha-numeric");
-    var isAlphaEmail = $element.hasClass("alpha-email");
-
-    if (isAlphaOnly) {
-      validAlpha = rules.getAlphaOnlyRegex().test(fieldValue);
-    } else if (isAlphaZip) {
-      validAlpha = rules.getAlphaZipRegex().test(fieldValue);
-    } else if (isAlphaNumeric) {
-      validAlpha = rules.getAlphaNumericRegex().test(fieldValue);
-    } else if (isAlphaEmail) {
-      validAlpha = rules.getAlphaEmailRegex().test(fieldValue);
-    }
+    validAlpha = rule.validate(fieldValue);
 
     return validAlpha;
   };
 
-  var _validateNumericField = function (element) {
+  var _validateNumericField = function(element) {
 
     var $element = $(element);
     var validNumeric = true;
