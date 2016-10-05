@@ -131,6 +131,21 @@ var rules = (function(element) {
     new _Rule("numeric", "numeric-jquery-date", _validateNumericJqueryDatePicker)
   ];
 
+  var _addNewValidationRule = function(ruleType, ruleClass, validationFunction) {
+
+    if (ruleType !== "alpha" && ruleType !== "numeric")
+      throw new Error('The rule type for a new validation rule must be either "alpha" or ""');
+
+    if (typeof ruleClass !== "string")
+      throw new Error('The rule class for a new validation rule is missing or is not of type string');
+
+    if (typeof validationFunction !== "function")
+      throw new Error('The validation function for a new validation rule is missing or is not of type function');
+
+    var rule = new _Rule(ruleType, ruleClass, validationFunction);
+    _rules.push(rule);
+  };
+
   //Public Methods *************************************************************
   var getRuleByRuleClass = function(ruleClasses) {
 
@@ -148,30 +163,20 @@ var rules = (function(element) {
     return rule;
   };
 
-  var overrideValidationRule = function(ruleClass, validationFunction) {
+  var addOrUpdateValidationRule = function(ruleClass, validationFunction, ruleType) {
     var rule = getRuleByRuleClass(ruleClass);
-    if (rule !== null) rule.validate = validationFunction;
-  };
 
-  var addValidationRule = function(ruleType, ruleClass, validationFunction) {
-
-    if (ruleType !== "alpha" && ruleType !==  "numeric")
-      throw new Error('The rule type for a new validation rule must be either "alpha" or ""');
-
-    if (typeof ruleClass !== "string")
-      throw new Error('The rule class for a new validation rule is missing or is not of type string');
-
-    if (typeof validationFunction !== "function")
-      throw new Error('The validation function for a new validation rule is missing or is not of type function');
-
-    var rule = new _Rule(ruleType, ruleClass, validationFunction);
-    _rules.push(rule);
+    if (rule === null) {
+      _addNewValidationRule(ruleType, ruleClass, validationFunction);
+    } else {
+      rule.ruleClass = ruleClass;
+      rule.validate = validationFunction;
+    }
   };
 
   return {
     getRuleByRuleClass: getRuleByRuleClass,
-    overrideValidationRule: overrideValidationRule,
-    addValidationRule: addValidationRule
+    addOrUpdateValidationRule: addOrUpdateValidationRule
   };
 
 })();
