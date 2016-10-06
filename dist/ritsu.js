@@ -1,10 +1,10 @@
 /* ritsu.js v0.2.0 
- * Created 2016-10-05
+ * Created 2016-10-06
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
 
-var rules = (function(element) {
+var rules = (function() {
 
   //Private Methods ************************************************************
   var _validateAlphaOnly = function(element) {
@@ -73,7 +73,7 @@ var rules = (function(element) {
    */
   var _validateNumericDecimalString = function(element) {
 
-    var decimalMax = element.getAttribute("data-decimal-max");
+    var decimalMax = element.getAttribute('data-decimal-max');
     if (decimalMax === null) decimalMax = 2;
 
     /*
@@ -81,7 +81,7 @@ var rules = (function(element) {
      *
      * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
      */
-    var numericDecimalRegexString = "^-?((([\\d]{1,3}(,[\\d]{3})*)+(\\.[\\d]{1,decimalPlaces})?)|[\\d]+(\\.[\\d]{1,decimalPlaces})?)$";
+    var numericDecimalRegexString = '^-?((([\\d]{1,3}(,[\\d]{3})*)+(\\.[\\d]{1,decimalPlaces})?)|[\\d]+(\\.[\\d]{1,decimalPlaces})?)$';
     var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalMax));
 
     return numericDecimalRegex.test(element.value);
@@ -100,14 +100,14 @@ var rules = (function(element) {
 
     var $element = $(element);
 
-    var isValid = $element.datepicker("getDate") !== null;
+    var isValid = $element.datepicker('getDate') !== null;
 
     var isNoPastDate = element.hasAttribute('data-no-past-date');
 
     if (isNoPastDate && isValid) {
       var date = new Date();
       var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      validNumeric = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
+      isValid = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
     }
 
     return isValid;
@@ -120,26 +120,26 @@ var rules = (function(element) {
   };
 
   var _rules = [
-    new _Rule("alpha", "alpha-only", _validateAlphaOnly),
-    new _Rule("alpha", "alpha-zip", _validateAlphaZip),
-    new _Rule("alpha", "alpha-numeric", _validateAlphaNumeric),
-    new _Rule("alpha", "alpha-email", _validateAlphaEmail),
-    new _Rule("numeric", "numeric-whole", _validateNumericWhole),
-    new _Rule("numeric", "numeric-monetary", _validateNumericMonetary),
-    new _Rule("numeric", "numeric-decimal", _validateNumericDecimalString),
-    new _Rule("numeric", "numeric-full-year", _validateNumericFullYear),
-    new _Rule("numeric", "numeric-jquery-date", _validateNumericJqueryDatePicker)
+    new _Rule('alpha', 'alpha-only', _validateAlphaOnly),
+    new _Rule('alpha', 'alpha-zip', _validateAlphaZip),
+    new _Rule('alpha', 'alpha-numeric', _validateAlphaNumeric),
+    new _Rule('alpha', 'alpha-email', _validateAlphaEmail),
+    new _Rule('numeric', 'numeric-whole', _validateNumericWhole),
+    new _Rule('numeric', 'numeric-monetary', _validateNumericMonetary),
+    new _Rule('numeric', 'numeric-decimal', _validateNumericDecimalString),
+    new _Rule('numeric', 'numeric-full-year', _validateNumericFullYear),
+    new _Rule('numeric', 'numeric-jquery-date', _validateNumericJqueryDatePicker)
   ];
 
   var _addNewValidationRule = function(ruleType, ruleClass, validationFunction) {
 
-    if (ruleType !== "alpha" && ruleType !== "numeric")
-      throw new Error('The rule type for a new validation rule must be either "alpha" or ""');
+    if (ruleType !== 'alpha' && ruleType !== 'numeric')
+      throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
 
-    if (typeof ruleClass !== "string")
+    if (typeof ruleClass !== 'string')
       throw new Error('The rule class for a new validation rule is missing or is not of type string');
 
-    if (typeof validationFunction !== "function")
+    if (typeof validationFunction !== 'function')
       throw new Error('The validation function for a new validation rule is missing or is not of type function');
 
     var rule = new _Rule(ruleType, ruleClass, validationFunction);
@@ -154,7 +154,7 @@ var rules = (function(element) {
 
     for (var i = 0; i < _rules.length; i++) {
 
-      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClass;
+      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
       if (ruleDoesNotMatch) continue;
 
       rule = _rules[i];
@@ -320,8 +320,8 @@ var ritsu = (function() {
 
   var initialize = function(options) {
 
-    var invalidOptions = typeof options !== "object";
-    if (invalidOptions) throw "Invalid options to initialize ritsu.js";
+    var invalidOptions = typeof options !== 'object';
+    if (invalidOptions) throw 'Invalid options to initialize ritsu.js';
 
     useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
     autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
@@ -358,7 +358,7 @@ var ritsu = (function() {
         }
 
         var hasFileAttached = this.files.length > 0;
-        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : "";
+        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : '';
 
         $this.data('initialValue', initialValue);
 
@@ -427,6 +427,7 @@ var ritsu = (function() {
     $selector.each(function() {
 
       var $element = $(this);
+
       var invalidElement = !validation.validateElement(this);
 
       //Sets the entire form to false, just because their was at least 1 invalid field
@@ -462,9 +463,9 @@ var ritsu = (function() {
       var isInvalid = $this.data('invalid');
 
       if (isInvalid) {
-        $errorSelector.addClass("has-error");
+        $errorSelector.addClass('has-error');
       } else {
-        $errorSelector.removeClass("has-error");
+        $errorSelector.removeClass('has-error');
       }
 
     });
@@ -527,65 +528,65 @@ var ritsu = (function() {
 
   var _getErrorMessageForInput = function($input) {
 
-    var isAlpha = $input.hasClass("alpha");
+    var isAlpha = $input.hasClass('alpha');
 
     if (isAlpha) {
 
-      var isAlphaAll = $input.hasClass("alpha-all");
+      var isAlphaAll = $input.hasClass('alpha-all');
       if (isAlphaAll) return null;
 
-      var isAlphaOnly = $input.hasClass("alpha-only");
-      if (isAlphaOnly) return "Please enter only letters";
+      var isAlphaOnly = $input.hasClass('alpha-only');
+      if (isAlphaOnly) return 'Please enter only letters';
 
-      var isAlphaZip = $input.hasClass("alpha-zip");
-      if (isAlphaZip) return "Please enter a valid zip code";
+      var isAlphaZip = $input.hasClass('alpha-zip');
+      if (isAlphaZip) return 'Please enter a valid zip code';
 
-      var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
-      if (isAlphaJqueryDate) return "Please select a date from the datepicker";
+      var isAlphaJqueryDate = $input.hasClass('alpha-jquery-date');
+      if (isAlphaJqueryDate) return 'Please select a date from the datepicker';
 
-      var isAlphaNumeric = $input.hasClass("alpha-numeric");
-      if (isAlphaNumeric) return "Please enter only alphanumeric characters";
+      var isAlphaNumeric = $input.hasClass('alpha-numeric');
+      if (isAlphaNumeric) return 'Please enter only alphanumeric characters';
     }
 
-    var isNumeric = $input.hasClass("numeric");
+    var isNumeric = $input.hasClass('numeric');
 
     if (isNumeric) {
 
       var errorMessage;
 
-      var isNumericWholeInput = $input.hasClass("numeric-whole");
-      if (isNumericWholeInput) errorMessage = "Please enter a whole number";
+      var isNumericWholeInput = $input.hasClass('numeric-whole');
+      if (isNumericWholeInput) errorMessage = 'Please enter a whole number';
 
-      var isNumericMonetaryInput = $input.hasClass("numeric-monetary");
-      if (isNumericMonetaryInput) errorMessage = "Please enter a monetary value";
+      var isNumericMonetaryInput = $input.hasClass('numeric-monetary');
+      if (isNumericMonetaryInput) errorMessage = 'Please enter a monetary value';
 
-      var isNumericDecimalInput = $input.hasClass("numeric-decimal");
-      if (isNumericDecimalInput) errorMessage = "Please enter a number";
+      var isNumericDecimalInput = $input.hasClass('numeric-decimal');
+      if (isNumericDecimalInput) errorMessage = 'Please enter a number';
 
-      var isNumericFullYear = $input.hasClass("numeric-full-year");
-      if (isNumericFullYear) errorMessage = "Please enter a 4 digit year";
+      var isNumericFullYear = $input.hasClass('numeric-full-year');
+      if (isNumericFullYear) errorMessage = 'Please enter a 4 digit year';
 
       var hasMinLimit = $input.attr('min') !== undefined;
       var hasMaxLimit = $input.attr('max') !== undefined;
       var hasDecimalMax = $input.data('decimal-max') !== undefined;
 
-      if (hasDecimalMax) errorMessage += " with " + $input.data('decimal-max') + " decimal places max";
+      if (hasDecimalMax) errorMessage += ' with ' + $input.data('decimal-max') + ' decimal places max';
 
       if (hasMinLimit && hasMaxLimit) {
-        errorMessage = errorMessage + " from " + $input.attr('min') + " to " + $input.attr('max');
+        errorMessage = errorMessage + ' from ' + $input.attr('min') + ' to ' + $input.attr('max');
       } else if (hasMinLimit) {
-        errorMessage = errorMessage + " greater or equal to " + $input.attr('min');
+        errorMessage = errorMessage + ' greater or equal to ' + $input.attr('min');
       } else if (hasMaxLimit) {
-        errorMessage = errorMessage + " lesser or equal to " + $input.attr('max');
+        errorMessage = errorMessage + ' lesser or equal to ' + $input.attr('max');
       }
 
-      errorMessage += ".";
+      errorMessage += '.';
 
       return errorMessage;
 
     }
 
-    return "Invalid Value";
+    return 'Invalid Value';
 
   };
 
