@@ -10,8 +10,8 @@ var ritsu = (function() {
 
   var initialize = function(options) {
 
-    var invalidOptions = typeof options !== "object";
-    if (invalidOptions) throw "Invalid options to initialize ritsu.js";
+    var invalidOptions = typeof options !== 'object';
+    if (invalidOptions) throw 'Invalid options to initialize ritsu.js';
 
     useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
     autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
@@ -48,7 +48,7 @@ var ritsu = (function() {
         }
 
         var hasFileAttached = this.files.length > 0;
-        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : "";
+        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : '';
 
         $this.data('initialValue', initialValue);
 
@@ -117,6 +117,7 @@ var ritsu = (function() {
     $selector.each(function() {
 
       var $element = $(this);
+
       var invalidElement = !validation.validateElement(this);
 
       //Sets the entire form to false, just because their was at least 1 invalid field
@@ -152,9 +153,9 @@ var ritsu = (function() {
       var isInvalid = $this.data('invalid');
 
       if (isInvalid) {
-        $errorSelector.addClass("has-error");
+        $errorSelector.addClass('has-error');
       } else {
-        $errorSelector.removeClass("has-error");
+        $errorSelector.removeClass('has-error');
       }
 
     });
@@ -217,65 +218,65 @@ var ritsu = (function() {
 
   var _getErrorMessageForInput = function($input) {
 
-    var isAlpha = $input.hasClass("alpha");
+    var isAlpha = $input.hasClass('alpha');
 
     if (isAlpha) {
 
-      var isAlphaAll = $input.hasClass("alpha-all");
+      var isAlphaAll = $input.hasClass('alpha-all');
       if (isAlphaAll) return null;
 
-      var isAlphaOnly = $input.hasClass("alpha-only");
-      if (isAlphaOnly) return "Please enter only letters";
+      var isAlphaOnly = $input.hasClass('alpha-only');
+      if (isAlphaOnly) return 'Please enter only letters';
 
-      var isAlphaZip = $input.hasClass("alpha-zip");
-      if (isAlphaZip) return "Please enter a valid zip code";
+      var isAlphaZip = $input.hasClass('alpha-zip');
+      if (isAlphaZip) return 'Please enter a valid zip code';
 
-      var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
-      if (isAlphaJqueryDate) return "Please select a date from the datepicker";
+      var isAlphaJqueryDate = $input.hasClass('alpha-jquery-date');
+      if (isAlphaJqueryDate) return 'Please select a date from the datepicker';
 
-      var isAlphaNumeric = $input.hasClass("alpha-numeric");
-      if (isAlphaNumeric) return "Please enter only alphanumeric characters";
+      var isAlphaNumeric = $input.hasClass('alpha-numeric');
+      if (isAlphaNumeric) return 'Please enter only alphanumeric characters';
     }
 
-    var isNumeric = $input.hasClass("numeric");
+    var isNumeric = $input.hasClass('numeric');
 
     if (isNumeric) {
 
       var errorMessage;
 
-      var isNumericWholeInput = $input.hasClass("numeric-whole");
-      if (isNumericWholeInput) errorMessage = "Please enter a whole number";
+      var isNumericWholeInput = $input.hasClass('numeric-whole');
+      if (isNumericWholeInput) errorMessage = 'Please enter a whole number';
 
-      var isNumericMonetaryInput = $input.hasClass("numeric-monetary");
-      if (isNumericMonetaryInput) errorMessage = "Please enter a monetary value";
+      var isNumericMonetaryInput = $input.hasClass('numeric-monetary');
+      if (isNumericMonetaryInput) errorMessage = 'Please enter a monetary value';
 
-      var isNumericDecimalInput = $input.hasClass("numeric-decimal");
-      if (isNumericDecimalInput) errorMessage = "Please enter a number";
+      var isNumericDecimalInput = $input.hasClass('numeric-decimal');
+      if (isNumericDecimalInput) errorMessage = 'Please enter a number';
 
-      var isNumericFullYear = $input.hasClass("numeric-full-year");
-      if (isNumericFullYear) errorMessage = "Please enter a 4 digit year";
+      var isNumericFullYear = $input.hasClass('numeric-full-year');
+      if (isNumericFullYear) errorMessage = 'Please enter a 4 digit year';
 
       var hasMinLimit = $input.attr('min') !== undefined;
       var hasMaxLimit = $input.attr('max') !== undefined;
       var hasDecimalMax = $input.data('decimal-max') !== undefined;
 
-      if (hasDecimalMax) errorMessage += " with " + $input.data('decimal-max') + " decimal places max";
+      if (hasDecimalMax) errorMessage += ' with ' + $input.data('decimal-max') + ' decimal places max';
 
       if (hasMinLimit && hasMaxLimit) {
-        errorMessage = errorMessage + " from " + $input.attr('min') + " to " + $input.attr('max');
+        errorMessage = errorMessage + ' from ' + $input.attr('min') + ' to ' + $input.attr('max');
       } else if (hasMinLimit) {
-        errorMessage = errorMessage + " greater or equal to " + $input.attr('min');
+        errorMessage = errorMessage + ' greater or equal to ' + $input.attr('min');
       } else if (hasMaxLimit) {
-        errorMessage = errorMessage + " lesser or equal to " + $input.attr('max');
+        errorMessage = errorMessage + ' lesser or equal to ' + $input.attr('max');
       }
 
-      errorMessage += ".";
+      errorMessage += '.';
 
       return errorMessage;
 
     }
 
-    return "Invalid Value";
+    return 'Invalid Value';
 
   };
 

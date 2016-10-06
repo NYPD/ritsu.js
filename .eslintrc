@@ -1,0 +1,19 @@
+{
+  "rules": {
+    "no-unused-vars": ["error", {"varsIgnorePattern": "rules|ritsu|validation"}],
+    "quotes": ["error", "single"],
+    "semi": ["error","always"]
+  },
+  "env": {
+    "browser": true,
+    "jquery": true,
+    "es6": true,
+    "node": true
+  },
+  "globals": {
+    "rules": true,
+    "validation": true,
+    "ritsu": true
+  },
+  "extends": "eslint:recommended"
+}

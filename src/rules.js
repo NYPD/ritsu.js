@@ -1,4 +1,4 @@
-var rules = (function(element) {
+var rules = (function() {
 
   //Private Methods ************************************************************
   var _validateAlphaOnly = function(element) {
@@ -67,7 +67,7 @@ var rules = (function(element) {
    */
   var _validateNumericDecimalString = function(element) {
 
-    var decimalMax = element.getAttribute("data-decimal-max");
+    var decimalMax = element.getAttribute('data-decimal-max');
     if (decimalMax === null) decimalMax = 2;
 
     /*
@@ -75,7 +75,7 @@ var rules = (function(element) {
      *
      * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
      */
-    var numericDecimalRegexString = "^-?((([\\d]{1,3}(,[\\d]{3})*)+(\\.[\\d]{1,decimalPlaces})?)|[\\d]+(\\.[\\d]{1,decimalPlaces})?)$";
+    var numericDecimalRegexString = '^-?((([\\d]{1,3}(,[\\d]{3})*)+(\\.[\\d]{1,decimalPlaces})?)|[\\d]+(\\.[\\d]{1,decimalPlaces})?)$';
     var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalMax));
 
     return numericDecimalRegex.test(element.value);
@@ -94,14 +94,14 @@ var rules = (function(element) {
 
     var $element = $(element);
 
-    var isValid = $element.datepicker("getDate") !== null;
+    var isValid = $element.datepicker('getDate') !== null;
 
     var isNoPastDate = element.hasAttribute('data-no-past-date');
 
     if (isNoPastDate && isValid) {
       var date = new Date();
       var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      validNumeric = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
+      isValid = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
     }
 
     return isValid;
@@ -114,26 +114,26 @@ var rules = (function(element) {
   };
 
   var _rules = [
-    new _Rule("alpha", "alpha-only", _validateAlphaOnly),
-    new _Rule("alpha", "alpha-zip", _validateAlphaZip),
-    new _Rule("alpha", "alpha-numeric", _validateAlphaNumeric),
-    new _Rule("alpha", "alpha-email", _validateAlphaEmail),
-    new _Rule("numeric", "numeric-whole", _validateNumericWhole),
-    new _Rule("numeric", "numeric-monetary", _validateNumericMonetary),
-    new _Rule("numeric", "numeric-decimal", _validateNumericDecimalString),
-    new _Rule("numeric", "numeric-full-year", _validateNumericFullYear),
-    new _Rule("numeric", "numeric-jquery-date", _validateNumericJqueryDatePicker)
+    new _Rule('alpha', 'alpha-only', _validateAlphaOnly),
+    new _Rule('alpha', 'alpha-zip', _validateAlphaZip),
+    new _Rule('alpha', 'alpha-numeric', _validateAlphaNumeric),
+    new _Rule('alpha', 'alpha-email', _validateAlphaEmail),
+    new _Rule('numeric', 'numeric-whole', _validateNumericWhole),
+    new _Rule('numeric', 'numeric-monetary', _validateNumericMonetary),
+    new _Rule('numeric', 'numeric-decimal', _validateNumericDecimalString),
+    new _Rule('numeric', 'numeric-full-year', _validateNumericFullYear),
+    new _Rule('numeric', 'numeric-jquery-date', _validateNumericJqueryDatePicker)
   ];
 
   var _addNewValidationRule = function(ruleType, ruleClass, validationFunction) {
 
-    if (ruleType !== "alpha" && ruleType !== "numeric")
-      throw new Error('The rule type for a new validation rule must be either "alpha" or ""');
+    if (ruleType !== 'alpha' && ruleType !== 'numeric')
+      throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
 
-    if (typeof ruleClass !== "string")
+    if (typeof ruleClass !== 'string')
       throw new Error('The rule class for a new validation rule is missing or is not of type string');
 
-    if (typeof validationFunction !== "function")
+    if (typeof validationFunction !== 'function')
       throw new Error('The validation function for a new validation rule is missing or is not of type function');
 
     var rule = new _Rule(ruleType, ruleClass, validationFunction);
@@ -148,7 +148,7 @@ var rules = (function(element) {
 
     for (var i = 0; i < _rules.length; i++) {
 
-      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClass;
+      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
       if (ruleDoesNotMatch) continue;
 
       rule = _rules[i];
