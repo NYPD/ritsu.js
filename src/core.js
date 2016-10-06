@@ -213,6 +213,7 @@ var ritsu = (function() {
       rules.addOrUpdateValidationRule(ruleType, rulesOrRuleClass, validationFunction);
     }
 
+    return this;
   };
 
   //Private Methods ************************************************************

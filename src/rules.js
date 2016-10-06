@@ -164,7 +164,6 @@ var rules = (function() {
     if (rule === null) {
       _addNewValidationRule(ruleType, ruleClass, validationFunction);
     } else {
-      rule.ruleClass = ruleClass;
       rule.validate = validationFunction;
     }
   };

@@ -170,7 +170,6 @@ var rules = (function() {
     if (rule === null) {
       _addNewValidationRule(ruleType, ruleClass, validationFunction);
     } else {
-      rule.ruleClass = ruleClass;
       rule.validate = validationFunction;
     }
   };
@@ -536,6 +535,7 @@ var ritsu = (function() {
       rules.addOrUpdateValidationRule(ruleType, rulesOrRuleClass, validationFunction);
     }
 
+    return this;
   };
 
   //Private Methods ************************************************************
