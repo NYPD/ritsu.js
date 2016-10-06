@@ -1,115 +1,183 @@
 /* ritsu.js v0.2.0 
- * Created 2016-09-30
+ * Created 2016-10-06
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
 
 var rules = (function() {
 
-  /*
-   * Matches all Canadian or American postal codes with different formats. For USA it is:
-   * any 5 digits followed optionally by an optional space or dash or empty string and any 4 digits after the optional
-   * space or dash. For Canada it is: certain capital letters (only one), any digit (only one), any capital letter (only one),
-   * optional space, any digit (only one), any capitol letter (only one), and and digit (only one).
-   *
-   * e.g. 19608 | 19608-8911 | A9C1A1 | A9C 1A1
-   *
-   */
-  var getAlphaZipRegex = function() {
-    return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/;
+  //Private Methods ************************************************************
+  var _validateAlphaOnly = function(element) {
+    /*
+     * Any case insensitive Roman character with periods, dashes, and spaces.
+     *
+     * e.g. cool | cool-beans | cool beans | beans.
+     */
+    return /^([A-Za-z\s\.\-])+$/.test(element.value);
+  };
+
+  var _validateAlphaZip = function(element) {
+    /*
+     * Matches all Canadian or American postal codes with different formats. For USA it is:
+     * any 5 digits followed optionally by an optional space or dash or empty string and any 4 digits after the optional
+     * space or dash. For Canada it is: certain capital letters (only one), any digit (only one), any capital letter (only one),
+     * optional space, any digit (only one), any capitol letter (only one), and and digit (only one).
+     *
+     * e.g. 19608 | 19608-8911 | A9C1A1 | A9C 1A1
+     *
+     */
+    return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/.test(element.value);
+  };
+
+  var _validateAlphaNumeric = function(element) {
+    /*
+     * Any case insensitive Roman character and digit
+     *
+     * e.g. Cool | C00l
+     */
+    return /^([a-zA-Z0-9]+)$/.test(element.value);
+  };
+
+
+  var _validateAlphaEmail = function(element) {
+    /*
+     * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
+     * It does not check tld and special chacter validity.
+     *
+     * e.g. a@a.a | bob@google.com | cool-beans@beans.com.uk | $#%@$%@$.com
+     */
+    return /^(\S+@\S+\.\S+)$/.test(element.value);
+  };
+
+
+  var _validateNumericWhole = function(element) {
+    /*
+     *  A negative or non negative number with optional thousands commas
+     *
+     *  e.g. 54 | -54 | -54,000 | 54000
+     */
+    return /^-?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/.test(element.value);
+  };
+
+  var _validateNumericMonetary = function(element) {
+    /*
+     * A negative or non negative monetary amount with optional thousands commas and optional hundreds decimal place
+     *
+     * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
+     */
+    return /^((-?[\d]{1,3}(,[\d]{3})*(\.[\d]{2})*)|-?[\d]+(\.[\d]{2})?)$/.test(element.value);
   };
 
   /*
-   * Any case insensitive Roman character with periods, dashes, and spaces.
-   *
-   * e.g. cool | cool-beans | cool beans | beans.
+   * Takes an optional decimalPlaces integer (defaults to 2 if not provided)
    */
-  var getAlphaOnlyRegex = function() {
-    return /^([A-Za-z\s\.\-])+$/;
+  var _validateNumericDecimalString = function(element) {
+
+    var decimalMax = element.getAttribute('data-decimal-max');
+    if (decimalMax === null) decimalMax = 2;
+
+    /*
+     * Any negative or non negative number amount with optional thousands commas and optional hundreds decimal place
+     *
+     * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
+     */
+    var numericDecimalRegexString = '^-?((([\\d]{1,3}(,[\\d]{3})*)+(\\.[\\d]{1,decimalPlaces})?)|[\\d]+(\\.[\\d]{1,decimalPlaces})?)$';
+    var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalMax));
+
+    return numericDecimalRegex.test(element.value);
   };
 
-  /*
-   * Any case insensitive Roman character and digit
-   *
-   * e.g. Cool | C00l
-   */
-  var getAlphaNumericRegex = function() {
-    return /^([a-zA-Z0-9]+)$/;
+  var _validateNumericFullYear = function(element) {
+    /*
+     * A four digit number
+     *
+     * e.g. 1999 | 2010 | 0000
+     */
+    return /^(\d{4})$/.test(element.value);
   };
 
-  /*
-   * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
-   * It does not check tld and special chacter validity.
-   *
-   * e.g. a@a.a | bob@google.com | cool-beans@beans.com.uk | $#%@$%@$.com
-   */
-  var getAlphaEmailRegex = function() {
-    return /^(\S+@\S+\.\S+)$/;
+  var _validateNumericJqueryDatePicker = function(element) {
+
+    var $element = $(element);
+
+    var isValid = $element.datepicker('getDate') !== null;
+
+    var isNoPastDate = element.hasAttribute('data-no-past-date');
+
+    if (isNoPastDate && isValid) {
+      var date = new Date();
+      var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      isValid = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
+    }
+
+    return isValid;
   };
 
-  /*
-   *  A negative or non negative number with optional thousands commas
-   *
-   *  e.g. 54 | -54 | -54,000 | 54000
-   */
-  var getNumericWholeRegex = function() {
-    return /^[-]?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/;
+  var _Rule = function(ruleType, ruleClass, validationFunction) {
+    this.ruleType = ruleType;
+    this.ruleClass = ruleClass;
+    this.validate = validationFunction;
   };
 
-  /*
-   * A negative or non negative monetary amount with optional thousands commas and optional hundreds decimal place
-   *
-   * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
-   */
-  var getNumericMonetaryRegex = function() {
-    return /^((-?[\d]{1,3}(,[\d]{3})*(\.[\d]{2})*)|-?[\d]+(\.[\d]{2})?)$/;
+  var _rules = [
+    new _Rule('alpha', 'alpha-only', _validateAlphaOnly),
+    new _Rule('alpha', 'alpha-zip', _validateAlphaZip),
+    new _Rule('alpha', 'alpha-numeric', _validateAlphaNumeric),
+    new _Rule('alpha', 'alpha-email', _validateAlphaEmail),
+    new _Rule('numeric', 'numeric-whole', _validateNumericWhole),
+    new _Rule('numeric', 'numeric-monetary', _validateNumericMonetary),
+    new _Rule('numeric', 'numeric-decimal', _validateNumericDecimalString),
+    new _Rule('numeric', 'numeric-full-year', _validateNumericFullYear),
+    new _Rule('numeric', 'numeric-jquery-date', _validateNumericJqueryDatePicker)
+  ];
+
+  var _addNewValidationRule = function(ruleType, ruleClass, validationFunction) {
+
+    if (ruleType !== 'alpha' && ruleType !== 'numeric')
+      throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
+
+    if (typeof ruleClass !== 'string')
+      throw new Error('The rule class for a new validation rule is missing or is not of type string');
+
+    if (typeof validationFunction !== 'function')
+      throw new Error('The validation function for a new validation rule is missing or is not of type function');
+
+    var rule = new _Rule(ruleType, ruleClass, validationFunction);
+    _rules.push(rule);
   };
 
-  /*
-   * Taking an optional decimalPlaces integer (defaults to 2 if not provided), any negative or non negative number amount with
-   * optional thousands commas and optional hundreds decimal place
-   *
-   * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
-   */
-  var getNumericDecimalRegexString = function(decimalPlaces) {
+  //Public Methods *************************************************************
+  var getRuleByRuleClass = function(ruleClasses) {
 
-    var decimalPlacesUndefined = decimalPlaces === undefined;
-    if (decimalPlacesUndefined) decimalPlaces = 2;
+    var isArray = Array.isArray(ruleClasses);
+    var rule = null;
 
-    var numericDecimalRegexString = "^((([\\d]{1,3}(,[\\d]{3})*)?(\\.[\\d]{1,decimalPlaces})?)|[\\d]*(\\.[\\d]{1,decimalPlaces})?)$";
-    var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalPlaces));
+    for (var i = 0; i < _rules.length; i++) {
 
-    return numericDecimalRegex;
+      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
+      if (ruleDoesNotMatch) continue;
+
+      rule = _rules[i];
+      break;
+    }
+    return rule;
   };
 
-  /*
-   * A four digit number
-   *
-   * e.g. 1999 | 2010 | 0000
-   */
-  var getNumericFullYearRegex = function() {
-    return /^(\d{4})$/;
-  };
+  var addOrUpdateValidationRule = function(ruleType, ruleClass, validationFunction) {
 
-  /*
-   * A date String in the format of MM/dd/YYYY. It DOES NOT check for validity of the month or day number.
-   *
-   * e.g. 10/02/1990 | 12/12/2014 | 84/65/1990
-   */
-  var getNumericDatePickerRegex = function() {
-    return /^(\d{2}\/\d{2}\/\d{4})$/;
+    var rule = getRuleByRuleClass(ruleClass);
+
+    if (rule === null) {
+      _addNewValidationRule(ruleType, ruleClass, validationFunction);
+    } else {
+      rule.ruleClass = ruleClass;
+      rule.validate = validationFunction;
+    }
   };
 
   return {
-    getAlphaZipRegex: getAlphaZipRegex,
-    getAlphaOnlyRegex: getAlphaOnlyRegex,
-    getAlphaEmailRegex: getAlphaEmailRegex,
-    getAlphaNumericRegex: getAlphaNumericRegex,
-    getNumericWholeRegex: getNumericWholeRegex,
-    getNumericMonetaryRegex: getNumericMonetaryRegex,
-    getNumericDecimalRegexString: getNumericDecimalRegexString,
-    getNumericFullYearRegex: getNumericFullYearRegex,
-    getNumericDatePickerRegex: getNumericDatePickerRegex
+    getRuleByRuleClass: getRuleByRuleClass,
+    addOrUpdateValidationRule: addOrUpdateValidationRule
   };
 
 })();
@@ -141,12 +209,12 @@ var validation = (function() {
 
     var validInput = true;
 
-    var isAlpha = $element.hasClass("alpha");
-    var isNumeric = $element.hasClass("numeric");
-    var isOptional = $element.hasClass("optional");
+    var isAlpha = $element.hasClass('alpha');
+    var isNumeric = $element.hasClass('numeric');
+    var isOptional = $element.hasClass('optional');
 
     var fieldValue = $element.val();
-    var isEmpty = $.trim(fieldValue) === "" || fieldValue === undefined;
+    var isEmpty = $.trim(fieldValue) === '' || fieldValue === undefined;
 
     var noValidationNeeded = isEmpty && isOptional;
     if (noValidationNeeded) return validInput;
@@ -163,7 +231,7 @@ var validation = (function() {
 
     var valueSelected = $element.val();
     var isOptional = $element.hasClass('optional');
-    var isEmpty = $.trim(valueSelected) === "" || valueSelected === undefined;
+    var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
 
     var validSelect = isOptional && isEmpty || !isEmpty;
 
@@ -172,86 +240,75 @@ var validation = (function() {
   };
 
   var _validateAlphaField = function(element) {
-
-    var $element = $(element);
     var validAlpha = true;
 
-    var fieldValue = $element.val();
+    var validationPattern = element.getAttribute('pattern');
+    var elementClassString = element.getAttribute('class');
 
-    var isAlphaOnly = $element.hasClass("alpha-only");
-    var isAlphaZip = $element.hasClass("alpha-zip");
-    var isAlphaNumeric = $element.hasClass("alpha-numeric");
-    var isAlphaEmail = $element.hasClass("alpha-email");
-
-    if (isAlphaOnly) {
-      validAlpha = rules.getAlphaOnlyRegex().test(fieldValue);
-    } else if (isAlphaZip) {
-      validAlpha = rules.getAlphaZipRegex().test(fieldValue);
-    } else if (isAlphaNumeric) {
-      validAlpha = rules.getAlphaNumericRegex().test(fieldValue);
-    } else if (isAlphaEmail) {
-      validAlpha = rules.getAlphaEmailRegex().test(fieldValue);
+    var hasValidationPattern = validationPattern !== null;
+    //User supplied their own validation, use that instead
+    if (hasValidationPattern) {
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      return userRegex.test(element.value);
     }
+
+    var elementHasNoClasses = elementClassString === null;
+    if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
+
+    var elementClasses = elementClassString.split(' ');
+
+    var rule = rules.getRuleByRuleClass(elementClasses);
+    if (rule === null) return validAlpha; //No rule found, so just exit
+
+    validAlpha = rule.validate(element);
 
     return validAlpha;
   };
 
-  var _validateNumericField = function (element) {
+  var _validateNumericField = function(element) {
 
-    var $element = $(element);
     var validNumeric = true;
 
-    var fieldValue = $element.val();
+    var validationPattern = element.getAttribute('pattern');
+    var hasValidationPattern = validationPattern !== null;
 
-    var isNumericWholeInput = $element.hasClass("numeric-whole");
-    var isNumericMonetaryInput = $element.hasClass("numeric-monetary");
-    var isNumericDecimalInput = $element.hasClass("numeric-decimal");
-    var isNumericFullYear = $element.hasClass("numeric-full-year");
-    var isNumericDatePicker = $element.hasClass("numeric-jquery-date");
+    //User supplied their own validation, use that instead
+    if (hasValidationPattern) {
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      validNumeric = userRegex.test(element.value);
+    } else {
+      var elementClassString = element.getAttribute('class');
+      var elementClasses = elementClassString ? elementClassString.split(' ') : ''; //In case there is no classes, make it empty strings for null safety
 
-    if (isNumericWholeInput) {
-      validNumeric = rules.getNumericWholeRegex().test(fieldValue);
-    } else if (isNumericMonetaryInput) {
-      validNumeric = rules.getNumericMonetaryRegex().test(fieldValue);
-    } else if (isNumericDecimalInput) {
-      validNumeric = rules.getNumericDecimalRegexString($element.data('decimal-max')).test(fieldValue);
-    } else if (isNumericFullYear) {
-      validNumeric = rules.getNumericFullYearRegex().test(fieldValue);
-    } else if (isNumericDatePicker) {
-
-      validNumeric = $element.datepicker("getDate") !== null;
-      var isNoPastDate = element.hasAttribute('data-no-past-date');
-
-      if (isNoPastDate && validNumeric) {
-        var date = new Date();
-        var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        validNumeric = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
-      }
-
+      var rule = rules.getRuleByRuleClass(elementClasses);
+      if (rule !== null) validNumeric = rule.validate(element);
     }
 
+    //If it is still valid, check min and max if it has any
     if (validNumeric) {
-
       /*
        * I know javascript auto converts strings into numbers when using "non stirct equality" operators,
        * but do this excplicity to show intention. (This is prob overkill idk)
        *
        * This won't work in locales that use commas as decimal places.
        */
-      var fieldValueAsNum = Number(fieldValue.replace(',', ''));
+      var fieldValueAsNum = Number(element.value.replace(',', ''));
 
-      var minLimit = $.trim($element.attr('min')) === "" ? null : Number($element.attr('min'));
-      var maxLimit = $.trim($element.attr('max')) === "" ? null : Number($element.attr('max'));
+      var minAttr = $.trim(element.getAttribute('min'));
+      var maxAttr = $.trim(element.getAttribute('max'));
+
+      var minLimit = (minAttr === '' || minAttr === null) ? null : Number(minAttr);
+      var maxLimit = (maxAttr === '' || maxAttr === null) ? null : Number(maxAttr);
 
       var hasMinLimit = minLimit !== null;
       var hasMaxLimit = maxLimit !== null;
 
       if (hasMinLimit && hasMaxLimit) {
-        validNumeric = fieldValue >= minLimit || fieldValue <= maxLimit;
+        validNumeric = fieldValueAsNum >= minLimit || fieldValueAsNum <= maxLimit;
       } else if (hasMinLimit) {
-        validNumeric = fieldValue >= minLimit;
+        validNumeric = fieldValueAsNum >= minLimit;
       } else if (hasMaxLimit) {
-        validNumeric = fieldValue <= maxLimit;
+        validNumeric = fieldValueAsNum <= maxLimit;
       }
     }
 
@@ -276,12 +333,15 @@ var ritsu = (function() {
 
   var initialize = function(options) {
 
-    var invalidOptions = typeof options !== "object";
-    if (invalidOptions) throw "Invalid options to initialize ritsu.js";
+    var invalidOptions = typeof options !== 'object';
+    if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
 
     useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
     autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
+
+    var validationRules = options.validationRules;
+    if (validationRules !== undefined) _addValidationRules(validationRules);
 
     return this;
   };
@@ -314,7 +374,7 @@ var ritsu = (function() {
         }
 
         var hasFileAttached = this.files.length > 0;
-        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : "";
+        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : '';
 
         $this.data('initialValue', initialValue);
 
@@ -383,6 +443,7 @@ var ritsu = (function() {
     $selector.each(function() {
 
       var $element = $(this);
+
       var invalidElement = !validation.validateElement(this);
 
       //Sets the entire form to false, just because their was at least 1 invalid field
@@ -418,9 +479,9 @@ var ritsu = (function() {
       var isInvalid = $this.data('invalid');
 
       if (isInvalid) {
-        $errorSelector.addClass("has-error");
+        $errorSelector.addClass('has-error');
       } else {
-        $errorSelector.removeClass("has-error");
+        $errorSelector.removeClass('has-error');
       }
 
     });
@@ -465,7 +526,25 @@ var ritsu = (function() {
     return this;
   };
 
+  var addValidationRule = function(rulesOrRuleClass, validationFunction, ruleType) {
+
+    var isRulesArray = Array.isArray(rulesOrRuleClass);
+
+    if (isRulesArray) {
+      _addValidationRules(rulesOrRuleClass);
+    } else {
+      rules.addOrUpdateValidationRule(ruleType, rulesOrRuleClass, validationFunction);
+    }
+
+  };
+
   //Private Methods ************************************************************
+  var _addValidationRules = function(validationRules) {
+    validationRules.forEach(function(rule) {
+      rules.addOrUpdateValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction);
+    });
+  };
+
   var _removeErrorMessage = function($input) {
 
     $input.closest('td').find('.error-label').remove();
@@ -483,65 +562,65 @@ var ritsu = (function() {
 
   var _getErrorMessageForInput = function($input) {
 
-    var isAlpha = $input.hasClass("alpha");
+    var isAlpha = $input.hasClass('alpha');
 
     if (isAlpha) {
 
-      var isAlphaAll = $input.hasClass("alpha-all");
+      var isAlphaAll = $input.hasClass('alpha-all');
       if (isAlphaAll) return null;
 
-      var isAlphaOnly = $input.hasClass("alpha-only");
-      if (isAlphaOnly) return "Please enter only letters";
+      var isAlphaOnly = $input.hasClass('alpha-only');
+      if (isAlphaOnly) return 'Please enter only letters';
 
-      var isAlphaZip = $input.hasClass("alpha-zip");
-      if (isAlphaZip) return "Please enter a valid zip code";
+      var isAlphaZip = $input.hasClass('alpha-zip');
+      if (isAlphaZip) return 'Please enter a valid zip code';
 
-      var isAlphaJqueryDate = $input.hasClass("alpha-jquery-date");
-      if (isAlphaJqueryDate) return "Please select a date from the datepicker";
+      var isAlphaJqueryDate = $input.hasClass('alpha-jquery-date');
+      if (isAlphaJqueryDate) return 'Please select a date from the datepicker';
 
-      var isAlphaNumeric = $input.hasClass("alpha-numeric");
-      if (isAlphaNumeric) return "Please enter only alphanumeric characters";
+      var isAlphaNumeric = $input.hasClass('alpha-numeric');
+      if (isAlphaNumeric) return 'Please enter only alphanumeric characters';
     }
 
-    var isNumeric = $input.hasClass("numeric");
+    var isNumeric = $input.hasClass('numeric');
 
     if (isNumeric) {
 
       var errorMessage;
 
-      var isNumericWholeInput = $input.hasClass("numeric-whole");
-      if (isNumericWholeInput) errorMessage = "Please enter a whole number";
+      var isNumericWholeInput = $input.hasClass('numeric-whole');
+      if (isNumericWholeInput) errorMessage = 'Please enter a whole number';
 
-      var isNumericMonetaryInput = $input.hasClass("numeric-monetary");
-      if (isNumericMonetaryInput) errorMessage = "Please enter a monetary value";
+      var isNumericMonetaryInput = $input.hasClass('numeric-monetary');
+      if (isNumericMonetaryInput) errorMessage = 'Please enter a monetary value';
 
-      var isNumericDecimalInput = $input.hasClass("numeric-decimal");
-      if (isNumericDecimalInput) errorMessage = "Please enter a number";
+      var isNumericDecimalInput = $input.hasClass('numeric-decimal');
+      if (isNumericDecimalInput) errorMessage = 'Please enter a number';
 
-      var isNumericFullYear = $input.hasClass("numeric-full-year");
-      if (isNumericFullYear) errorMessage = "Please enter a 4 digit year";
+      var isNumericFullYear = $input.hasClass('numeric-full-year');
+      if (isNumericFullYear) errorMessage = 'Please enter a 4 digit year';
 
       var hasMinLimit = $input.attr('min') !== undefined;
       var hasMaxLimit = $input.attr('max') !== undefined;
       var hasDecimalMax = $input.data('decimal-max') !== undefined;
 
-      if (hasDecimalMax) errorMessage += " with " + $input.data('decimal-max') + " decimal places max";
+      if (hasDecimalMax) errorMessage += ' with ' + $input.data('decimal-max') + ' decimal places max';
 
       if (hasMinLimit && hasMaxLimit) {
-        errorMessage = errorMessage + " from " + $input.attr('min') + " to " + $input.attr('max');
+        errorMessage = errorMessage + ' from ' + $input.attr('min') + ' to ' + $input.attr('max');
       } else if (hasMinLimit) {
-        errorMessage = errorMessage + " greater or equal to " + $input.attr('min');
+        errorMessage = errorMessage + ' greater or equal to ' + $input.attr('min');
       } else if (hasMaxLimit) {
-        errorMessage = errorMessage + " lesser or equal to " + $input.attr('max');
+        errorMessage = errorMessage + ' lesser or equal to ' + $input.attr('max');
       }
 
-      errorMessage += ".";
+      errorMessage += '.';
 
       return errorMessage;
 
     }
 
-    return "Invalid Value";
+    return 'Invalid Value';
 
   };
 
@@ -551,7 +630,8 @@ var ritsu = (function() {
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,
-    showErrorMessages: showErrorMessages
+    showErrorMessages: showErrorMessages,
+    addValidationRule: addValidationRule
   };
 
 })();

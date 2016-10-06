@@ -25,12 +25,12 @@ var validation = (function() {
 
     var validInput = true;
 
-    var isAlpha = $element.hasClass("alpha");
-    var isNumeric = $element.hasClass("numeric");
-    var isOptional = $element.hasClass("optional");
+    var isAlpha = $element.hasClass('alpha');
+    var isNumeric = $element.hasClass('numeric');
+    var isOptional = $element.hasClass('optional');
 
     var fieldValue = $element.val();
-    var isEmpty = $.trim(fieldValue) === "" || fieldValue === undefined;
+    var isEmpty = $.trim(fieldValue) === '' || fieldValue === undefined;
 
     var noValidationNeeded = isEmpty && isOptional;
     if (noValidationNeeded) return validInput;
@@ -47,7 +47,7 @@ var validation = (function() {
 
     var valueSelected = $element.val();
     var isOptional = $element.hasClass('optional');
-    var isEmpty = $.trim(valueSelected) === "" || valueSelected === undefined;
+    var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
 
     var validSelect = isOptional && isEmpty || !isEmpty;
 
@@ -56,86 +56,75 @@ var validation = (function() {
   };
 
   var _validateAlphaField = function(element) {
-
-    var $element = $(element);
     var validAlpha = true;
 
-    var fieldValue = $element.val();
+    var validationPattern = element.getAttribute('pattern');
+    var elementClassString = element.getAttribute('class');
 
-    var isAlphaOnly = $element.hasClass("alpha-only");
-    var isAlphaZip = $element.hasClass("alpha-zip");
-    var isAlphaNumeric = $element.hasClass("alpha-numeric");
-    var isAlphaEmail = $element.hasClass("alpha-email");
-
-    if (isAlphaOnly) {
-      validAlpha = rules.getAlphaOnlyRegex().test(fieldValue);
-    } else if (isAlphaZip) {
-      validAlpha = rules.getAlphaZipRegex().test(fieldValue);
-    } else if (isAlphaNumeric) {
-      validAlpha = rules.getAlphaNumericRegex().test(fieldValue);
-    } else if (isAlphaEmail) {
-      validAlpha = rules.getAlphaEmailRegex().test(fieldValue);
+    var hasValidationPattern = validationPattern !== null;
+    //User supplied their own validation, use that instead
+    if (hasValidationPattern) {
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      return userRegex.test(element.value);
     }
+
+    var elementHasNoClasses = elementClassString === null;
+    if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
+
+    var elementClasses = elementClassString.split(' ');
+
+    var rule = rules.getRuleByRuleClass(elementClasses);
+    if (rule === null) return validAlpha; //No rule found, so just exit
+
+    validAlpha = rule.validate(element);
 
     return validAlpha;
   };
 
-  var _validateNumericField = function (element) {
+  var _validateNumericField = function(element) {
 
-    var $element = $(element);
     var validNumeric = true;
 
-    var fieldValue = $element.val();
+    var validationPattern = element.getAttribute('pattern');
+    var hasValidationPattern = validationPattern !== null;
 
-    var isNumericWholeInput = $element.hasClass("numeric-whole");
-    var isNumericMonetaryInput = $element.hasClass("numeric-monetary");
-    var isNumericDecimalInput = $element.hasClass("numeric-decimal");
-    var isNumericFullYear = $element.hasClass("numeric-full-year");
-    var isNumericDatePicker = $element.hasClass("numeric-jquery-date");
+    //User supplied their own validation, use that instead
+    if (hasValidationPattern) {
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      validNumeric = userRegex.test(element.value);
+    } else {
+      var elementClassString = element.getAttribute('class');
+      var elementClasses = elementClassString ? elementClassString.split(' ') : ''; //In case there is no classes, make it empty strings for null safety
 
-    if (isNumericWholeInput) {
-      validNumeric = rules.getNumericWholeRegex().test(fieldValue);
-    } else if (isNumericMonetaryInput) {
-      validNumeric = rules.getNumericMonetaryRegex().test(fieldValue);
-    } else if (isNumericDecimalInput) {
-      validNumeric = rules.getNumericDecimalRegexString($element.data('decimal-max')).test(fieldValue);
-    } else if (isNumericFullYear) {
-      validNumeric = rules.getNumericFullYearRegex().test(fieldValue);
-    } else if (isNumericDatePicker) {
-
-      validNumeric = $element.datepicker("getDate") !== null;
-      var isNoPastDate = element.hasAttribute('data-no-past-date');
-
-      if (isNoPastDate && validNumeric) {
-        var date = new Date();
-        var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        validNumeric = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
-      }
-
+      var rule = rules.getRuleByRuleClass(elementClasses);
+      if (rule !== null) validNumeric = rule.validate(element);
     }
 
+    //If it is still valid, check min and max if it has any
     if (validNumeric) {
-
       /*
        * I know javascript auto converts strings into numbers when using "non stirct equality" operators,
        * but do this excplicity to show intention. (This is prob overkill idk)
        *
        * This won't work in locales that use commas as decimal places.
        */
-      var fieldValueAsNum = Number(fieldValue.replace(',', ''));
+      var fieldValueAsNum = Number(element.value.replace(',', ''));
 
-      var minLimit = $.trim($element.attr('min')) === "" ? null : Number($element.attr('min'));
-      var maxLimit = $.trim($element.attr('max')) === "" ? null : Number($element.attr('max'));
+      var minAttr = $.trim(element.getAttribute('min'));
+      var maxAttr = $.trim(element.getAttribute('max'));
+
+      var minLimit = (minAttr === '' || minAttr === null) ? null : Number(minAttr);
+      var maxLimit = (maxAttr === '' || maxAttr === null) ? null : Number(maxAttr);
 
       var hasMinLimit = minLimit !== null;
       var hasMaxLimit = maxLimit !== null;
 
       if (hasMinLimit && hasMaxLimit) {
-        validNumeric = fieldValue >= minLimit || fieldValue <= maxLimit;
+        validNumeric = fieldValueAsNum >= minLimit || fieldValueAsNum <= maxLimit;
       } else if (hasMinLimit) {
-        validNumeric = fieldValue >= minLimit;
+        validNumeric = fieldValueAsNum >= minLimit;
       } else if (hasMaxLimit) {
-        validNumeric = fieldValue <= maxLimit;
+        validNumeric = fieldValueAsNum <= maxLimit;
       }
     }
 
