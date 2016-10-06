@@ -208,12 +208,12 @@ var validation = (function() {
 
     var validInput = true;
 
-    var isAlpha = $element.hasClass("alpha");
-    var isNumeric = $element.hasClass("numeric");
-    var isOptional = $element.hasClass("optional");
+    var isAlpha = $element.hasClass('alpha');
+    var isNumeric = $element.hasClass('numeric');
+    var isOptional = $element.hasClass('optional');
 
     var fieldValue = $element.val();
-    var isEmpty = $.trim(fieldValue) === "" || fieldValue === undefined;
+    var isEmpty = $.trim(fieldValue) === '' || fieldValue === undefined;
 
     var noValidationNeeded = isEmpty && isOptional;
     if (noValidationNeeded) return validInput;
@@ -230,7 +230,7 @@ var validation = (function() {
 
     var valueSelected = $element.val();
     var isOptional = $element.hasClass('optional');
-    var isEmpty = $.trim(valueSelected) === "" || valueSelected === undefined;
+    var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
 
     var validSelect = isOptional && isEmpty || !isEmpty;
 
@@ -281,21 +281,21 @@ var validation = (function() {
        */
       var fieldValueAsNum = Number(element.value.replace(',', ''));
 
-      var minAttr = $.trim(element.getAttribute("min"));
-      var maxAttr = $.trim(element.getAttribute("max"));
+      var minAttr = $.trim(element.getAttribute('min'));
+      var maxAttr = $.trim(element.getAttribute('max'));
 
-      var minLimit = (minAttr === "" || minAttr === null) ? null : Number(minAttr);
-      var maxLimit = (maxAttr === "" || maxAttr === null) ? null : Number(maxAttr);
+      var minLimit = (minAttr === '' || minAttr === null) ? null : Number(minAttr);
+      var maxLimit = (maxAttr === '' || maxAttr === null) ? null : Number(maxAttr);
 
       var hasMinLimit = minLimit !== null;
       var hasMaxLimit = maxLimit !== null;
 
       if (hasMinLimit && hasMaxLimit) {
-        validNumeric = fieldValue >= minLimit || fieldValue <= maxLimit;
+        validNumeric = fieldValueAsNum >= minLimit || fieldValueAsNum <= maxLimit;
       } else if (hasMinLimit) {
-        validNumeric = fieldValue >= minLimit;
+        validNumeric = fieldValueAsNum >= minLimit;
       } else if (hasMaxLimit) {
-        validNumeric = fieldValue <= maxLimit;
+        validNumeric = fieldValueAsNum <= maxLimit;
       }
     }
 
