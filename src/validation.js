@@ -58,7 +58,15 @@ var validation = (function() {
   var _validateAlphaField = function(element) {
     var validAlpha = true;
 
+    var validationPattern = element.getAttribute('pattern');
     var elementClassString = element.getAttribute('class');
+
+    var hasValidationPattern = validationPattern !== null;
+    //User supplied their own validation, use that instead
+    if (hasValidationPattern) {
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      return userRegex.test(element.value);
+    }
 
     var elementHasNoClasses = elementClassString === null;
     if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
@@ -77,18 +85,22 @@ var validation = (function() {
 
     var validNumeric = true;
 
-    var elementClassString = element.getAttribute('class');
+    var validationPattern = element.getAttribute('pattern');
+    var hasValidationPattern = validationPattern !== null;
 
-    var elementHasNoClasses = elementClassString === null;
-    if (elementHasNoClasses) return validNumeric; //No need to validate just exit early
+    //User supplied their own validation, use that instead
+    if (hasValidationPattern) {
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      validNumeric = userRegex.test(element.value);
+    } else {
+      var elementClassString = element.getAttribute('class');
+      var elementClasses = elementClassString ? elementClassString.split(' ') : ''; //In case there is no classes, make it empty strings for null safety
 
-    var elementClasses = elementClassString.split(' ');
+      var rule = rules.getRuleByRuleClass(elementClasses);
+      if (rule !== null) validNumeric = rule.validate(element);
+    }
 
-    var rule = rules.getRuleByRuleClass(elementClasses);
-    if (rule === null) return validNumeric; //No rule found, so just exit
-
-    validNumeric = rule.validate(element);
-
+    //If it is still valid, check min and max if it has any
     if (validNumeric) {
       /*
        * I know javascript auto converts strings into numbers when using "non stirct equality" operators,

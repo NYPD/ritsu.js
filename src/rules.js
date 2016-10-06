@@ -157,7 +157,8 @@ var rules = (function() {
     return rule;
   };
 
-  var addOrUpdateValidationRule = function(ruleClass, validationFunction, ruleType) {
+  var addOrUpdateValidationRule = function(ruleType, ruleClass, validationFunction) {
+
     var rule = getRuleByRuleClass(ruleClass);
 
     if (rule === null) {

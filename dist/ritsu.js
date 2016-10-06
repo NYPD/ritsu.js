@@ -163,7 +163,8 @@ var rules = (function() {
     return rule;
   };
 
-  var addOrUpdateValidationRule = function(ruleClass, validationFunction, ruleType) {
+  var addOrUpdateValidationRule = function(ruleType, ruleClass, validationFunction) {
+
     var rule = getRuleByRuleClass(ruleClass);
 
     if (rule === null) {
@@ -241,7 +242,15 @@ var validation = (function() {
   var _validateAlphaField = function(element) {
     var validAlpha = true;
 
+    var validationPattern = element.getAttribute('pattern');
     var elementClassString = element.getAttribute('class');
+
+    var hasValidationPattern = validationPattern !== null;
+    //User supplied their own validation, use that instead
+    if (hasValidationPattern) {
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      return userRegex.test(element.value);
+    }
 
     var elementHasNoClasses = elementClassString === null;
     if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
@@ -260,18 +269,22 @@ var validation = (function() {
 
     var validNumeric = true;
 
-    var elementClassString = element.getAttribute('class');
+    var validationPattern = element.getAttribute('pattern');
+    var hasValidationPattern = validationPattern !== null;
 
-    var elementHasNoClasses = elementClassString === null;
-    if (elementHasNoClasses) return validNumeric; //No need to validate just exit early
+    //User supplied their own validation, use that instead
+    if (hasValidationPattern) {
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      validNumeric = userRegex.test(element.value);
+    } else {
+      var elementClassString = element.getAttribute('class');
+      var elementClasses = elementClassString ? elementClassString.split(' ') : ''; //In case there is no classes, make it empty strings for null safety
 
-    var elementClasses = elementClassString.split(' ');
+      var rule = rules.getRuleByRuleClass(elementClasses);
+      if (rule !== null) validNumeric = rule.validate(element);
+    }
 
-    var rule = rules.getRuleByRuleClass(elementClasses);
-    if (rule === null) return validNumeric; //No rule found, so just exit
-
-    validNumeric = rule.validate(element);
-
+    //If it is still valid, check min and max if it has any
     if (validNumeric) {
       /*
        * I know javascript auto converts strings into numbers when using "non stirct equality" operators,
@@ -321,11 +334,14 @@ var ritsu = (function() {
   var initialize = function(options) {
 
     var invalidOptions = typeof options !== 'object';
-    if (invalidOptions) throw 'Invalid options to initialize ritsu.js';
+    if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
 
     useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
     autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
+
+    var validationRules = options.validationRules;
+    if (validationRules !== undefined) _addValidationRules(validationRules);
 
     return this;
   };
@@ -510,7 +526,25 @@ var ritsu = (function() {
     return this;
   };
 
+  var addValidationRule = function(rulesOrRuleClass, validationFunction, ruleType) {
+
+    var isRulesArray = Array.isArray(rulesOrRuleClass);
+
+    if (isRulesArray) {
+      _addValidationRules(rulesOrRuleClass);
+    } else {
+      rules.addOrUpdateValidationRule(ruleType, rulesOrRuleClass, validationFunction);
+    }
+
+  };
+
   //Private Methods ************************************************************
+  var _addValidationRules = function(validationRules) {
+    validationRules.forEach(function(rule) {
+      rules.addOrUpdateValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction);
+    });
+  };
+
   var _removeErrorMessage = function($input) {
 
     $input.closest('td').find('.error-label').remove();
@@ -596,7 +630,8 @@ var ritsu = (function() {
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,
-    showErrorMessages: showErrorMessages
+    showErrorMessages: showErrorMessages,
+    addValidationRule: addValidationRule
   };
 
 })();

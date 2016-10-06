@@ -11,11 +11,14 @@ var ritsu = (function() {
   var initialize = function(options) {
 
     var invalidOptions = typeof options !== 'object';
-    if (invalidOptions) throw 'Invalid options to initialize ritsu.js';
+    if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
 
     useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
     autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
+
+    var validationRules = options.validationRules;
+    if (validationRules !== undefined) _addValidationRules(validationRules);
 
     return this;
   };
@@ -200,7 +203,25 @@ var ritsu = (function() {
     return this;
   };
 
+  var addValidationRule = function(rulesOrRuleClass, validationFunction, ruleType) {
+
+    var isRulesArray = Array.isArray(rulesOrRuleClass);
+
+    if (isRulesArray) {
+      _addValidationRules(rulesOrRuleClass);
+    } else {
+      rules.addOrUpdateValidationRule(ruleType, rulesOrRuleClass, validationFunction);
+    }
+
+  };
+
   //Private Methods ************************************************************
+  var _addValidationRules = function(validationRules) {
+    validationRules.forEach(function(rule) {
+      rules.addOrUpdateValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction);
+    });
+  };
+
   var _removeErrorMessage = function($input) {
 
     $input.closest('td').find('.error-label').remove();
@@ -286,7 +307,8 @@ var ritsu = (function() {
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,
-    showErrorMessages: showErrorMessages
+    showErrorMessages: showErrorMessages,
+    addValidationRule: addValidationRule
   };
 
 })();
