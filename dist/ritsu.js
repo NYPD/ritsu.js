@@ -1,10 +1,38 @@
 /* ritsu.js v0.2.0 
- * Created 2016-10-06
+ * Created 2016-10-07
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
 
 var rules = (function() {
+
+  //Public Methods *************************************************************
+  var getRuleByRuleClass = function(ruleClasses) {
+
+    var isArray = Array.isArray(ruleClasses);
+    var rule = null;
+
+    for (var i = 0; i < _rules.length; i++) {
+
+      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
+      if (ruleDoesNotMatch) continue;
+
+      rule = _rules[i];
+      break;
+    }
+    return rule;
+  };
+
+  var addOrUpdateValidationRule = function(ruleType, ruleClass, validationFunction) {
+
+    var rule = getRuleByRuleClass(ruleClass);
+
+    if (rule === null) {
+      _addNewValidationRule(ruleType, ruleClass, validationFunction);
+    } else {
+      rule.validate = validationFunction;
+    }
+  };
 
   //Private Methods ************************************************************
   var _validateAlphaOnly = function(element) {
@@ -51,40 +79,40 @@ var rules = (function() {
 
 
   var _validateNumericWhole = function(element) {
+
+    var value = element.value;
+    var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
     /*
      *  A negative or non negative number with optional thousands commas
      *
      *  e.g. 54 | -54 | -54,000 | 54000
      */
-    return /^-?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/.test(element.value);
+    var validNumericWhole = /^-?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/.test(value);
+    if(noThousandsSeparator) validNumericWhole = validNumericWhole && value.indexOf(',') === -1;
+
+    return validNumericWhole;
+
   };
 
-  var _validateNumericMonetary = function(element) {
+  var _validateNumericDecimalString = function(element) {
+
+    var value = element.value;
+    var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
+    var decimalMax = element.getAttribute('data-decimal-max');
+    if (decimalMax === null) decimalMax = 2;
+
     /*
      * A negative or non negative monetary amount with optional thousands commas and optional hundreds decimal place
      *
      * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
      */
-    return /^((-?[\d]{1,3}(,[\d]{3})*(\.[\d]{2})*)|-?[\d]+(\.[\d]{2})?)$/.test(element.value);
-  };
-
-  /*
-   * Takes an optional decimalPlaces integer (defaults to 2 if not provided)
-   */
-  var _validateNumericDecimalString = function(element) {
-
-    var decimalMax = element.getAttribute('data-decimal-max');
-    if (decimalMax === null) decimalMax = 2;
-
-    /*
-     * Any negative or non negative number amount with optional thousands commas and optional hundreds decimal place
-     *
-     * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
-     */
     var numericDecimalRegexString = '^-?((([\\d]{1,3}(,[\\d]{3})*)+(\\.[\\d]{1,decimalPlaces})?)|[\\d]+(\\.[\\d]{1,decimalPlaces})?)$';
     var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalMax));
 
-    return numericDecimalRegex.test(element.value);
+    var validNumericDecimal = numericDecimalRegex.test(value);
+    if(noThousandsSeparator) validNumericDecimal = validNumericDecimal && value.indexOf(',') === -1;
+
+    return validNumericDecimal;
   };
 
   var _validateNumericFullYear = function(element) {
@@ -102,12 +130,33 @@ var rules = (function() {
 
     var isValid = $element.datepicker('getDate') !== null;
 
+    if(!isValid) return isValid; //Its not valid, no point ot validate it more
+
+    var dateSelectedInMillis = $element.datepicker('getDate').getTime();
+
     var isNoPastDate = element.hasAttribute('data-no-past-date');
 
-    if (isNoPastDate && isValid) {
+    if (isNoPastDate) {
       var date = new Date();
       var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      isValid = $element.datepicker('getDate').getTime() >= dateWithNoTime.getTime();
+      isValid = dateSelectedInMillis >= dateWithNoTime.getTime();
+    }
+
+    var minAttr = element.getAttribute('min');
+    var maxAttr = element.getAttribute('max');
+
+    var minLimit = (minAttr === '' || minAttr === null) ? null : Number(minAttr);
+    var maxLimit = (maxAttr === '' || maxAttr === null) ? null : Number(maxAttr);
+
+    var hasMinLimit = minLimit !== null;
+    var hasMaxLimit = maxLimit !== null;
+
+    if (hasMinLimit && hasMaxLimit) {
+      isValid = dateSelectedInMillis >= minLimit || dateSelectedInMillis <= maxLimit;
+    } else if (hasMinLimit) {
+      isValid = dateSelectedInMillis >= minLimit;
+    } else if (hasMaxLimit) {
+      isValid = dateSelectedInMillis <= maxLimit;
     }
 
     return isValid;
@@ -125,7 +174,6 @@ var rules = (function() {
     new _Rule('alpha', 'alpha-numeric', _validateAlphaNumeric),
     new _Rule('alpha', 'alpha-email', _validateAlphaEmail),
     new _Rule('numeric', 'numeric-whole', _validateNumericWhole),
-    new _Rule('numeric', 'numeric-monetary', _validateNumericMonetary),
     new _Rule('numeric', 'numeric-decimal', _validateNumericDecimalString),
     new _Rule('numeric', 'numeric-full-year', _validateNumericFullYear),
     new _Rule('numeric', 'numeric-jquery-date', _validateNumericJqueryDatePicker)
@@ -144,34 +192,6 @@ var rules = (function() {
 
     var rule = new _Rule(ruleType, ruleClass, validationFunction);
     _rules.push(rule);
-  };
-
-  //Public Methods *************************************************************
-  var getRuleByRuleClass = function(ruleClasses) {
-
-    var isArray = Array.isArray(ruleClasses);
-    var rule = null;
-
-    for (var i = 0; i < _rules.length; i++) {
-
-      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
-      if (ruleDoesNotMatch) continue;
-
-      rule = _rules[i];
-      break;
-    }
-    return rule;
-  };
-
-  var addOrUpdateValidationRule = function(ruleType, ruleClass, validationFunction) {
-
-    var rule = getRuleByRuleClass(ruleClass);
-
-    if (rule === null) {
-      _addNewValidationRule(ruleType, ruleClass, validationFunction);
-    } else {
-      rule.validate = validationFunction;
-    }
   };
 
   return {
@@ -292,9 +312,10 @@ var validation = (function() {
        * This won't work in locales that use commas as decimal places.
        */
       var fieldValueAsNum = Number(element.value.replace(',', ''));
+      if (isNaN(fieldValueAsNum)) return validNumeric; //Not a number, just return
 
-      var minAttr = $.trim(element.getAttribute('min'));
-      var maxAttr = $.trim(element.getAttribute('max'));
+      var minAttr = element.getAttribute('min');
+      var maxAttr = element.getAttribute('max');
 
       var minLimit = (minAttr === '' || minAttr === null) ? null : Number(minAttr);
       var maxLimit = (maxAttr === '' || maxAttr === null) ? null : Number(maxAttr);

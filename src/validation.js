@@ -109,9 +109,10 @@ var validation = (function() {
        * This won't work in locales that use commas as decimal places.
        */
       var fieldValueAsNum = Number(element.value.replace(',', ''));
+      if (isNaN(fieldValueAsNum)) return validNumeric; //Not a number, just return
 
-      var minAttr = $.trim(element.getAttribute('min'));
-      var maxAttr = $.trim(element.getAttribute('max'));
+      var minAttr = element.getAttribute('min');
+      var maxAttr = element.getAttribute('max');
 
       var minLimit = (minAttr === '' || minAttr === null) ? null : Number(minAttr);
       var maxLimit = (maxAttr === '' || maxAttr === null) ? null : Number(maxAttr);
