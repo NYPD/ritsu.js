@@ -1,7 +1,7 @@
-var rules = (function() {
+var rules = (function () {
 
   //Public Methods *************************************************************
-  var getRuleByRuleClass = function(ruleClasses) {
+  var getRuleByRuleClass = function (ruleClasses) {
 
     var isArray = Array.isArray(ruleClasses);
     var rule = null;
@@ -17,7 +17,7 @@ var rules = (function() {
     return rule;
   };
 
-  var addOrUpdateValidationRule = function(ruleType, ruleClass, validationFunction) {
+  var addOrUpdateValidationRule = function (ruleType, ruleClass, validationFunction) {
 
     var rule = getRuleByRuleClass(ruleClass);
 
@@ -29,7 +29,7 @@ var rules = (function() {
   };
 
   //Private Methods ************************************************************
-  var _validateAlphaOnly = function(element) {
+  var _validateAlphaOnly = function (element) {
     /*
      * Any case insensitive Roman character with periods, dashes, and spaces.
      *
@@ -38,7 +38,7 @@ var rules = (function() {
     return /^([A-Za-z\s\.\-])+$/.test(element.value);
   };
 
-  var _validateAlphaZip = function(element) {
+  var _validateAlphaZip = function (element) {
     /*
      * Matches all Canadian or American postal codes with different formats. For USA it is:
      * any 5 digits followed optionally by an optional space or dash or empty string and any 4 digits after the optional
@@ -51,7 +51,7 @@ var rules = (function() {
     return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/.test(element.value);
   };
 
-  var _validateAlphaNumeric = function(element) {
+  var _validateAlphaNumeric = function (element) {
     /*
      * Any case insensitive Roman character and digit
      *
@@ -61,7 +61,7 @@ var rules = (function() {
   };
 
 
-  var _validateAlphaEmail = function(element) {
+  var _validateAlphaEmail = function (element) {
     /*
      * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
      * It does not check tld and special chacter validity.
@@ -72,7 +72,7 @@ var rules = (function() {
   };
 
 
-  var _validateNumericWhole = function(element) {
+  var _validateNumericWhole = function (element) {
 
     var value = element.value;
     var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
@@ -82,13 +82,13 @@ var rules = (function() {
      *  e.g. 54 | -54 | -54,000 | 54000
      */
     var validNumericWhole = /^-?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/.test(value);
-    if(noThousandsSeparator) validNumericWhole = validNumericWhole && value.indexOf(',') === -1;
+    if (noThousandsSeparator) validNumericWhole = validNumericWhole && value.indexOf(',') === -1;
 
     return validNumericWhole;
 
   };
 
-  var _validateNumericDecimalString = function(element) {
+  var _validateNumericDecimalString = function (element) {
 
     var value = element.value;
     var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
@@ -104,12 +104,12 @@ var rules = (function() {
     var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalMax));
 
     var validNumericDecimal = numericDecimalRegex.test(value);
-    if(noThousandsSeparator) validNumericDecimal = validNumericDecimal && value.indexOf(',') === -1;
+    if (noThousandsSeparator) validNumericDecimal = validNumericDecimal && value.indexOf(',') === -1;
 
     return validNumericDecimal;
   };
 
-  var _validateNumericFullYear = function(element) {
+  var _validateNumericFullYear = function (element) {
     /*
      * A four digit number
      *
@@ -118,16 +118,14 @@ var rules = (function() {
     return /^(\d{4})$/.test(element.value);
   };
 
-  var _validateNumericJqueryDatePicker = function(element) {
+  var _validateNumericJqueryDatePicker = function (element) {
 
     var $element = $(element);
-
     var isValid = $element.datepicker('getDate') !== null;
 
-    if(!isValid) return isValid; //Its not valid, no point ot validate it more
+    if (!isValid) return isValid; //Its not valid, no point to validate it more
 
     var dateSelectedInMillis = $element.datepicker('getDate').getTime();
-
     var isNoPastDate = element.hasAttribute('data-no-past-date');
 
     if (isNoPastDate) {
@@ -135,6 +133,8 @@ var rules = (function() {
       var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
       isValid = dateSelectedInMillis >= dateWithNoTime.getTime();
     }
+
+    if (!isValid) return isValid; //Its not valid, no point to validate it more
 
     var minAttr = element.getAttribute('min');
     var maxAttr = element.getAttribute('max');
@@ -156,7 +156,7 @@ var rules = (function() {
     return isValid;
   };
 
-  var _Rule = function(ruleType, ruleClass, validationFunction) {
+  var _Rule = function (ruleType, ruleClass, validationFunction) {
     this.ruleType = ruleType;
     this.ruleClass = ruleClass;
     this.validate = validationFunction;
@@ -173,7 +173,7 @@ var rules = (function() {
     new _Rule('numeric', 'numeric-jquery-date', _validateNumericJqueryDatePicker)
   ];
 
-  var _addNewValidationRule = function(ruleType, ruleClass, validationFunction) {
+  var _addNewValidationRule = function (ruleType, ruleClass, validationFunction) {
 
     if (ruleType !== 'alpha' && ruleType !== 'numeric')
       throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
