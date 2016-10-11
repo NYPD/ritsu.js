@@ -1,5 +1,7 @@
 var rules = (function() {
 
+  var _rules = [];
+
   //Public Methods *************************************************************
   var getRuleByRuleClass = function(ruleClasses) {
 
@@ -17,18 +19,57 @@ var rules = (function() {
     return rule;
   };
 
-  var addOrUpdateValidationRule = function(ruleType, ruleClass, validationFunction) {
+  var addValidationRule = function(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
 
-    var rule = getRuleByRuleClass(ruleClass);
+    var isArray = Array.isArray(ruleTypeOrRules);
 
-    if (rule === null) {
-      _addNewValidationRule(ruleType, ruleClass, validationFunction);
+    if (isArray) {
+
+      ruleTypeOrRules.forEach(function(rule) {
+        _upsertValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction, rule.errorMessageFunction);
+      });
+
     } else {
-      rule.validate = validationFunction;
+      _upsertValidationRule(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam);
     }
   };
 
   //Private Methods ************************************************************
+  var _Rule = function(ruleType, ruleClass, validationFunction, errorMessageFunction) {
+    this.ruleType = ruleType;
+    this.ruleClass = ruleClass;
+    this.validate = validationFunction;
+    this.getErrorMessage = errorMessageFunction;
+  };
+
+  var _upsertValidationRule = function(ruleType, ruleClass, validationFunction, errorMessageParam) {
+
+    if (ruleType !== 'alpha' && ruleType !== 'numeric')
+      throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
+
+    if (typeof ruleClass !== 'string')
+      throw new Error('The rule class for a new validation rule is missing or is not of type string');
+
+    if (typeof validationFunction !== 'function')
+      throw new Error('The validation function for a new validation rule is missing or is not of type function');
+
+    if (errorMessageParam === undefined)
+      errorMessageParam = new Function('', 'return "Invalid value";');
+
+    if (typeof errorMessageParam === 'string')
+      errorMessageParam = new Function('', 'return "' + errorMessageParam + '";');
+
+    //Remove exsiting rule if found
+    var rule = getRuleByRuleClass(ruleClass);
+    if (rule !== null) {
+      var ruleIndex = _rules.indexOf(rule);
+      _rules.splice(ruleIndex, 1);
+    }
+
+    _rules.push(new _Rule(ruleType, ruleClass, validationFunction, errorMessageParam));
+
+  };
+
   var _validateAlphaOnly = function(element) {
     /*
      * Any case insensitive Roman character with periods, dashes, and spaces.
@@ -88,6 +129,24 @@ var rules = (function() {
 
   };
 
+  var _getNumericWholeErrorMessage = function(element) {
+
+    var errorMessage = 'Enter a whole number';
+
+    var hasMinLimit = element.hasAttribute('min');
+    var hasMaxLimit = element.hasAttribute('max');
+
+    if (hasMinLimit && hasMaxLimit) {
+      errorMessage = errorMessage + ' from ' + element.getAttribute('min') + ' to ' + element.getAttribute('max');
+    } else if (hasMinLimit) {
+      errorMessage = errorMessage + ' greater or equal to ' + element.getAttribute('min');
+    } else if (hasMaxLimit) {
+      errorMessage = errorMessage + ' lesser or equal to ' + element.getAttribute('max');
+    }
+
+    return errorMessage;
+  };
+
   var _validateNumericDecimalString = function(element) {
 
     var value = element.value;
@@ -108,6 +167,26 @@ var rules = (function() {
 
     return validNumericDecimal;
   };
+  var _getNumericDecimalErrorMessage = function(element) {
+
+    var errorMessage = 'Please enter a number';
+
+    var hasMinLimit = element.hasAttribute('min');
+    var hasMaxLimit = element.hasAttribute('max');
+
+    var maxDecimals = element.hasAttribute('data-decimal-max') ? element.getAttribute('data-decimal-max') : 2;
+    errorMessage += ' with ' + maxDecimals + ' decimal places max';
+
+    if (hasMinLimit && hasMaxLimit) {
+      errorMessage = errorMessage + ' and from ' + element.getAttribute('min') + ' to ' + element.getAttribute('max');
+    } else if (hasMinLimit) {
+      errorMessage = errorMessage + ' and greater or equal to ' + element.getAttribute('min');
+    } else if (hasMaxLimit) {
+      errorMessage = errorMessage + ' and lesser or equal to ' + element.getAttribute('max');
+    }
+
+    return errorMessage;
+  };
 
   var _validateNumericFullYear = function(element) {
     /*
@@ -118,79 +197,46 @@ var rules = (function() {
     return /^(\d{4})$/.test(element.value);
   };
 
+  var _getNumericFullYearErrorMessage = function(element) {
+
+    var errorMessage = 'Please enter a 4 digit year';
+
+    var hasMinLimit = element.hasAttribute('min');
+    var hasMaxLimit = element.hasAttribute('max');
+
+    if (hasMinLimit && hasMaxLimit) {
+      errorMessage = errorMessage + ' from ' + element.getAttribute('min') + ' to ' + element.getAttribute('max');
+    } else if (hasMinLimit) {
+      errorMessage = errorMessage + ' greater or equal to ' + element.getAttribute('min');
+    } else if (hasMaxLimit) {
+      errorMessage = errorMessage + ' lesser or equal to ' + element.getAttribute('max');
+    }
+
+    return errorMessage;
+  };
+
   var _validateNumericJqueryDatePicker = function(element) {
 
     var $element = $(element);
     var isValid = $element.datepicker('getDate') !== null;
 
-    if (!isValid) return isValid; //Its not valid, no point to validate it more
-
-    var dateSelectedInMillis = $element.datepicker('getDate').getTime();
-    var isNoPastDate = element.hasAttribute('data-no-past-date');
-
-    if (isNoPastDate) {
-      var date = new Date();
-      var dateWithNoTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      isValid = dateSelectedInMillis >= dateWithNoTime.getTime();
-    }
-
-    if (!isValid) return isValid; //Its not valid, no point to validate it more
-
-    var minAttr = element.getAttribute('min');
-    var maxAttr = element.getAttribute('max');
-
-    var minLimit = (minAttr === '' || minAttr === null) ? null : Number(minAttr);
-    var maxLimit = (maxAttr === '' || maxAttr === null) ? null : Number(maxAttr);
-
-    var hasMinLimit = minLimit !== null;
-    var hasMaxLimit = maxLimit !== null;
-
-    if (hasMinLimit && hasMaxLimit) {
-      isValid = dateSelectedInMillis >= minLimit || dateSelectedInMillis <= maxLimit;
-    } else if (hasMinLimit) {
-      isValid = dateSelectedInMillis >= minLimit;
-    } else if (hasMaxLimit) {
-      isValid = dateSelectedInMillis <= maxLimit;
-    }
-
     return isValid;
   };
 
-  var _Rule = function(ruleType, ruleClass, validationFunction) {
-    this.ruleType = ruleType;
-    this.ruleClass = ruleClass;
-    this.validate = validationFunction;
-  };
+  //Add default rules
+  _upsertValidationRule('alpha', 'alpha-only', _validateAlphaOnly, 'Only letters, spaces, hypens, and periods are allowed');
+  _upsertValidationRule('alpha', 'alpha-zip', _validateAlphaZip, 'Enter a valid zip code');
+  _upsertValidationRule('alpha', 'alpha-numeric', _validateAlphaNumeric, 'Enter only alphanumeric characters');
+  _upsertValidationRule('alpha', 'alpha-email', _validateAlphaEmail, 'Make sure the email is correct');
 
-  var _rules = [
-    new _Rule('alpha', 'alpha-only', _validateAlphaOnly),
-    new _Rule('alpha', 'alpha-zip', _validateAlphaZip),
-    new _Rule('alpha', 'alpha-numeric', _validateAlphaNumeric),
-    new _Rule('alpha', 'alpha-email', _validateAlphaEmail),
-    new _Rule('numeric', 'numeric-whole', _validateNumericWhole),
-    new _Rule('numeric', 'numeric-decimal', _validateNumericDecimalString),
-    new _Rule('numeric', 'numeric-full-year', _validateNumericFullYear),
-    new _Rule('numeric', 'numeric-jquery-date', _validateNumericJqueryDatePicker)
-  ];
-
-  var _addNewValidationRule = function(ruleType, ruleClass, validationFunction) {
-
-    if (ruleType !== 'alpha' && ruleType !== 'numeric')
-      throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
-
-    if (typeof ruleClass !== 'string')
-      throw new Error('The rule class for a new validation rule is missing or is not of type string');
-
-    if (typeof validationFunction !== 'function')
-      throw new Error('The validation function for a new validation rule is missing or is not of type function');
-
-    var rule = new _Rule(ruleType, ruleClass, validationFunction);
-    _rules.push(rule);
-  };
+  _upsertValidationRule('numeric', 'numeric-whole', _validateNumericWhole, _getNumericWholeErrorMessage);
+  _upsertValidationRule('numeric', 'numeric-decimal', _validateNumericDecimalString, _getNumericDecimalErrorMessage);
+  _upsertValidationRule('numeric', 'numeric-full-year', _validateNumericFullYear, _getNumericFullYearErrorMessage);
+  _upsertValidationRule('numeric', 'numeric-jquery-date', _validateNumericJqueryDatePicker, 'Please select a date from the date picker');
 
   return {
     getRuleByRuleClass: getRuleByRuleClass,
-    addOrUpdateValidationRule: addOrUpdateValidationRule
+    addValidationRule: addValidationRule
   };
 
 })();

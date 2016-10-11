@@ -18,7 +18,7 @@ var ritsu = (function() {
     autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
 
     var validationRules = options.validationRules;
-    if (validationRules !== undefined) _addValidationRules(validationRules);
+    if (validationRules !== undefined) rules.addValidationRule(validationRules);
 
     return this;
   };
@@ -183,7 +183,7 @@ var ritsu = (function() {
       var isValid = !$this.data('invalid');
       if (isValid) return true;
 
-      var errorMessage = _getErrorMessageForInput($this);
+      var errorMessage = _getErrorMessageForInput(this);
 
       if (useBootstrap3Stlying) {
 
@@ -203,26 +203,7 @@ var ritsu = (function() {
     return this;
   };
 
-  var addValidationRule = function(rulesOrRuleClass, validationFunction, ruleType) {
-
-    var isRulesArray = Array.isArray(rulesOrRuleClass);
-
-    if (isRulesArray) {
-      _addValidationRules(rulesOrRuleClass);
-    } else {
-      rules.addOrUpdateValidationRule(ruleType, rulesOrRuleClass, validationFunction);
-    }
-
-    return this;
-  };
-
   //Private Methods ************************************************************
-  var _addValidationRules = function(validationRules) {
-    validationRules.forEach(function(rule) {
-      rules.addOrUpdateValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction);
-    });
-  };
-
   var _removeErrorMessage = function($input) {
 
     $input.closest('td').find('.error-label').remove();
@@ -238,78 +219,40 @@ var ritsu = (function() {
 
   };
 
-  var _getErrorMessageForInput = function($input) {
+  var _getErrorMessageForInput = function(element) {
 
-    var isAlpha = $input.hasClass('alpha');
+    var isDropdown = element.nodeName === 'SELECT';
+    if (isDropdown) return 'Please select an option'; //Selects do not have rules
 
-    if (isAlpha) {
+    var elementHasErrorMessageAttr = element.hasAttribute('data-error-message');
+    if (elementHasErrorMessageAttr) return element.getAttribute('data-error-message');
 
-      var isAlphaAll = $input.hasClass('alpha-all');
-      if (isAlphaAll) return null;
+    var errorMessage = 'Invalid Value';
 
-      var isAlphaOnly = $input.hasClass('alpha-only');
-      if (isAlphaOnly) return 'Please enter only letters';
+    var elementClassString = element.getAttribute('class');
 
-      var isAlphaZip = $input.hasClass('alpha-zip');
-      if (isAlphaZip) return 'Please enter a valid zip code';
+    var elementHasNoClasses = elementClassString === null || elementClassString === '';
+    if (elementHasNoClasses) return errorMessage; //Element has no classes for some reason, so no rule wil be found
 
-      var isAlphaJqueryDate = $input.hasClass('alpha-jquery-date');
-      if (isAlphaJqueryDate) return 'Please select a date from the datepicker';
+    var elementClasses = elementClassString.split(' ');
 
-      var isAlphaNumeric = $input.hasClass('alpha-numeric');
-      if (isAlphaNumeric) return 'Please enter only alphanumeric characters';
-    }
+    var rule = rules.getRuleByRuleClass(elementClasses);
+    if (rule !== null) errorMessage = rule.getErrorMessage(element);
 
-    var isNumeric = $input.hasClass('numeric');
-
-    if (isNumeric) {
-
-      var errorMessage;
-
-      var isNumericWholeInput = $input.hasClass('numeric-whole');
-      if (isNumericWholeInput) errorMessage = 'Please enter a whole number';
-
-      var isNumericMonetaryInput = $input.hasClass('numeric-monetary');
-      if (isNumericMonetaryInput) errorMessage = 'Please enter a monetary value';
-
-      var isNumericDecimalInput = $input.hasClass('numeric-decimal');
-      if (isNumericDecimalInput) errorMessage = 'Please enter a number';
-
-      var isNumericFullYear = $input.hasClass('numeric-full-year');
-      if (isNumericFullYear) errorMessage = 'Please enter a 4 digit year';
-
-      var hasMinLimit = $input.attr('min') !== undefined;
-      var hasMaxLimit = $input.attr('max') !== undefined;
-      var hasDecimalMax = $input.data('decimal-max') !== undefined;
-
-      if (hasDecimalMax) errorMessage += ' with ' + $input.data('decimal-max') + ' decimal places max';
-
-      if (hasMinLimit && hasMaxLimit) {
-        errorMessage = errorMessage + ' from ' + $input.attr('min') + ' to ' + $input.attr('max');
-      } else if (hasMinLimit) {
-        errorMessage = errorMessage + ' greater or equal to ' + $input.attr('min');
-      } else if (hasMaxLimit) {
-        errorMessage = errorMessage + ' lesser or equal to ' + $input.attr('max');
-      }
-
-      errorMessage += '.';
-
-      return errorMessage;
-
-    }
-
-    return 'Invalid Value';
+    return errorMessage;
 
   };
 
   return {
+    rules: rules,//Access to the Rules API
+
     initialize: initialize,
     storeInitialFormValues: storeInitialFormValues,
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,
-    showErrorMessages: showErrorMessages,
-    addValidationRule: addValidationRule
+    showErrorMessages: showErrorMessages
+
   };
 
 })();

@@ -68,7 +68,7 @@ var validation = (function() {
       return userRegex.test(element.value);
     }
 
-    var elementHasNoClasses = elementClassString === null;
+    var elementHasNoClasses = elementClassString === null || elementClassString === '';
     if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
 
     var elementClasses = elementClassString.split(' ');
