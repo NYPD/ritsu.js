@@ -22,8 +22,11 @@ var rules = (function() {
   var addValidationRule = function(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
 
     var isArray = Array.isArray(ruleTypeOrRules);
+    var isRule = typeof ruleTypeOrRules === 'object' && !isArray;
 
-    if (isArray) {
+    if (isArray || isRule) {
+
+      if (isRule) ruleTypeOrRules = [ruleTypeOrRules];
 
       ruleTypeOrRules.forEach(function(rule) {
         _upsertValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction, rule.errorMessageFunction);

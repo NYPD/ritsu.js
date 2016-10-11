@@ -244,7 +244,7 @@ var ritsu = (function() {
   };
 
   return {
-    rules: rules,//Access to the Rules API
+    rules: rules, //Access to the Rules API
 
     initialize: initialize,
     storeInitialFormValues: storeInitialFormValues,
