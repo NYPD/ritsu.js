@@ -35,7 +35,7 @@ var rules = (function() {
       if (isRule) ruleTypeOrRules = [ruleTypeOrRules];
 
       ruleTypeOrRules.forEach(function(rule) {
-        _upsertValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction, rule.errorMessageFunction);
+        _upsertValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction, rule.errorMessage);
       });
 
     } else {
