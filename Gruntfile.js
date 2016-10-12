@@ -49,7 +49,7 @@ module.exports = function(grunt) {
     /* Concat Task **************************************************************/
     concat: {
       base: {
-        src: ['src/rules.js', 'src/core.js'],
+        src: ['src/rules.js', 'src/validation.js', 'src/core.js'],
         dest: 'dist/ritsu.js'
       }
     },

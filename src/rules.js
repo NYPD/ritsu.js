@@ -1,109 +1,245 @@
-var rules = (function () {
+var rules = (function() {
 
-  /*
-   * Matches all Canadian or American postal codes with different formats. For USA it is:
-   * any 5 digits followed optionally by an optional space or dash or empty string and any 4 digits after the optional
-   * space or dash. For Canada it is: certain capital letters (only one), any digit (only one), any capital letter (only one),
-   * optional space, any digit (only one), any capitol letter (only one), and and digit (only one).
-   *
-   * e.g. 19608 | 19608-8911 | A9C1A1 | A9C 1A1
-   *
-   */
-  var getAlphaZipRegex = function () {
-    return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/;
+  var _rules = [];
+
+  //Public Methods *************************************************************
+  var getRuleByRuleClass = function(ruleClasses) {
+
+    var isArray = Array.isArray(ruleClasses);
+    var rule = null;
+
+    for (var i = 0; i < _rules.length; i++) {
+
+      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
+      if (ruleDoesNotMatch) continue;
+
+      rule = _rules[i];
+      break;
+    }
+    return rule;
   };
 
-  /*
-   * Any case insensitive Roman character with periods, dashes, and spaces.
-   *
-   * e.g. cool | cool-beans | cool beans | beans.
-   */
-  var getAlphaOnlyRegex = function () {
-    return /^([A-Za-z\s\.\-])+$/;
+  var addValidationRule = function(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
+
+    var isArray = Array.isArray(ruleTypeOrRules);
+    var isRule = typeof ruleTypeOrRules === 'object' && !isArray;
+
+    if (isArray || isRule) {
+
+      if (isRule) ruleTypeOrRules = [ruleTypeOrRules];
+
+      ruleTypeOrRules.forEach(function(rule) {
+        _upsertValidationRule(rule.ruleType, rule.ruleClass, rule.validationFunction, rule.errorMessage);
+      });
+
+    } else {
+      _upsertValidationRule(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam);
+    }
   };
 
-  /*
-   * Any case insensitive Roman character and digit
-   *
-   * e.g. Cool | C00l
-   */
-  var getAlphaNumericRegex = function () {
-    return /^([a-zA-Z0-9]+)$/;
+  //Private Methods ************************************************************
+  var _Rule = function(ruleType, ruleClass, validationFunction, errorMessageFunction) {
+    this.ruleType = ruleType;
+    this.ruleClass = ruleClass;
+    this.validate = validationFunction;
+    this.getErrorMessage = errorMessageFunction;
   };
 
-  /*
-   * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
-   * It does not check tld and special chacter validity.
-   *
-   * e.g. a@a.a | bob@google.com | cool-beans@beans.com.uk | $#%@$%@$.com
-   */
-  var getAlphaEmailRegex = function () {
-    return /^(\S+@\S+\.\S+)$/;
+  var _upsertValidationRule = function(ruleType, ruleClass, validationFunction, errorMessageParam) {
+
+    if (ruleType !== 'alpha' && ruleType !== 'numeric')
+      throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
+
+    if (typeof ruleClass !== 'string')
+      throw new Error('The rule class for a new validation rule is missing or is not of type string');
+
+    if (typeof validationFunction !== 'function')
+      throw new Error('The validation function for a new validation rule is missing or is not of type function');
+
+    if (errorMessageParam === undefined)
+      errorMessageParam = new Function('', 'return "Invalid value";');
+
+    if (typeof errorMessageParam === 'string')
+      errorMessageParam = new Function('', 'return "' + errorMessageParam + '";');
+
+    //Remove exsiting rule if found
+    var rule = getRuleByRuleClass(ruleClass);
+    if (rule !== null) {
+      var ruleIndex = _rules.indexOf(rule);
+      _rules.splice(ruleIndex, 1);
+    }
+
+    _rules.push(new _Rule(ruleType, ruleClass, validationFunction, errorMessageParam));
+
   };
 
-  /*
-   *  A negative or non negative number with optional thousands commas
-   *
-   *  e.g. 54 | -54 | -54,000 | 54000
-   */
-  var getNumericWholeRegex = function () {
-    return /^[-]?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/;
+  var _validateAlphaOnly = function(element) {
+    /*
+     * Any case insensitive Roman character with periods, dashes, and spaces.
+     *
+     * e.g. cool | cool-beans | cool beans | beans.
+     */
+    return /^([A-Za-z\s\.\-])+$/.test(element.value);
   };
 
-  /*
-   * A negative or non negative monetary amount with optional thousands commas and optional hundreds decimal place
-   *
-   * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
-   */
-  var getNumericMonetaryRegex = function () {
-    return /^((-?[\d]{1,3}(,[\d]{3})*(\.[\d]{2})*)|-?[\d]+(\.[\d]{2})?)$/;
+  var _validateAlphaZip = function(element) {
+    /*
+     * Matches all Canadian or American postal codes with different formats. For USA it is:
+     * any 5 digits followed optionally by an optional space or dash or empty string and any 4 digits after the optional
+     * space or dash. For Canada it is: certain capital letters (only one), any digit (only one), any capital letter (only one),
+     * optional space, any digit (only one), any capitol letter (only one), and and digit (only one).
+     *
+     * e.g. 19608 | 19608-8911 | A9C1A1 | A9C 1A1
+     *
+     */
+    return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/.test(element.value);
   };
 
-  /*
-   * Taking an optional decimalPlaces integer (defaults to 2 if not provided), any negative or non negative number amount with
-   * optional thousands commas and optional hundreds decimal place
-   *
-   * e.g. (undefined) -54 | (1) 54.1 | (undefined) 54.00 | (undefined) -54,544 | (8) 54,544.54231541
-   */
-  var getNumericDecimalRegexString = function (decimalPlaces) {
-
-    var decimalPlacesUndefined = decimalPlaces === undefined;
-    if (decimalPlacesUndefined) decimalPlaces = 2;
-
-    var numericDecimalRegexString = "^((([\\d]{1,3}(,[\\d]{3})*)?(\\.[\\d]{1,decimalPlaces})?)|[\\d]*(\\.[\\d]{1,decimalPlaces})?)$";
-    var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalPlaces));
-
-    return numericDecimalRegex;
+  var _validateAlphaNumeric = function(element) {
+    /*
+     * Any case insensitive Roman character and digit
+     *
+     * e.g. Cool | C00l
+     */
+    return /^([a-zA-Z0-9]+)$/.test(element.value);
   };
 
-  /*
-   * A four digit number
-   *
-   * e.g. 1999 | 2010 | 0000
-   */
-  var getNumericFullYearRegex = function () {
-    return /^(\d{4})$/;
+
+  var _validateAlphaEmail = function(element) {
+    /*
+     * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
+     * It does not check tld and special chacter validity.
+     *
+     * e.g. a@a.a | bob@google.com | cool-beans@beans.com.uk | $#%@$%@$.com
+     */
+    return /^(\S+@\S+\.\S+)$/.test(element.value);
   };
 
-  /*
-   * A date String in the format of MM/dd/YYYY. It DOES NOT check for validity of the month or day number.
-   *
-   * e.g. 10/02/1990 | 12/12/2014 | 84/65/1990
-   */
-  var getNumericDatePickerRegex = function () {
-    return /^(\d{2}\/\d{2}\/\d{4})$/;
+
+  var _validateNumericWhole = function(element) {
+
+    var value = element.value;
+    var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
+    /*
+     *  A negative or non negative number with optional thousands commas
+     *
+     *  e.g. 54 | -54 | -54,000 | 54000
+     */
+    var validNumericWhole = /^-?(([\d]{1,3}(,{1}[\d]{3})*)|[\d]+)$/.test(value);
+    if (noThousandsSeparator) validNumericWhole = validNumericWhole && value.indexOf(',') === -1;
+
+    return validNumericWhole;
+
   };
+
+  var _getNumericWholeErrorMessage = function(element) {
+
+    var errorMessage = 'Enter a whole number';
+
+    var hasMinLimit = element.hasAttribute('min');
+    var hasMaxLimit = element.hasAttribute('max');
+
+    if (hasMinLimit && hasMaxLimit) {
+      errorMessage = errorMessage + ' from ' + element.getAttribute('min') + ' to ' + element.getAttribute('max');
+    } else if (hasMinLimit) {
+      errorMessage = errorMessage + ' greater or equal to ' + element.getAttribute('min');
+    } else if (hasMaxLimit) {
+      errorMessage = errorMessage + ' lesser or equal to ' + element.getAttribute('max');
+    }
+
+    return errorMessage;
+  };
+
+  var _validateNumericDecimalString = function(element) {
+
+    var value = element.value;
+    var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
+    var decimalMax = element.getAttribute('data-decimal-max');
+    if (decimalMax === null) decimalMax = 2;
+
+    /*
+     * A negative or non negative monetary amount with optional thousands commas and optional hundreds decimal place
+     *
+     * e.g. -54 | 54 | 54.00 | -54,544 | 54,544.54
+     */
+    var numericDecimalRegexString = '^-?((([\\d]{1,3}(,[\\d]{3})*)+(\\.[\\d]{1,decimalPlaces})?)|[\\d]+(\\.[\\d]{1,decimalPlaces})?)$';
+    var numericDecimalRegex = new RegExp(numericDecimalRegexString.replace(/decimalPlaces/g, decimalMax));
+
+    var validNumericDecimal = numericDecimalRegex.test(value);
+    if (noThousandsSeparator) validNumericDecimal = validNumericDecimal && value.indexOf(',') === -1;
+
+    return validNumericDecimal;
+  };
+  var _getNumericDecimalErrorMessage = function(element) {
+
+    var errorMessage = 'Please enter a number';
+
+    var hasMinLimit = element.hasAttribute('min');
+    var hasMaxLimit = element.hasAttribute('max');
+
+    var maxDecimals = element.hasAttribute('data-decimal-max') ? element.getAttribute('data-decimal-max') : 2;
+    errorMessage += ' with ' + maxDecimals + ' decimal places max';
+
+    if (hasMinLimit && hasMaxLimit) {
+      errorMessage = errorMessage + ' and from ' + element.getAttribute('min') + ' to ' + element.getAttribute('max');
+    } else if (hasMinLimit) {
+      errorMessage = errorMessage + ' and greater or equal to ' + element.getAttribute('min');
+    } else if (hasMaxLimit) {
+      errorMessage = errorMessage + ' and lesser or equal to ' + element.getAttribute('max');
+    }
+
+    return errorMessage;
+  };
+
+  var _validateNumericFullYear = function(element) {
+    /*
+     * A four digit number
+     *
+     * e.g. 1999 | 2010 | 0000
+     */
+    return /^(\d{4})$/.test(element.value);
+  };
+
+  var _getNumericFullYearErrorMessage = function(element) {
+
+    var errorMessage = 'Please enter a 4 digit year';
+
+    var hasMinLimit = element.hasAttribute('min');
+    var hasMaxLimit = element.hasAttribute('max');
+
+    if (hasMinLimit && hasMaxLimit) {
+      errorMessage = errorMessage + ' from ' + element.getAttribute('min') + ' to ' + element.getAttribute('max');
+    } else if (hasMinLimit) {
+      errorMessage = errorMessage + ' greater or equal to ' + element.getAttribute('min');
+    } else if (hasMaxLimit) {
+      errorMessage = errorMessage + ' lesser or equal to ' + element.getAttribute('max');
+    }
+
+    return errorMessage;
+  };
+
+  var _validateNumericJqueryDatePicker = function(element) {
+
+    var $element = $(element);
+    var isValid = $element.datepicker('getDate') !== null;
+
+    return isValid;
+  };
+
+  //Add default rules
+  _upsertValidationRule('alpha', 'alpha-only', _validateAlphaOnly, 'Only letters, spaces, hypens, and periods are allowed');
+  _upsertValidationRule('alpha', 'alpha-zip', _validateAlphaZip, 'Enter a valid zip code');
+  _upsertValidationRule('alpha', 'alpha-numeric', _validateAlphaNumeric, 'Enter only alphanumeric characters');
+  _upsertValidationRule('alpha', 'alpha-email', _validateAlphaEmail, 'Make sure the email is correct');
+
+  _upsertValidationRule('numeric', 'numeric-whole', _validateNumericWhole, _getNumericWholeErrorMessage);
+  _upsertValidationRule('numeric', 'numeric-decimal', _validateNumericDecimalString, _getNumericDecimalErrorMessage);
+  _upsertValidationRule('numeric', 'numeric-full-year', _validateNumericFullYear, _getNumericFullYearErrorMessage);
+  _upsertValidationRule('numeric', 'numeric-jquery-date', _validateNumericJqueryDatePicker, 'Please select a date from the date picker');
 
   return {
-    getAlphaZipRegex: getAlphaZipRegex,
-    getAlphaOnlyRegex: getAlphaOnlyRegex,
-    getAlphaEmailRegex: getAlphaEmailRegex,
-    getAlphaNumericRegex: getAlphaNumericRegex,
-    getNumericWholeRegex: getNumericWholeRegex,
-    getNumericMonetaryRegex: getNumericMonetaryRegex,
-    getNumericDecimalRegexString: getNumericDecimalRegexString,
-    getNumericFullYearRegex: getNumericFullYearRegex,
-    getNumericDatePickerRegex: getNumericDatePickerRegex
+    getRuleByRuleClass: getRuleByRuleClass,
+    addValidationRule: addValidationRule
   };
 
 })();
