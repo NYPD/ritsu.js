@@ -51,7 +51,7 @@ var ritsu = (function() {
         }
 
         var hasFileAttached = this.files.length > 0;
-        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : '';
+        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size : undefined;
 
         $this.data('initialValue', initialValue);
 
@@ -91,7 +91,7 @@ var ritsu = (function() {
         valueChanged = $this.data('initialValue') != $this.is(':checked');
       } else if (isFile) {
         var hasFileAttached = this.files.length > 0;
-        valueChanged = $this.data('initialValue') != (hasFileAttached ? this.files[0].name + this.files[0].size + this.files[0].lastModified : $this.data('simple-file-hash'));
+        valueChanged = $this.data('initialValue') != (hasFileAttached ? this.files[0].name + this.files[0].size : $this.data('simple-file-hash'));
       } else {
         valueChanged = $this.data('initialValue') != $this.val();
       }
