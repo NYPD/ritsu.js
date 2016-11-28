@@ -188,7 +188,15 @@ var ritsu = (function() {
       if (useBootstrap3Stlying) {
 
         var $formGroup = $this.closest('.form-group');
-        $formGroup.append('<span class="help-block">' + errorMessage + '</span>');
+        var $helpBlock = $formGroup.find('.help-block');
+
+        var hasHelpBlock = $helpBlock.length > 0;
+
+        if (hasHelpBlock)
+          $helpBlock.prepend('<b class="ritsu-error"><em>' + errorMessage + '</em></b><br class="ritsu-error">');
+        else
+          $formGroup.append('<span class="help-block ritsu-error"><b><em>' + errorMessage + '</em></b></span>');
+
 
       } else {
 
@@ -209,7 +217,7 @@ var ritsu = (function() {
     $input.closest('td').find('.error-label').remove();
 
     if (useBootstrap3Stlying) {
-      $input.closest('.form-group').find('.help-block').remove();
+      $input.closest('.form-group').find('.ritsu-error').remove(); //Will find either the <b><em> and <br> or remove the <span> help block
       return;
     }
 
