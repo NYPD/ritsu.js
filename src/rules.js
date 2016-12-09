@@ -243,3 +243,5 @@ var rules = (function() {
   };
 
 })();
+
+module.exports = rules;

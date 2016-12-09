@@ -2,14 +2,24 @@
   "name": "ritsu.js",
   "version": "0.2.2",
   "description": "HTML form validation",
+  "dependencies": {
+    "jquery": ">=1.2.3"
+  },
   "devDependencies": {
+    "chai": "*",
     "grunt": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-cssmin": "^1.0.1",
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-stamp": "^0.3.0"
+    "grunt-stamp": "^0.3.0",
+    "mocha": "*",
+    "mocha-jsdom": "^1.1.0"
+  },
+  "scripts": {
+    "test": "mocha",
+    "nyan": "mocha --reporter nyan"
   },
   "repository": {
     "type": "git",
