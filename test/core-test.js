@@ -144,6 +144,27 @@ describe('ritsu', function() {
 
     });
 
+    it('should mark a input element passed in with a data attribute of invalid = false once it passed validation', function() {
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha alpha-only';
+
+      input.value = 'bean3s';
+      var $input = $(input);
+      ritsu.validate($input);
+
+      var invalid = $input.data('invalid') === true;
+      assert.isTrue(invalid);
+
+      input.value = 'beans';
+      $input = $(input);
+      ritsu.validate($input);
+      var valid = $input.data('invalid') === false;
+      assert.isTrue(valid);
+
+    });
+
     it('should add a has-error class to the input element passed in', function() {
 
       var input = document.createElement('input');
@@ -180,6 +201,31 @@ describe('ritsu', function() {
 
       var hasError = $formGroup.hasClass('has-error');
       assert.isTrue(hasError);
+
+    });
+
+    it('should add an error message label next to the input element', function() {
+
+      ritsu.initialize({
+        autoShowErrorMessages: true
+      });
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha alpha-only';
+      input.value = 'bean3s';
+
+      var $input = $(input);
+
+      $('body').append($input);
+
+      var labelExists = $input.next('label').length === 1;
+      assert.isFalse(labelExists);
+
+      ritsu.validate($input);
+
+      labelExists = $input.next('label').length === 1;
+      assert.isTrue(labelExists);
 
     });
 
