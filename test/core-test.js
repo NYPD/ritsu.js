@@ -166,6 +166,8 @@ describe('ritsu', function() {
 
     });
 
+    it('should not mark a input element passed in with a data attribute of invalid = true because autoMarkInvalidFields is false');
+
     it('should add a has-error class to the input element passed in', function() {
 
       var input = document.createElement('input');
