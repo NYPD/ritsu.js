@@ -42,12 +42,13 @@ describe('ritsu', function() {
   });
 
 
+
   describe('validate();', function() {
 
 
-    beforeEach(function () {
-        $('body').html('');
-        ritsu.initialize({});
+    beforeEach(function() {
+      $('body').html('');
+      ritsu.initialize({});
     });
 
     it('should validate a input element passed in', function() {
@@ -95,7 +96,7 @@ describe('ritsu', function() {
       input.className = 'alpha alpha-only';
 
       input.value = 'beans';
-     $('.cool').html(input);
+      $('.cool').html(input);
       var isValid = ritsu.validate($('.cool'));
       assert.isTrue(isValid);
 
@@ -204,7 +205,7 @@ describe('ritsu', function() {
 
     });
 
-    it('should add an error message label next to the input element', function() {
+    it('should add an error message label next to the input since autoShowErrorMessages is true', function() {
 
       ritsu.initialize({
         autoShowErrorMessages: true
@@ -226,6 +227,168 @@ describe('ritsu', function() {
 
       labelExists = $input.next('label').length === 1;
       assert.isTrue(labelExists);
+
+    });
+
+    it('should not add a error message next to an input since autoShowErrorMessages is false', function() {
+
+      ritsu.initialize({
+        autoShowErrorMessages: false
+      });
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha alpha-only';
+      input.value = 'bean3s';
+
+      var $input = $(input);
+
+      $('body').append($input);
+
+      var labelExists = $input.next('label').length === 1;
+      assert.isFalse(labelExists);
+
+      ritsu.validate($input);
+
+      labelExists = $input.next('label').length === 1;
+      assert.isFalse(labelExists);
+
+    });
+
+    it('should add a error message to a .form-group that has no .help-block when bootstrap is being used', function() {
+
+      ritsu.initialize({
+        useBootstrap3Stlying: true,
+        autoShowErrorMessages: true
+      });
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha alpha-only';
+      input.value = 'bean3s';
+
+      var $input = $(input);
+
+      $('body').append('<div class="form-group"></div>');
+
+      var $formGroup = $('.form-group');
+      $formGroup.append($input);
+
+      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      assert.isFalse(helpBlockExists);
+
+      ritsu.validate($input);
+
+      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      assert.isTrue(helpBlockExists);
+
+    });
+
+    it('should remove a error message from a .form-group that had no .help-block when bootstrap is being used', function() {
+
+      ritsu.initialize({
+        useBootstrap3Stlying: true,
+        autoShowErrorMessages: true
+      });
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha alpha-only';
+      input.value = 'bean3s';
+
+      var $input = $(input);
+
+      $('body').append('<div class="form-group"></div>');
+
+      var $formGroup = $('.form-group');
+      $formGroup.append($input);
+
+      ritsu.validate($input);
+
+      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      assert.isTrue(helpBlockExists);
+
+      //Time to fix the input
+      $formGroup.find('input').val('beans');
+      ritsu.validate($input);
+
+      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      assert.isFalse(helpBlockExists);
+
+    });
+
+    it('should add a error message to a .form-group that already has a .help-block from bootstrap being used', function() {
+
+      ritsu.initialize({
+        useBootstrap3Stlying: true,
+        autoShowErrorMessages: true
+      });
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha alpha-only';
+      input.value = 'bean3s';
+
+      var $input = $(input);
+
+      $('body').append('<div class="form-group"><span class="help-block"></span></div>');
+
+      var $formGroup = $('.form-group');
+
+      $formGroup.append($input);
+
+      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+
+      assert.isTrue(helpBlockExists);
+      assert.isFalse(ritsuErrorExists);
+
+      ritsu.validate($input);
+
+      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+
+      assert.isTrue(helpBlockExists);
+      assert.isTrue(ritsuErrorExists);
+
+    });
+
+    it('should remove a error message from a .form-group that already had a .help-block from bootstrap being used', function() {
+
+      ritsu.initialize({
+        useBootstrap3Stlying: true,
+        autoShowErrorMessages: true
+      });
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha alpha-only';
+      input.value = 'bean3s';
+
+      var $input = $(input);
+
+      $('body').append('<div class="form-group"><span class="help-block"></span></div>');
+
+      var $formGroup = $('.form-group');
+      $formGroup.append($input);
+
+      ritsu.validate($input);
+
+      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+
+      assert.isTrue(helpBlockExists);
+      assert.isTrue(ritsuErrorExists);
+
+      //Time to fix the input
+      $formGroup.find('input').val('beans');
+      ritsu.validate($input);
+
+      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+
+      assert.isTrue(helpBlockExists);
+      assert.isFalse(ritsuErrorExists);
 
     });
 
