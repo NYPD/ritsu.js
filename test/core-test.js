@@ -43,6 +43,120 @@ describe('ritsu', function() {
 
   describe('#storeInitialFormValues()', function() {
 
+    var $body = $('body');
+
+    afterEach(function() {
+      $body.empty();
+    });
+
+    it('should store initialValue for a text input element passed in', function() {
+
+      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      ritsu.storeInitialFormValues($input);
+
+      //change the current value
+      $input.val('crepes');
+
+      var intialValue = $input.data('initialValue');
+
+      assert.strictEqual(intialValue, 'benzi');
+
+    });
+
+    it('should store initialValue for a text input element on the document since nothing was passed in', function() {
+
+      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+      $body.append($input);
+
+      ritsu.storeInitialFormValues();
+
+      //change the current value
+      $input.val('crepes');
+
+      var intialValue = $input.data('initialValue');
+
+      assert.strictEqual(intialValue, 'benzi');
+
+    });
+
+    it('should store initialValue for a text input element on the document when a container is passed in', function() {
+
+      $body.append('<div></div>');
+
+      var $div = $('div');
+      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      $div.append($input);
+
+      ritsu.storeInitialFormValues($div);
+
+      //change the current value
+      $input.val('crepes');
+
+      var intialValue = $input.data('initialValue');
+
+      assert.strictEqual(intialValue, 'benzi');
+
+    });
+
+    it('should store initialValue for a checkbox input element passed in', function() {
+
+      var $checkbox = $('<input type="checkbox" checked/>');
+
+      ritsu.storeInitialFormValues($checkbox);
+
+      //Make sure this checkbox is checked
+      var checkboxIsChecked = $checkbox.is(':checked') === true;
+      assert.isTrue(checkboxIsChecked);
+
+      //change the current value
+      $checkbox.prop('checked', false);
+
+      //Make sure it remembers the original checkbox state and this checkbox is unchecked
+      var intialValue = $checkbox.data('initialValue');
+      var checkboxIsUnchecked = $checkbox.is(':checked') === false;
+
+      assert.strictEqual(intialValue, true);
+      assert.isTrue(checkboxIsUnchecked);
+
+    });
+
+    it('should store initialValue for a radio input element passed in', function() {
+
+      var $radio1 = $('<input type="radio" name="sex" value="male" id="male" checked/>');
+      var $radio2 = $('<input type="radio" name="sex" value="female" id="female"/>');
+
+      $body.append([$radio1, $radio2]);
+
+      ritsu.storeInitialFormValues();
+
+      //Make sure radio male button is checked
+      var currentRadioValue = $body.find('input[type="radio"]:checked').val();
+      assert.strictEqual(currentRadioValue, 'male');
+
+      //change the current value
+      $('#female').prop('checked', true);
+
+      //Make sure it remembers the original radio states and that the female radio is checked
+      var intialValueOfMale = $('#male').data('initialValue');
+      var intialValueOfFemale = $('#female').data('initialValue');
+      currentRadioValue = $body.find('input[type="radio"]:checked').val();
+
+      assert.strictEqual(intialValueOfMale, true);
+      assert.strictEqual(intialValueOfFemale, false);
+      assert.strictEqual(currentRadioValue, 'female');
+
+    });
+
+    //Cant test out a file input
+    it('should store initialValue for a file input element passed in', function() {});
+
+  });
+
+  describe('#isFormDirty()', function() {
+
+
   });
 
   describe('#validate()', function() {
@@ -153,7 +267,7 @@ describe('ritsu', function() {
 
     it('should mark an input element passed in with a .has-error class', function() {
 
-      ritsu.initialize( {
+      ritsu.initialize({
         autoMarkInvalidFields: true
       });
 
@@ -167,7 +281,7 @@ describe('ritsu', function() {
 
     it('should mark an input element with a .has-error class when nothing is passed in', function() {
 
-      ritsu.initialize( {
+      ritsu.initialize({
         autoMarkInvalidFields: true
       });
 
@@ -188,7 +302,7 @@ describe('ritsu', function() {
 
     it('should mark an input element with a .has-error class when nothing a container is passed in', function() {
 
-      ritsu.initialize( {
+      ritsu.initialize({
         autoMarkInvalidFields: true
       });
 
@@ -212,7 +326,7 @@ describe('ritsu', function() {
 
     it('should mark a .form-group element with a .has-error class when useBootstrap3Stlying = true', function() {
 
-      ritsu.initialize( {
+      ritsu.initialize({
         useBootstrap3Stlying: true,
         autoMarkInvalidFields: true
       });
@@ -237,7 +351,7 @@ describe('ritsu', function() {
 
     it('should not mark an input element passed in with a .has-error class because autoMarkInvalidFields is false', function() {
 
-      ritsu.initialize( {
+      ritsu.initialize({
         autoMarkInvalidFields: false
       });
 
@@ -420,6 +534,11 @@ describe('ritsu', function() {
       assert.isTrue(helpBlockExists);
       assert.isFalse(ritsuErrorExists);
 
+    });
+
+    after(function() {
+      ritsu.initialize({});
+      $body.empty();
     });
 
   });
