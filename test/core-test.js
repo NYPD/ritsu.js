@@ -156,6 +156,123 @@ describe('ritsu', function() {
 
   describe('#isFormDirty()', function() {
 
+    var $body = $('body');
+
+    afterEach(function() {
+      $body.empty();
+    });
+
+    it('should not return dirty since nothing changed', function() {
+
+      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      ritsu.storeInitialFormValues($input);
+
+      var isDirty = ritsu.isFormDirty($input);
+      assert.isFalse(isDirty);
+
+    });
+
+    it('should return dirty for a text input element passed in', function() {
+
+      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      ritsu.storeInitialFormValues($input);
+
+      //change the current value
+      $input.val('crepes');
+
+      var isDirty = ritsu.isFormDirty($input);
+      assert.isTrue(isDirty);
+
+    });
+
+    it('should return dirty for a text input element on the document since nothing was passed in', function() {
+
+      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+      $body.append($input);
+
+      ritsu.storeInitialFormValues();
+
+      //change the current value
+      $input.val('crepes');
+
+      var isDirty = ritsu.isFormDirty();
+      assert.isTrue(isDirty);
+
+    });
+
+    it('should return dirty for a text input element on the document when a container is passed in', function() {
+
+      $body.append('<div></div>');
+
+      var $div = $('div');
+      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      $div.append($input);
+
+      ritsu.storeInitialFormValues($input);
+
+      //change the current value
+      $input.val('crepes');
+
+      var isDirty = ritsu.isFormDirty($div);
+      assert.isTrue(isDirty);
+
+    });
+
+    it('should return dirty for a checkbox input element passed in', function() {
+
+      var $checkbox = $('<input type="checkbox" checked/>');
+
+      ritsu.storeInitialFormValues($checkbox);
+
+      //Make sure this checkbox is checked
+      var checkboxIsChecked = $checkbox.is(':checked') === true;
+      assert.isTrue(checkboxIsChecked);
+
+      //change the current value
+      $checkbox.prop('checked', false);
+
+      var isDirty = ritsu.isFormDirty($checkbox);
+      assert.isTrue(isDirty);
+
+    });
+
+    it('should return dirty for a radio input element passed in', function() {
+
+      var $radio1 = $('<input type="radio" name="sex" value="male" id="male" checked/>');
+      var $radio2 = $('<input type="radio" name="sex" value="female" id="female"/>');
+
+      $body.append([$radio1, $radio2]);
+
+      ritsu.storeInitialFormValues();
+
+      var $male = $('#male');
+      var $female = $('#female');
+
+      //Make sure radios are not dirty
+      var isDirtyMale = ritsu.isFormDirty($male);
+      var isDirtyFemale = ritsu.isFormDirty($female);
+
+      assert.isFalse(isDirtyMale);
+      assert.isFalse(isDirtyFemale);
+
+      //change the current value
+      $('#female').prop('checked', true);
+
+      //Make sure both radios are now dirty
+      isDirtyMale = ritsu.isFormDirty($male);
+      isDirtyFemale = ritsu.isFormDirty($female);
+
+      assert.isTrue(isDirtyMale);
+      assert.isTrue(isDirtyFemale);
+
+    });
+
+    //Cant test out a file input
+    it('should return dirty for a file input element passed in', function() {});
+
 
   });
 
@@ -245,7 +362,7 @@ describe('ritsu', function() {
 
     });
 
-    it('should mark an input element passed in with a data attribute of invalid = true', function() {
+    it('should set an input element passed in with a data attribute of invalid = true', function() {
 
       $input.val('bean3s');
       ritsu.validate($input);
@@ -255,7 +372,7 @@ describe('ritsu', function() {
 
     });
 
-    it('should mark an input element passed in with a data attribute of invalid = false', function() {
+    it('should set an input element passed in with a data attribute of invalid = false', function() {
 
       $input.val('beans');
       ritsu.validate($input);
@@ -263,6 +380,235 @@ describe('ritsu', function() {
       var dataInvalidAttr = $input.data('invalid') === false;
       assert.isTrue(dataInvalidAttr);
 
+    });
+
+    it('should mark an input element passed in with a .has-error class because autoMarkInvalidFields is true', function() {
+
+      ritsu.initialize({
+        autoMarkInvalidFields: true
+      });
+
+      $input.val('b3ans');
+      ritsu.validate($input);
+
+      var hasHasErrorClass = $input.hasClass('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
+
+    it('should not mark an input element passed in with a .has-error class because autoMarkInvalidFields is false', function() {
+
+      ritsu.initialize({
+        autoMarkInvalidFields: false
+      });
+
+      $input.val('b3ans');
+      ritsu.validate($input);
+
+      var hasHasErrorClass = $input.hasClass('has-error');
+      assert.isFalse(hasHasErrorClass);
+
+    });
+
+    it('should add an error message label next to the input since autoShowErrorMessages is true', function() {
+
+      ritsu.initialize({
+        autoShowErrorMessages: true
+      });
+
+      $body.append($input);
+
+      //Check label does not exist
+      var labelExists = $input.next('label').length === 1;
+      assert.isFalse(labelExists);
+
+      ritsu.validate($input);
+
+      //Check label exists
+      labelExists = $input.next('label').length === 1;
+      assert.isTrue(labelExists);
+
+    });
+
+    it('should not add a error message next to an input since autoShowErrorMessages is false', function() {
+
+      ritsu.initialize({
+        autoShowErrorMessages: false
+      });
+
+      $input.val('bean3s');
+      $body.append($input);
+
+      //Check label does not exist
+      var labelExists = $input.next('label').length === 1;
+      assert.isFalse(labelExists);
+
+      ritsu.validate($input);
+
+      //Check label still does not exist
+      labelExists = $input.next('label').length === 1;
+      assert.isFalse(labelExists);
+
+    });
+
+    after(function() {
+      ritsu.initialize({});
+      $body.empty();
+    });
+
+  });
+
+  describe('#showErrorMessages()', function() {
+
+    var $body = $('body');
+    var $validinput = $('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
+    var $invalidinput = $('<input type="text" class="alpha alpha-only" data-invalid="true"/>');
+
+    beforeEach(function() {
+      ritsu.initialize({});
+      $body.empty();
+    });
+
+    it('should add an error message label next to the input', function() {
+
+      $body.append($invalidinput);
+
+      //Check label does not exist
+      var labelExists = $invalidinput.next('label').length === 1;
+      assert.isFalse(labelExists);
+
+      ritsu.showErrorMessages($invalidinput);
+
+      //Check label exists
+      labelExists = $invalidinput.next('label').length === 1;
+      assert.isTrue(labelExists);
+
+    });
+
+    it('should add an error message to a .form-group that has no .help-block when bootstrap is being used', function() {
+
+      ritsu.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      $body.append('<div class="form-group"></div>');
+
+      var $formGroup = $('.form-group');
+      $formGroup.append($invalidinput);
+
+      //Check .help=block does not exist
+      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      assert.isFalse(helpBlockExists);
+
+      ritsu.showErrorMessages($invalidinput);
+
+      //Check .help=block does exist
+      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      assert.isTrue(helpBlockExists);
+
+    });
+
+    it('should remove an error message from a .form-group that had no .help-block when bootstrap is being used', function() {
+
+      ritsu.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      $body.append('<div class="form-group">' +
+                      '<span class="help-block ritsu-error"></span>'+
+                   '</div>');
+
+      var $formGroup = $('.form-group');
+      $formGroup.append($validinput);
+
+      //.help block should be there
+      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      assert.isTrue(helpBlockExists);
+
+      ritsu.showErrorMessages($validinput);
+
+      //.help block should have been removed
+      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      assert.isFalse(helpBlockExists);
+
+    });
+
+    it('should add a error message to a .form-group that already has a .help-block from bootstrap being used', function() {
+
+      ritsu.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      $body.append('<div class="form-group"><span class="help-block"></span></div>');
+
+      var $formGroup = $('.form-group');
+      $formGroup.append($invalidinput);
+
+      //Make sure there is a help block but no ritsu-error <b>
+      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+      assert.isTrue(helpBlockExists);
+      assert.isFalse(ritsuErrorExists);
+
+      ritsu.showErrorMessages($invalidinput);
+
+      //Make sure there is a help block and a ritsu-error <b>
+      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+      assert.isTrue(helpBlockExists);
+      assert.isTrue(ritsuErrorExists);
+
+    });
+
+    it('should remove a error message from a .form-group that already had a .help-block from bootstrap being used', function() {
+
+      ritsu.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      $body.append('<div class="form-group">'+
+                      '<span class="help-block">'+
+                        '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">'+
+                      '</span>'+
+                    '</div>');
+
+      var $formGroup = $('.form-group');
+      $formGroup.append($validinput);
+
+      //Make sure there is a help block and a ritsu-error <b>
+      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+      assert.isTrue(helpBlockExists);
+      assert.isTrue(ritsuErrorExists);
+
+      ritsu.showErrorMessages($validinput);
+
+      //Make sure there is a help block still but the ritsu-error <b> gone
+      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+      assert.isTrue(helpBlockExists);
+      assert.isFalse(ritsuErrorExists);
+
+    });
+
+    after(function() {
+      ritsu.initialize({});
+      $body.empty();
+    });
+
+  });
+
+
+  describe('#markInvalidFields()', function() {
+
+    var $body = $('body');
+    var $input = $('<input type="text" class="alpha alpha-only"/>');
+
+    beforeEach(function() {
+      $body.empty();
+      ritsu.initialize({});
+      $input.removeClass('has-error');
     });
 
     it('should mark an input element passed in with a .has-error class', function() {
@@ -346,193 +692,6 @@ describe('ritsu', function() {
       //Make sure there is a class
       hasHasErrorClass = $formGroup.hasClass('has-error');
       assert.isTrue(hasHasErrorClass);
-
-    });
-
-    it('should not mark an input element passed in with a .has-error class because autoMarkInvalidFields is false', function() {
-
-      ritsu.initialize({
-        autoMarkInvalidFields: false
-      });
-
-      $input.val('b3ans');
-      ritsu.validate($input);
-
-      var hasHasErrorClass = $input.hasClass('has-error');
-      assert.isFalse(hasHasErrorClass);
-
-    });
-
-    it('should add a has-error class to the input element passed in', function() {
-
-      var input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'alpha alpha-only';
-      input.value = 'bean3s';
-
-      var $input = $(input);
-
-      ritsu.validate($input);
-
-      var hasError = $input.hasClass('has-error');
-      assert.isTrue(hasError);
-
-    });
-
-    it('should add an error message label next to the input since autoShowErrorMessages is true', function() {
-
-      ritsu.initialize({
-        autoShowErrorMessages: true
-      });
-
-      $body.append($input);
-
-      //Check label does not exist
-      var labelExists = $input.next('label').length === 1;
-      assert.isFalse(labelExists);
-
-      ritsu.validate($input);
-
-      //Check label exists
-      labelExists = $input.next('label').length === 1;
-      assert.isTrue(labelExists);
-
-    });
-
-    it('should not add a error message next to an input since autoShowErrorMessages is false', function() {
-
-      ritsu.initialize({
-        autoShowErrorMessages: false
-      });
-
-      $input.val('bean3s');
-      $body.append($input);
-
-      //Check label does not exist
-      var labelExists = $input.next('label').length === 1;
-      assert.isFalse(labelExists);
-
-      ritsu.validate($input);
-
-      //Check label still does not exist
-      labelExists = $input.next('label').length === 1;
-      assert.isFalse(labelExists);
-
-    });
-
-    it('should add an error message to a .form-group that has no .help-block when bootstrap is being used', function() {
-
-      ritsu.initialize({
-        useBootstrap3Stlying: true,
-        autoShowErrorMessages: true
-      });
-
-      $input.val('bean3s');
-      $body.append('<div class="form-group"></div>');
-
-      var $formGroup = $('.form-group');
-      $formGroup.append($input);
-
-      //Check .help=block does not exist
-      var helpBlockExists = $formGroup.find('.help-block').length === 1;
-      assert.isFalse(helpBlockExists);
-
-      ritsu.validate($input);
-
-      //Check .help=block does exist
-      helpBlockExists = $formGroup.find('.help-block').length === 1;
-      assert.isTrue(helpBlockExists);
-
-    });
-
-    it('should remove an error message from a .form-group that had no .help-block when bootstrap is being used', function() {
-
-      ritsu.initialize({
-        useBootstrap3Stlying: true,
-        autoShowErrorMessages: true
-      });
-
-      $input.val('bean3s');
-      $body.append('<div class="form-group"></div>');
-
-      var $formGroup = $('.form-group');
-      $formGroup.append($input);
-
-      ritsu.validate($input);
-
-      //.help block should have been added
-      var helpBlockExists = $formGroup.find('.help-block').length === 1;
-      assert.isTrue(helpBlockExists);
-
-      //Time to fix the input
-      $input.val('beans');
-      ritsu.validate($input);
-
-      //.help block should have been removed
-      helpBlockExists = $formGroup.find('.help-block').length === 1;
-      assert.isFalse(helpBlockExists);
-
-    });
-
-    it('should add a error message to a .form-group that already has a .help-block from bootstrap being used', function() {
-
-      ritsu.initialize({
-        useBootstrap3Stlying: true,
-        autoShowErrorMessages: true
-      });
-
-      $input.val('bean3s');
-      $body.append('<div class="form-group"><span class="help-block"></span></div>');
-
-      var $formGroup = $('.form-group');
-      $formGroup.append($input);
-
-      //Make sure there is a help block but no ritsu-error <b>
-      var helpBlockExists = $formGroup.find('.help-block').length === 1;
-      var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
-      assert.isTrue(helpBlockExists);
-      assert.isFalse(ritsuErrorExists);
-
-      ritsu.validate($input);
-
-      //Make sure there is a help block and a ritsu-error <b>
-      helpBlockExists = $formGroup.find('.help-block').length === 1;
-      ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
-      assert.isTrue(helpBlockExists);
-      assert.isTrue(ritsuErrorExists);
-
-    });
-
-    it('should remove a error message from a .form-group that already had a .help-block from bootstrap being used', function() {
-
-      ritsu.initialize({
-        useBootstrap3Stlying: true,
-        autoShowErrorMessages: true
-      });
-
-      $input.val('bean3s');
-      $body.append('<div class="form-group"><span class="help-block"></span></div>');
-
-      var $formGroup = $('.form-group');
-      $formGroup.append($input);
-
-      ritsu.validate($input);
-
-      //Make sure there is a help block and a ritsu-error <b>
-      var helpBlockExists = $formGroup.find('.help-block').length === 1;
-      var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
-      assert.isTrue(helpBlockExists);
-      assert.isTrue(ritsuErrorExists);
-
-      //Time to fix the input
-      $input.val('beans');
-      ritsu.validate($input);
-
-      //Make sure there is a help block still but the ritsu-error <b> gone
-      helpBlockExists = $formGroup.find('.help-block').length === 1;
-      ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
-      assert.isTrue(helpBlockExists);
-      assert.isFalse(ritsuErrorExists);
 
     });
 
