@@ -6,7 +6,7 @@
     "jquery": ">=1.2.3"
   },
   "devDependencies": {
-    "chai": "*",
+    "chai": "^3.5.0",
     "grunt": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
@@ -14,7 +14,7 @@
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-stamp": "^0.3.0",
-    "mocha": "*",
+    "mocha": "^3.2.0",
     "jsdom": "^9.8.3"
   },
   "scripts": {
@@ -28,10 +28,11 @@
   "bugs": {
     "url": "https://github.com/NYPD/ritsu/issues"
   },
+  "author": {
+    "name": "NYPD"
+  },
   "contributors": [
-    {
-      "name": "NYPD"
-    }
+    {}
   ],
   "license": "MIT"
 }

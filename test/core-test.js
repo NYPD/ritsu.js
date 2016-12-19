@@ -6,11 +6,13 @@ var expect = chai.expect;
 var jsdom = require('jsdom').jsdom;
 global.document = jsdom('<html><body></body></html>');
 global.window = document.defaultView;
+
 global.$ = require('jquery');
+global.rules = require('../src/rules.js');
+global.validation = require('../src/validation.js');
+var ritsu = require('../src/core.js');
 
-var ritsu = require('../dist/ritsu.js');
-
-describe('ritsu', function() {
+describe('core', function() {
 
   describe('#initialize()', function() {
 

@@ -48,7 +48,13 @@ module.exports = function(grunt) {
 
     /* Concat Task **************************************************************/
     concat: {
-      base: {
+      options: {
+        // Custom function to remove all module.exports
+        process: function (src) {
+          return src.replace(/^(module\.exports).*/gm, '');
+        }
+      },
+      dist: {
         src: ['src/rules.js', 'src/validation.js', 'src/core.js'],
         dest: 'dist/ritsu.js'
       }
