@@ -173,6 +173,68 @@ describe('rules', function() {
 
     });
 
+    it('alpha-numeric', function() {
+
+      var rule = rules.getRuleByRuleClass('alpha-numeric');
+
+      var input = document.createElement('input');
+      input.type = 'text';
+
+      input.value = '19608';
+      var isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = 'C00L';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = 'Beans';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = 'C00L Beans';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      input.value = '19608-555';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      input.value = 'E.M.';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+    });
+
+    it('alpha-email', function() {
+
+      var rule = rules.getRuleByRuleClass('alpha-email');
+
+      var input = document.createElement('input');
+      input.type = 'text';
+
+      input.value = 'a@a.a';
+      var isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '1337@a.sp34k';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = 'a@a';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      input.value = 'a@a';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      input.value = 'beans.com';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+    });
+
   });
 
 });
