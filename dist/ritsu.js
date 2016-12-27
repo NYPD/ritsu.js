@@ -1,5 +1,5 @@
-/* ritsu.js v0.2.2 
- * Created 2016-12-19
+/* ritsu.js v0.2.3 
+ * Created 2016-12-27
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -375,7 +375,7 @@ var validation = (function() {
       var hasMaxLimit = maxLimit !== null;
 
       if (hasMinLimit && hasMaxLimit) {
-        validNumeric = fieldValueAsNum >= minLimit || fieldValueAsNum <= maxLimit;
+        validNumeric = fieldValueAsNum >= minLimit && fieldValueAsNum <= maxLimit;
       } else if (hasMinLimit) {
         validNumeric = fieldValueAsNum >= minLimit;
       } else if (hasMaxLimit) {

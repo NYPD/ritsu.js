@@ -1,6 +1,6 @@
 {
   "name": "ritsu.js",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "HTML form validation",
   "dependencies": {
     "jquery": ">=1.2.3"
