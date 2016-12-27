@@ -5,9 +5,12 @@ var expect = chai.expect;
 var rules = require('../src/rules.js');
 
 var jsdom = require('jsdom').jsdom;
-var window = jsdom().defaultView;
-var document = window.document;
+global.document = jsdom('<html><body></body></html>');
+global.window = document.defaultView;
+global.navigator = window.navigator;
 
+global.jQuery = global.$ = require('jquery');
+$.ui = require('jquery-ui-dist/jquery-ui.min');
 
 describe('rules', function() {
 
@@ -225,13 +228,140 @@ describe('rules', function() {
       isValid = rule.validate(input);
       assert.isFalse(isValid);
 
-      input.value = 'a@a';
-      isValid = rule.validate(input);
-      assert.isFalse(isValid);
-
       input.value = 'beans.com';
       isValid = rule.validate(input);
       assert.isFalse(isValid);
+
+    });
+
+    it('numeric-whole', function() {
+
+      var rule = rules.getRuleByRuleClass('numeric-whole');
+
+      var input = document.createElement('input');
+      input.type = 'text';
+
+      input.value = '54';
+      var isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '-54';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '54,000';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '54.25';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      input.value = 'CoolBeans';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+
+      input.setAttribute('data-no-thousands-separator', '');
+
+      input.value = '54,000';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+    });
+
+    it('numeric-decimal', function() {
+
+      var rule = rules.getRuleByRuleClass('numeric-decimal');
+
+      var input = document.createElement('input');
+      input.type = 'text';
+
+      input.value = '54';
+      var isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '-54';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '54.1';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '-54,500.15';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      //Test decimal Max
+      input.value = '54.123456';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      input.setAttribute('data-decimal-max', '6');
+
+      input.value = '54.123456';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      // Test no commas
+      input.setAttribute('data-no-thousands-separator', '');
+
+      input.value = '54,000.15';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+    });
+
+    it('numeric-full-year', function() {
+
+      var rule = rules.getRuleByRuleClass('numeric-full-year');
+
+      var input = document.createElement('input');
+      input.type = 'text';
+
+      input.value = '1900';
+      var isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '2001';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '0000';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = '54';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      input.value = 'CoolBeans';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+    });
+
+    it('numeric-jquery-date', function() {
+
+      var rule = rules.getRuleByRuleClass('numeric-jquery-date');
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.id = 'date';
+
+      $('body').append(input);
+
+      var $date = $('#date');
+      $date.datepicker();
+
+      var isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      $('#date').datepicker('setDate', '10/12/2012');
+
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
 
     });
 
