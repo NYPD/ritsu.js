@@ -1,5 +1,5 @@
 /* ritsu.js v0.2.2 
- * Created 2016-12-07
+ * Created 2016-12-19
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -250,6 +250,8 @@ var rules = (function() {
 
 })();
 
+
+
 var validation = (function() {
 
   var validateElement = function(element) {
@@ -390,7 +392,9 @@ var validation = (function() {
 
 })();
 
-if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+
+
+if (typeof jQuery === 'undefined' && typeof $ === 'undefined') {
   throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
 }
 
@@ -656,3 +660,5 @@ var ritsu = (function() {
   };
 
 })();
+
+

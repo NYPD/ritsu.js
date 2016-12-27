@@ -121,7 +121,7 @@ var validation = (function() {
       var hasMaxLimit = maxLimit !== null;
 
       if (hasMinLimit && hasMaxLimit) {
-        validNumeric = fieldValueAsNum >= minLimit || fieldValueAsNum <= maxLimit;
+        validNumeric = fieldValueAsNum >= minLimit && fieldValueAsNum <= maxLimit;
       } else if (hasMinLimit) {
         validNumeric = fieldValueAsNum >= minLimit;
       } else if (hasMaxLimit) {
@@ -137,3 +137,5 @@ var validation = (function() {
   };
 
 })();
+
+module.exports = validation;

@@ -2,14 +2,26 @@
   "name": "ritsu.js",
   "version": "0.2.2",
   "description": "HTML form validation",
+  "dependencies": {
+    "jquery": ">=1.2.3"
+  },
   "devDependencies": {
+    "chai": "^3.5.0",
     "grunt": "^1.0.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-cssmin": "^1.0.1",
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-stamp": "^0.3.0"
+    "grunt-stamp": "^0.3.0",
+    "jquery-ui": "^1.12.1",
+    "jquery-ui-dist": "^1.12.1",
+    "jsdom": "^9.8.3",
+    "mocha": "^3.2.0"
+  },
+  "scripts": {
+    "test": "mocha",
+    "nyan": "mocha --reporter nyan"
   },
   "repository": {
     "type": "git",
@@ -18,10 +30,11 @@
   "bugs": {
     "url": "https://github.com/NYPD/ritsu/issues"
   },
+  "author": {
+    "name": "NYPD"
+  },
   "contributors": [
-    {
-      "name": "NYPD"
-    }
+    {}
   ],
   "license": "MIT"
 }
