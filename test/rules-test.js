@@ -365,6 +365,10 @@ describe('rules', function() {
 
     });
 
+    after(function() {
+      $('body').empty();
+    });
+
   });
 
 });
