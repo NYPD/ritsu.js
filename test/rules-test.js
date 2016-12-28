@@ -130,15 +130,26 @@ describe('rules', function() {
 
       var input = document.createElement('input');
       input.type = 'text';
+
       input.value = 'beans';
-
       var isValid = rule.validate(input);
+      assert.isTrue(isValid);
 
+      input.value = 'cool-beans';
+      isValid = rule.validate(input);
       assert.isTrue(isValid);
 
       input.value = 'b34ns';
       isValid = rule.validate(input);
+      assert.isFalse(isValid);
 
+      //Test space and no-space
+      input.value = 'cool beans';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.setAttribute('data-no-space', '');
+      isValid = rule.validate(input);
       assert.isFalse(isValid);
 
     });
@@ -195,15 +206,20 @@ describe('rules', function() {
       isValid = rule.validate(input);
       assert.isTrue(isValid);
 
-      input.value = 'C00L Beans';
-      isValid = rule.validate(input);
-      assert.isFalse(isValid);
-
       input.value = '19608-555';
       isValid = rule.validate(input);
       assert.isFalse(isValid);
 
       input.value = 'E.M.';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      //Test space and no-space
+      input.value = 'C00L Beans';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.setAttribute('data-no-space', '');
       isValid = rule.validate(input);
       assert.isFalse(isValid);
 
