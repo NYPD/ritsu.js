@@ -518,8 +518,8 @@ describe('core', function() {
       });
 
       $body.append('<div class="form-group">' +
-        '<span class="help-block ritsu-error"></span>' +
-        '</div>');
+                     '<span class="help-block ritsu-error"></span>' +
+                   '</div>');
 
       var $formGroup = $('.form-group');
       $formGroup.append($validinput);
@@ -570,10 +570,10 @@ describe('core', function() {
       });
 
       $body.append('<div class="form-group">' +
-        '<span class="help-block">' +
-        '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
-        '</span>' +
-        '</div>');
+                     '<span class="help-block">' +
+                       '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
+                     '</span>' +
+                   '</div>');
 
       var $formGroup = $('.form-group');
       $formGroup.append($validinput);
