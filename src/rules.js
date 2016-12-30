@@ -115,7 +115,7 @@ var rules = (function() {
     var alphaNumericRegexString = '^([a-zA-Z0-9@]+)$';
     var alphaNumericRegex = new RegExp(alphaNumericRegexString.replace(/@/g, noSpace ? '' : '\\s'));
 
-    return alphaNumericRegex.test(element.value);
+    return alphaNumericRegex.test(value);
   };
 
 
