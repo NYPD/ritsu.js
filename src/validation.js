@@ -21,15 +21,13 @@ var validation = (function() {
   //Private Methods ************************************************************
   var _validateInput = function(element) {
 
-    var $element = $(element);
-
     var validInput = true;
 
-    var isAlpha = $element.hasClass('alpha');
-    var isNumeric = $element.hasClass('numeric');
-    var isOptional = $element.hasClass('optional');
+    var isAlpha = element.classList.contains('alpha');
+    var isNumeric = element.classList.contains('numeric');
+    var isOptional = element.classList.contains('optional');
 
-    var fieldValue = $element.val();
+    var fieldValue = element.value;
     var isEmpty = $.trim(fieldValue) === '' || fieldValue === undefined;
 
     var noValidationNeeded = isEmpty && isOptional;
@@ -43,10 +41,8 @@ var validation = (function() {
 
   var _validateSelect = function(element) {
 
-    var $element = $(element);
-
-    var valueSelected = $element.val();
-    var isOptional = $element.hasClass('optional');
+    var valueSelected = element.options[element.selectedIndex].value;
+    var isOptional = element.classList.contains('optional');
     var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
 
     var validSelect = isOptional && isEmpty || !isEmpty;
