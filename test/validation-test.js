@@ -22,19 +22,15 @@ describe('validation', function() {
       input.className = 'alpha alpha-only';
       input.disabled = false;
       input.value = '1337Speak';
-
-      var validElement = validation.validateElement(input);
-      assert.isFalse(validElement);
-
       input.disabled = true;
 
       //Should pass cause its disaled now home slice
-      validElement = validation.validateElement(input);
+      var validElement = validation.validateElement(input);
       assert.isTrue(validElement);
 
     });
 
-    it('should not validate input element is optional and has no value', function() {
+    it('should not validate input element because it is optional and has no value', function() {
 
       //Should fail since it aint optional
       var input = document.createElement('input');
@@ -42,12 +38,6 @@ describe('validation', function() {
       input.className = 'alpha alpha-only';
 
       var validElement = validation.validateElement(input);
-      assert.isFalse(validElement);
-
-      input.classList.add('optional');
-
-      //Should pass cause its disaled now home slice
-      validElement = validation.validateElement(input);
       assert.isTrue(validElement);
 
     });
@@ -57,7 +47,7 @@ describe('validation', function() {
       //Should fail since it aint optional
       var input = document.createElement('input');
       input.type = 'text';
-      input.className = 'alpha alpha-only optional';
+      input.className = 'alpha alpha-only';
       input.value = '1337Speak';
 
       var validElement = validation.validateElement(input);
@@ -70,7 +60,6 @@ describe('validation', function() {
       var select = document.createElement('select');
       var optionEmpty = document.createElement('option');
 
-      select.className = 'optional';
       optionEmpty.text = '';
 
       select.appendChild(optionEmpty);
@@ -88,11 +77,27 @@ describe('validation', function() {
       var select = document.createElement('select');
       var optionEmpty = document.createElement('option');
 
+      optionEmpty.text = 'hello';
+
+      select.appendChild(optionEmpty);
+
+      select.options[0].selected = true;
+
+      var validElement = validation.validateElement(select);
+      assert.isTrue(validElement);
+
+    });
+
+    it('should fail select element validation beacuse it required and has no value', function() {
+
+      var select = document.createElement('select');
+      select.setAttribute('required', '');
+
+      var optionEmpty = document.createElement('option');
       optionEmpty.text = '';
 
       select.appendChild(optionEmpty);
 
-      //Make sure its passes
       select.options[0].selected = true;
 
       var validElement = validation.validateElement(select);
@@ -107,6 +112,7 @@ describe('validation', function() {
       input.type = 'text';
       input.className = 'alpha alpha-only';
       input.value = '1337Speak';
+      input.setAttribute('required', '');
 
       var validElement = validation.validateElement(input);
       assert.isFalse(validElement);
@@ -126,6 +132,7 @@ describe('validation', function() {
       input.type = 'text';
       input.className = 'numeric numeric-whole';
       input.value = '1337Speak';
+      input.setAttribute('required', '');
 
       var validElement = validation.validateElement(input);
       assert.isFalse(validElement);
@@ -146,6 +153,7 @@ describe('validation', function() {
       input.className = 'numeric numeric-whole';
       input.min = '1338';
       input.value = '1337';
+      input.setAttribute('required', '');
 
       var validElement = validation.validateElement(input);
       assert.isFalse(validElement);
@@ -165,6 +173,7 @@ describe('validation', function() {
       input.className = 'numeric numeric-whole';
       input.max = '1336';
       input.value = '1337';
+      input.setAttribute('required', '');
 
       var validElement = validation.validateElement(input);
       assert.isFalse(validElement);
@@ -185,6 +194,7 @@ describe('validation', function() {
       input.min = '1336';
       input.max = '1338';
       input.value = '1337';
+      input.setAttribute('required', '');
 
       var validElement = validation.validateElement(input);
       assert.isTrue(validElement);

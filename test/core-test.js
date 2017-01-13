@@ -341,6 +341,8 @@ describe('core', function() {
     it('should validate a select element passed in', function() {
 
       var select = document.createElement('select');
+      select.setAttribute('required', '');
+
       var optionEmpty = document.createElement('option');
       var optionNonEmpty = document.createElement('option');
 
@@ -350,13 +352,13 @@ describe('core', function() {
       select.appendChild(optionEmpty);
       select.appendChild(optionNonEmpty);
 
-      //Make sure its passes
+      //Make sure its fails
       select.options[0].selected = true;
       select.options[1].selected = false;
       var isValid = core.validate($(select));
       assert.isFalse(isValid);
 
-      //Make sure its fails
+      //Make sure its passes
       select.options[0].selected = false;
       select.options[1].selected = true;
       isValid = core.validate($(select));

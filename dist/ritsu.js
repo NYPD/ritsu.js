@@ -298,16 +298,17 @@ var validation = (function() {
 
     var isAlpha = element.classList.contains('alpha');
     var isNumeric = element.classList.contains('numeric');
-    var isOptional = element.classList.contains('optional');
+    var isRequired = element.hasAttribute('required');
 
     var fieldValue = element.value;
     var isEmpty = $.trim(fieldValue) === '' || fieldValue === undefined;
 
-    var noValidationNeeded = isEmpty && isOptional;
+    var noValidationNeeded = isEmpty && !isRequired;
     if (noValidationNeeded) return validInput;
 
     if (isAlpha) validInput = _validateAlphaField(element);
     if (isNumeric) validInput = _validateNumericField(element);
+    if (!isAlpha && !isNumeric && isRequired) validInput = !isEmpty; //Anything is allowed, just can't be blank
 
     return validInput;
   };
