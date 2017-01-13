@@ -10,7 +10,7 @@ global.window = document.defaultView;
 global.$ = require('jquery');
 global.rules = require('../src/rules.js');
 global.validation = require('../src/validation.js');
-var ritsu = require('../src/core.js');
+var core = require('../src/core.js');
 
 describe('core', function() {
 
@@ -18,7 +18,7 @@ describe('core', function() {
 
     it('should throw an Error when the options passed in is not an object', function() {
       expect(function() {
-        ritsu.initialize('init');
+        core.initialize('init');
       }).to.throw(Error);
     });
 
@@ -31,14 +31,14 @@ describe('core', function() {
       };
 
       expect(function() {
-        ritsu.initialize(options);
+        core.initialize(options);
       }).to.not.throw(Error);
 
     });
 
     //Clean up the ristu object to the defaults
     after(function() {
-      ritsu.initialize({});
+      core.initialize({});
     });
 
   });
@@ -55,7 +55,7 @@ describe('core', function() {
 
       var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
-      ritsu.storeInitialFormValues($input);
+      core.storeInitialFormValues($input);
 
       //change the current value
       $input.val('crepes');
@@ -71,7 +71,7 @@ describe('core', function() {
       var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
       $body.append($input);
 
-      ritsu.storeInitialFormValues();
+      core.storeInitialFormValues();
 
       //change the current value
       $input.val('crepes');
@@ -91,7 +91,7 @@ describe('core', function() {
 
       $div.append($input);
 
-      ritsu.storeInitialFormValues($div);
+      core.storeInitialFormValues($div);
 
       //change the current value
       $input.val('crepes');
@@ -106,7 +106,7 @@ describe('core', function() {
 
       var $checkbox = $('<input type="checkbox" checked/>');
 
-      ritsu.storeInitialFormValues($checkbox);
+      core.storeInitialFormValues($checkbox);
 
       //Make sure this checkbox is checked
       var checkboxIsChecked = $checkbox.is(':checked') === true;
@@ -131,7 +131,7 @@ describe('core', function() {
 
       $body.append([$radio1, $radio2]);
 
-      ritsu.storeInitialFormValues();
+      core.storeInitialFormValues();
 
       //Make sure radio male button is checked
       var currentRadioValue = $body.find('input[type="radio"]:checked').val();
@@ -168,9 +168,9 @@ describe('core', function() {
 
       var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
-      ritsu.storeInitialFormValues($input);
+      core.storeInitialFormValues($input);
 
-      var isDirty = ritsu.isFormDirty($input);
+      var isDirty = core.isFormDirty($input);
       assert.isFalse(isDirty);
 
     });
@@ -179,12 +179,12 @@ describe('core', function() {
 
       var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
-      ritsu.storeInitialFormValues($input);
+      core.storeInitialFormValues($input);
 
       //change the current value
       $input.val('crepes');
 
-      var isDirty = ritsu.isFormDirty($input);
+      var isDirty = core.isFormDirty($input);
       assert.isTrue(isDirty);
 
     });
@@ -194,12 +194,12 @@ describe('core', function() {
       var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
       $body.append($input);
 
-      ritsu.storeInitialFormValues();
+      core.storeInitialFormValues();
 
       //change the current value
       $input.val('crepes');
 
-      var isDirty = ritsu.isFormDirty();
+      var isDirty = core.isFormDirty();
       assert.isTrue(isDirty);
 
     });
@@ -213,12 +213,12 @@ describe('core', function() {
 
       $div.append($input);
 
-      ritsu.storeInitialFormValues($input);
+      core.storeInitialFormValues($input);
 
       //change the current value
       $input.val('crepes');
 
-      var isDirty = ritsu.isFormDirty($div);
+      var isDirty = core.isFormDirty($div);
       assert.isTrue(isDirty);
 
     });
@@ -227,7 +227,7 @@ describe('core', function() {
 
       var $checkbox = $('<input type="checkbox" checked/>');
 
-      ritsu.storeInitialFormValues($checkbox);
+      core.storeInitialFormValues($checkbox);
 
       //Make sure this checkbox is checked
       var checkboxIsChecked = $checkbox.is(':checked') === true;
@@ -236,7 +236,7 @@ describe('core', function() {
       //change the current value
       $checkbox.prop('checked', false);
 
-      var isDirty = ritsu.isFormDirty($checkbox);
+      var isDirty = core.isFormDirty($checkbox);
       assert.isTrue(isDirty);
 
     });
@@ -248,14 +248,14 @@ describe('core', function() {
 
       $body.append([$radio1, $radio2]);
 
-      ritsu.storeInitialFormValues();
+      core.storeInitialFormValues();
 
       var $male = $('#male');
       var $female = $('#female');
 
       //Make sure radios are not dirty
-      var isDirtyMale = ritsu.isFormDirty($male);
-      var isDirtyFemale = ritsu.isFormDirty($female);
+      var isDirtyMale = core.isFormDirty($male);
+      var isDirtyFemale = core.isFormDirty($female);
 
       assert.isFalse(isDirtyMale);
       assert.isFalse(isDirtyFemale);
@@ -264,8 +264,8 @@ describe('core', function() {
       $('#female').prop('checked', true);
 
       //Make sure both radios are now dirty
-      isDirtyMale = ritsu.isFormDirty($male);
-      isDirtyFemale = ritsu.isFormDirty($female);
+      isDirtyMale = core.isFormDirty($male);
+      isDirtyFemale = core.isFormDirty($female);
 
       assert.isTrue(isDirtyMale);
       assert.isTrue(isDirtyFemale);
@@ -285,7 +285,7 @@ describe('core', function() {
 
     beforeEach(function() {
       $body.empty();
-      ritsu.initialize({});
+      core.initialize({});
       $input.removeClass('has-error');
     });
 
@@ -293,12 +293,12 @@ describe('core', function() {
 
       //Make sure its passes
       $input.val('beans');
-      var isValid = ritsu.validate($input);
+      var isValid = core.validate($input);
       assert.isTrue(isValid);
 
       //Make sure its fails
       $input.val('bea3ns');
-      isValid = ritsu.validate($input);
+      isValid = core.validate($input);
       assert.isFalse(isValid);
 
     });
@@ -309,12 +309,12 @@ describe('core', function() {
 
       //Make sure its passes
       $input.val('beans');
-      var isValid = ritsu.validate();
+      var isValid = core.validate();
       assert.isTrue(isValid);
 
       //Make sure its fails
       $input.val('bea3ns');
-      isValid = ritsu.validate();
+      isValid = core.validate();
       assert.isFalse(isValid);
 
     });
@@ -328,12 +328,12 @@ describe('core', function() {
 
       //Make sure its passes
       $input.val('beans');
-      var isValid = ritsu.validate($cool);
+      var isValid = core.validate($cool);
       assert.isTrue(isValid);
 
       //Make sure its fails
       $input.val('bea3ns');
-      isValid = ritsu.validate($cool);
+      isValid = core.validate($cool);
       assert.isFalse(isValid);
 
     });
@@ -353,13 +353,13 @@ describe('core', function() {
       //Make sure its passes
       select.options[0].selected = true;
       select.options[1].selected = false;
-      var isValid = ritsu.validate($(select));
+      var isValid = core.validate($(select));
       assert.isFalse(isValid);
 
       //Make sure its fails
       select.options[0].selected = false;
       select.options[1].selected = true;
-      isValid = ritsu.validate($(select));
+      isValid = core.validate($(select));
       assert.isTrue(isValid);
 
     });
@@ -367,7 +367,7 @@ describe('core', function() {
     it('should set an input element passed in with a data attribute of invalid = true', function() {
 
       $input.val('bean3s');
-      ritsu.validate($input);
+      core.validate($input);
 
       var hasDataInvalidAttr = $input.data('invalid') === true;
       assert.isTrue(hasDataInvalidAttr);
@@ -377,7 +377,7 @@ describe('core', function() {
     it('should set an input element passed in with a data attribute of invalid = false', function() {
 
       $input.val('beans');
-      ritsu.validate($input);
+      core.validate($input);
 
       var dataInvalidAttr = $input.data('invalid') === false;
       assert.isTrue(dataInvalidAttr);
@@ -386,12 +386,12 @@ describe('core', function() {
 
     it('should mark an input element passed in with a .has-error class because autoMarkInvalidFields is true', function() {
 
-      ritsu.initialize({
+      core.initialize({
         autoMarkInvalidFields: true
       });
 
       $input.val('b3ans');
-      ritsu.validate($input);
+      core.validate($input);
 
       var hasHasErrorClass = $input.hasClass('has-error');
       assert.isTrue(hasHasErrorClass);
@@ -401,12 +401,12 @@ describe('core', function() {
 
     it('should not mark an input element passed in with a .has-error class because autoMarkInvalidFields is false', function() {
 
-      ritsu.initialize({
+      core.initialize({
         autoMarkInvalidFields: false
       });
 
       $input.val('b3ans');
-      ritsu.validate($input);
+      core.validate($input);
 
       var hasHasErrorClass = $input.hasClass('has-error');
       assert.isFalse(hasHasErrorClass);
@@ -415,7 +415,7 @@ describe('core', function() {
 
     it('should add an error message label next to the input since autoShowErrorMessages is true', function() {
 
-      ritsu.initialize({
+      core.initialize({
         autoShowErrorMessages: true
       });
 
@@ -425,7 +425,7 @@ describe('core', function() {
       var labelExists = $input.next('label').length === 1;
       assert.isFalse(labelExists);
 
-      ritsu.validate($input);
+      core.validate($input);
 
       //Check label exists
       labelExists = $input.next('label').length === 1;
@@ -435,7 +435,7 @@ describe('core', function() {
 
     it('should not add a error message next to an input since autoShowErrorMessages is false', function() {
 
-      ritsu.initialize({
+      core.initialize({
         autoShowErrorMessages: false
       });
 
@@ -446,7 +446,7 @@ describe('core', function() {
       var labelExists = $input.next('label').length === 1;
       assert.isFalse(labelExists);
 
-      ritsu.validate($input);
+      core.validate($input);
 
       //Check label still does not exist
       labelExists = $input.next('label').length === 1;
@@ -455,7 +455,7 @@ describe('core', function() {
     });
 
     after(function() {
-      ritsu.initialize({});
+      core.initialize({});
       $body.empty();
     });
 
@@ -468,7 +468,7 @@ describe('core', function() {
     var $invalidinput = $('<input type="text" class="alpha alpha-only" data-invalid="true"/>');
 
     beforeEach(function() {
-      ritsu.initialize({});
+      core.initialize({});
       $body.empty();
     });
 
@@ -480,7 +480,7 @@ describe('core', function() {
       var labelExists = $invalidinput.next('label').length === 1;
       assert.isFalse(labelExists);
 
-      ritsu.showErrorMessages($invalidinput);
+      core.showErrorMessages($invalidinput);
 
       //Check label exists
       labelExists = $invalidinput.next('label').length === 1;
@@ -490,7 +490,7 @@ describe('core', function() {
 
     it('should add an error message to a .form-group that has no .help-block when bootstrap is being used', function() {
 
-      ritsu.initialize({
+      core.initialize({
         useBootstrap3Stlying: true
       });
 
@@ -503,7 +503,7 @@ describe('core', function() {
       var helpBlockExists = $formGroup.find('.help-block').length === 1;
       assert.isFalse(helpBlockExists);
 
-      ritsu.showErrorMessages($invalidinput);
+      core.showErrorMessages($invalidinput);
 
       //Check .help=block does exist
       helpBlockExists = $formGroup.find('.help-block').length === 1;
@@ -513,7 +513,7 @@ describe('core', function() {
 
     it('should remove an error message from a .form-group that had no .help-block when bootstrap is being used', function() {
 
-      ritsu.initialize({
+      core.initialize({
         useBootstrap3Stlying: true
       });
 
@@ -528,7 +528,7 @@ describe('core', function() {
       var helpBlockExists = $formGroup.find('.help-block').length === 1;
       assert.isTrue(helpBlockExists);
 
-      ritsu.showErrorMessages($validinput);
+      core.showErrorMessages($validinput);
 
       //.help block should have been removed
       helpBlockExists = $formGroup.find('.help-block').length === 1;
@@ -538,7 +538,7 @@ describe('core', function() {
 
     it('should add a error message to a .form-group that already has a .help-block from bootstrap being used', function() {
 
-      ritsu.initialize({
+      core.initialize({
         useBootstrap3Stlying: true
       });
 
@@ -553,7 +553,7 @@ describe('core', function() {
       assert.isTrue(helpBlockExists);
       assert.isFalse(ritsuErrorExists);
 
-      ritsu.showErrorMessages($invalidinput);
+      core.showErrorMessages($invalidinput);
 
       //Make sure there is a help block and a ritsu-error <b>
       helpBlockExists = $formGroup.find('.help-block').length === 1;
@@ -565,7 +565,7 @@ describe('core', function() {
 
     it('should remove a error message from a .form-group that already had a .help-block from bootstrap being used', function() {
 
-      ritsu.initialize({
+      core.initialize({
         useBootstrap3Stlying: true
       });
 
@@ -584,7 +584,7 @@ describe('core', function() {
       assert.isTrue(helpBlockExists);
       assert.isTrue(ritsuErrorExists);
 
-      ritsu.showErrorMessages($validinput);
+      core.showErrorMessages($validinput);
 
       //Make sure there is a help block still but the ritsu-error <b> gone
       helpBlockExists = $formGroup.find('.help-block').length === 1;
@@ -595,7 +595,7 @@ describe('core', function() {
     });
 
     after(function() {
-      ritsu.initialize({});
+      core.initialize({});
       $body.empty();
     });
 
@@ -609,18 +609,18 @@ describe('core', function() {
 
     beforeEach(function() {
       $body.empty();
-      ritsu.initialize({});
+      core.initialize({});
       $input.removeClass('has-error');
     });
 
     it('should mark an input element passed in with a .has-error class', function() {
 
-      ritsu.initialize({
+      core.initialize({
         autoMarkInvalidFields: true
       });
 
       $input.val('b3ans');
-      ritsu.validate($input);
+      core.validate($input);
 
       var hasHasErrorClass = $input.hasClass('has-error');
       assert.isTrue(hasHasErrorClass);
@@ -629,7 +629,7 @@ describe('core', function() {
 
     it('should mark an input element with a .has-error class when nothing is passed in', function() {
 
-      ritsu.initialize({
+      core.initialize({
         autoMarkInvalidFields: true
       });
 
@@ -640,7 +640,7 @@ describe('core', function() {
       var hasHasErrorClass = $input.hasClass('has-error');
       assert.isFalse(hasHasErrorClass);
 
-      ritsu.validate();
+      core.validate();
 
       //Make sure there is a class
       hasHasErrorClass = $input.hasClass('has-error');
@@ -650,7 +650,7 @@ describe('core', function() {
 
     it('should mark an input element with a .has-error class when nothing a container is passed in', function() {
 
-      ritsu.initialize({
+      core.initialize({
         autoMarkInvalidFields: true
       });
 
@@ -664,7 +664,7 @@ describe('core', function() {
       var hasHasErrorClass = $input.hasClass('has-error');
       assert.isFalse(hasHasErrorClass);
 
-      ritsu.validate($formGroup);
+      core.validate($formGroup);
 
       //Make sure there is a class
       hasHasErrorClass = $input.hasClass('has-error');
@@ -674,7 +674,7 @@ describe('core', function() {
 
     it('should mark a .form-group element with a .has-error class when useBootstrap3Stlying = true', function() {
 
-      ritsu.initialize({
+      core.initialize({
         useBootstrap3Stlying: true,
         autoMarkInvalidFields: true
       });
@@ -689,7 +689,7 @@ describe('core', function() {
       var hasHasErrorClass = $formGroup.hasClass('has-error');
       assert.isFalse(hasHasErrorClass);
 
-      ritsu.validate($formGroup);
+      core.validate($formGroup);
 
       //Make sure there is a class
       hasHasErrorClass = $formGroup.hasClass('has-error');
@@ -698,7 +698,7 @@ describe('core', function() {
     });
 
     after(function() {
-      ritsu.initialize({});
+      core.initialize({});
       $body.empty();
     });
 

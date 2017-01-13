@@ -1,9 +1,14 @@
 /* ritsu.js v0.2.4 
- * Created 2017-01-03
+ * Created 2017-01-13
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
 
+if (typeof jQuery === 'undefined' && typeof $ === 'undefined') {
+  throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
+}
+
+var ritsu = (function() {
 var rules = (function() {
 
   var _rules = [];
@@ -404,11 +409,7 @@ var validation = (function() {
 
 
 
-if (typeof jQuery === 'undefined' && typeof $ === 'undefined') {
-  throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
-}
-
-var ritsu = (function() {
+var core = (function() {
 
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
@@ -672,3 +673,5 @@ var ritsu = (function() {
 })();
 
 
+return core;
+})();

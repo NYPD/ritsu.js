@@ -1,8 +1,4 @@
-if (typeof jQuery === 'undefined' && typeof $ === 'undefined') {
-  throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
-}
-
-var ritsu = (function() {
+var core = (function() {
 
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
@@ -265,4 +261,4 @@ var ritsu = (function() {
 
 })();
 
-module.exports = ritsu;
+module.exports = core;

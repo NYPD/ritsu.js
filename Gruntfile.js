@@ -4,15 +4,21 @@ module.exports = function(grunt) {
 
     pkg: grunt.file.readJSON('package.json'),
     banner: '/* ritsu.js v<%= pkg.version %> \n' +
-      ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-      ' * Licensed under the <%= pkg.license %> license\n' +
-      ' * Source code can be found here: <%= pkg.repository.url %> \n' +
-      ' */\n',
-
+            ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+            ' * Licensed under the <%= pkg.license %> license\n' +
+            ' * Source code can be found here: <%= pkg.repository.url %> \n' +
+            ' */\n',
+    jqueryCheck: 'if (typeof jQuery === \'undefined\' && typeof $ === \'undefined\') {\n' +
+                 '  throw new Error(\'ritsu.js requires jQuery or a jQuery-compatible API\');\n' +
+                 '}\n',
+    ritsuHeader: 'var ritsu = (function() {',
+    ritsuFooter: 'return core;\n' +
+                 '})();',
     /* grunt stamp ************************************************************/
     stamp: {
       options: {
-        banner: '<%= banner %>'
+        banner: '<%= banner %>\n<%= jqueryCheck %>\n<%= ritsuHeader %>',
+        footer: '<%= ritsuFooter %>'
       },
       yourTarget: {
         files: {
