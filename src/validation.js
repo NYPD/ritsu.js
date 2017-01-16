@@ -1,4 +1,4 @@
-var validation = (function() {
+var validation = function(rules) {
 
   var validateElement = function(element) {
 
@@ -133,6 +133,6 @@ var validation = (function() {
     validateElement: validateElement
   };
 
-})();
+};
 
-module.exports = validation;
+module.exports = function(rules) {return validation(rules);};

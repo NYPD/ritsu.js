@@ -12,7 +12,7 @@ module.exports = function(grunt) {
                  '  throw new Error(\'ritsu.js requires jQuery or a jQuery-compatible API\');\n' +
                  '}\n',
     ritsuHeader: 'var ritsu = (function() {',
-    ritsuFooter: 'return core(rules, validation);\n' +
+    ritsuFooter: 'return core(rules(), validation(rules));\n' +
                  '})();',
     /* grunt stamp ************************************************************/
     stamp: {
@@ -71,10 +71,6 @@ module.exports = function(grunt) {
       dist: {
         src: ['src/rules.js', 'src/validation.js', 'src/core.js'],
         dest: 'dist/ritsu.js'
-      },
-      test: {
-        src: ['src/rules.js', 'src/validation.js', 'src/core.js'],
-        dest: 'test/ritsu-test.js'
       }
 
     },
@@ -116,5 +112,5 @@ module.exports = function(grunt) {
 
   //Register dem tasks
   grunt.registerTask('default', ['watch']);
-  grunt.registerTask('build', ['copy', 'concat:dist', 'concat:test', 'uglify', 'cssmin', 'stamp:js', 'stamp:css']);
+  grunt.registerTask('build', ['copy', 'concat:dist', 'uglify', 'cssmin', 'stamp:js', 'stamp:css']);
 };

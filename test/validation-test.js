@@ -1,16 +1,19 @@
 /* eslint-env mocha */
-var chai = require('chai');
-var assert = chai.assert;
+const chai = require('chai');
+const assert = chai.assert;
 
-var jsdom = require('jsdom').jsdom;
-var window = jsdom().defaultView;
-var document = window.document;
+const jsdom = require('jsdom').jsdom;
+const window = jsdom().defaultView;
+const document = window.document;
 
-global.$ = require('jquery');
-global.rules = require('../src/rules.js');
-var validation = require('../src/validation.js');
+const rules = require('../src/rules.js')();
+const validation = require('../src/validation.js')(rules);
 
 describe('validation', function() {
+
+  before(function (){
+    global.jQuery = global.$ = require('jquery');//Need jQuery cause ritsu still uses jquery
+  });
 
   describe('#validateElement()', function() {
 

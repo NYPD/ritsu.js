@@ -9,7 +9,7 @@ if (typeof jQuery === 'undefined' && typeof $ === 'undefined') {
 }
 
 var ritsu = (function() {
-var rules = (function() {
+var rules = function() {
 
   var _rules = [];
 
@@ -267,11 +267,11 @@ var rules = (function() {
     addValidationRule: addValidationRule
   };
 
-})();
+};
 
 
 
-var validation = (function() {
+var validation = function(rules) {
 
   var validateElement = function(element) {
 
@@ -406,7 +406,7 @@ var validation = (function() {
     validateElement: validateElement
   };
 
-})();
+};
 
 
 
@@ -674,5 +674,5 @@ var core = function(rules, validation) {
 };
 
 
-return core(rules, validation);
+return core(rules(), validation(rules));
 })();

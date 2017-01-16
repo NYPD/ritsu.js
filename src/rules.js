@@ -1,4 +1,4 @@
-var rules = (function() {
+var rules = function() {
 
   var _rules = [];
 
@@ -256,6 +256,6 @@ var rules = (function() {
     addValidationRule: addValidationRule
   };
 
-})();
+};
 
-module.exports = rules;
+module.exports = function() {return rules();};

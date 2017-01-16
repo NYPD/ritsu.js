@@ -1,10 +1,11 @@
 /* eslint-env mocha */
-var chai = require('chai');
-var assert = chai.assert;
-var expect = chai.expect;
-var rules = require('../src/rules.js');
+const chai = require('chai');
+const assert = chai.assert;
+const expect = chai.expect;
+const rules = require('../src/rules.js')();
 
-var jsdom = require('jsdom').jsdom;
+const jsdom = require('jsdom').jsdom;
+
 global.document = jsdom('<html><body></body></html>');
 global.window = document.defaultView;
 global.navigator = window.navigator;
@@ -385,6 +386,14 @@ describe('rules', function() {
       $('body').empty();
     });
 
+  });
+
+  after(function() {
+    delete global.document;
+    delete global.window;
+    delete global.navigator;
+    delete global.jQuery;
+    delete global.$;
   });
 
 });

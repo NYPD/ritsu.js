@@ -1,15 +1,15 @@
 /* eslint-env mocha */
-var chai = require('chai');
-var assert = chai.assert;
-var expect = chai.expect;
+const chai = require('chai');
+const assert = chai.assert;
+const expect = chai.expect;
 
-var jsdom = require('jsdom').jsdom;
+const jsdom = require('jsdom').jsdom;
 const document = jsdom('<html><body></body></html>');
 global.window = document.defaultView;
 
 const $ = require('jquery');
-const rules = require('../src/rules.js');
-const validation = require('../src/validation.js');
+const rules = require('../src/rules.js')();
+const validation = require('../src/validation.js')(rules);
 
 const core = require('../src/core.js')(rules, validation);
 
@@ -705,6 +705,10 @@ describe('core', function() {
       $body.empty();
     });
 
+  });
+
+  after(function() {
+    delete global.window;
   });
 
 });
