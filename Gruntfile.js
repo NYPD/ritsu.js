@@ -12,7 +12,7 @@ module.exports = function(grunt) {
                  '  throw new Error(\'ritsu.js requires jQuery or a jQuery-compatible API\');\n' +
                  '}\n',
     ritsuHeader: 'var ritsu = (function() {',
-    ritsuFooter: 'return core(rules(), validation(rules));\n' +
+    ritsuFooter: 'return core(rules(), validation(rules()));\n' +
                  '})();',
     /* grunt stamp ************************************************************/
     stamp: {

@@ -674,5 +674,5 @@ var core = function(rules, validation) {
 };
 
 
-return core(rules(), validation(rules));
+return core(rules(), validation(rules()));
 })();
