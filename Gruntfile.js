@@ -12,17 +12,25 @@ module.exports = function(grunt) {
                  '  throw new Error(\'ritsu.js requires jQuery or a jQuery-compatible API\');\n' +
                  '}\n',
     ritsuHeader: 'var ritsu = (function() {',
-    ritsuFooter: 'return core;\n' +
+    ritsuFooter: 'return core(rules, validation);\n' +
                  '})();',
     /* grunt stamp ************************************************************/
     stamp: {
-      options: {
-        banner: '<%= banner %>\n<%= jqueryCheck %>\n<%= ritsuHeader %>',
-        footer: '<%= ritsuFooter %>'
-      },
-      yourTarget: {
+      js: {
+        options: {
+          banner: '<%= banner %>\n<%= jqueryCheck %>\n<%= ritsuHeader %>',
+          footer: '<%= ritsuFooter %>'
+        },
         files: {
-          src: 'dist/**'
+          src: ['dist/**/*.js']
+        }
+      },
+      css: {
+        options: {
+          banner: '<%= banner %>'
+        },
+        files: {
+          src: ['dist/**/*.css']
         }
       }
     },
@@ -63,7 +71,12 @@ module.exports = function(grunt) {
       dist: {
         src: ['src/rules.js', 'src/validation.js', 'src/core.js'],
         dest: 'dist/ritsu.js'
+      },
+      test: {
+        src: ['src/rules.js', 'src/validation.js', 'src/core.js'],
+        dest: 'test/ritsu-test.js'
       }
+
     },
 
     /* Copy Task **************************************************************/
@@ -103,5 +116,5 @@ module.exports = function(grunt) {
 
   //Register dem tasks
   grunt.registerTask('default', ['watch']);
-  grunt.registerTask('build', ['copy', 'concat', 'uglify', 'cssmin', 'stamp']);
+  grunt.registerTask('build', ['copy', 'concat:dist', 'concat:test', 'uglify', 'cssmin', 'stamp:js', 'stamp:css']);
 };

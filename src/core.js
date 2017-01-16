@@ -1,4 +1,4 @@
-var core = (function() {
+var core = function(rules, validation) {
 
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
@@ -259,6 +259,6 @@ var core = (function() {
 
   };
 
-})();
+};
 
-module.exports = core;
+module.exports = function(rules, validation) {return core(rules, validation);};
