@@ -1,10 +1,15 @@
-/* ritsu.js v0.2.3 
- * Created 2016-12-27
+/* ritsu.js v0.2.4 
+ * Created 2017-01-16
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
 
-var rules = (function() {
+if (typeof jQuery === 'undefined' && typeof $ === 'undefined') {
+  throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
+}
+
+var ritsu = (function() {
+var rules = function() {
 
   var _rules = [];
 
@@ -80,12 +85,19 @@ var rules = (function() {
   };
 
   var _validateAlphaOnly = function(element) {
+
+    var value = element.value;
+    var noSpace = element.hasAttribute('data-no-space');
+
     /*
-     * Any case insensitive Roman character with periods, dashes, and spaces.
+     * Any case insensitive Roman character with periods, dashes, and spaces (if allowed).
      *
      * e.g. cool | cool-beans | cool beans | beans.
      */
-    return /^([A-Za-z\s\.\-])+$/.test(element.value);
+    var alphaOnlyRegexString = '^([A-Za-z@\.\-])+$';
+    var alphaOnlyRegex = new RegExp(alphaOnlyRegexString.replace(/@/g, noSpace ? '' : '\\s'));
+
+    return alphaOnlyRegex.test(value);
   };
 
   var _validateAlphaZip = function(element) {
@@ -102,12 +114,19 @@ var rules = (function() {
   };
 
   var _validateAlphaNumeric = function(element) {
+
+    var value = element.value;
+    var noSpace = element.hasAttribute('data-no-space');
+
     /*
-     * Any case insensitive Roman character and digit
+     * Any case insensitive Roman character, digit, and spaces (if allowed)
      *
      * e.g. Cool | C00l
      */
-    return /^([a-zA-Z0-9]+)$/.test(element.value);
+    var alphaNumericRegexString = '^([a-zA-Z0-9@]+)$';
+    var alphaNumericRegex = new RegExp(alphaNumericRegexString.replace(/@/g, noSpace ? '' : '\\s'));
+
+    return alphaNumericRegex.test(value);
   };
 
 
@@ -248,11 +267,11 @@ var rules = (function() {
     addValidationRule: addValidationRule
   };
 
-})();
+};
 
 
 
-var validation = (function() {
+var validation = function(rules) {
 
   var validateElement = function(element) {
 
@@ -275,35 +294,32 @@ var validation = (function() {
   //Private Methods ************************************************************
   var _validateInput = function(element) {
 
-    var $element = $(element);
-
     var validInput = true;
 
-    var isAlpha = $element.hasClass('alpha');
-    var isNumeric = $element.hasClass('numeric');
-    var isOptional = $element.hasClass('optional');
+    var isAlpha = element.classList.contains('alpha');
+    var isNumeric = element.classList.contains('numeric');
+    var isRequired = element.hasAttribute('required');
 
-    var fieldValue = $element.val();
+    var fieldValue = element.value;
     var isEmpty = $.trim(fieldValue) === '' || fieldValue === undefined;
 
-    var noValidationNeeded = isEmpty && isOptional;
+    var noValidationNeeded = isEmpty && !isRequired;
     if (noValidationNeeded) return validInput;
 
     if (isAlpha) validInput = _validateAlphaField(element);
     if (isNumeric) validInput = _validateNumericField(element);
+    if (!isAlpha && !isNumeric && isRequired) validInput = !isEmpty; //Anything is allowed, just can't be blank
 
     return validInput;
   };
 
   var _validateSelect = function(element) {
 
-    var $element = $(element);
-
-    var valueSelected = $element.val();
-    var isOptional = $element.hasClass('optional');
+    var valueSelected = element.options[element.selectedIndex].value;
+    var isRequired = element.hasAttribute('required');
     var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
 
-    var validSelect = isOptional && isEmpty || !isEmpty;
+    var validSelect = isEmpty && !isRequired || !isEmpty;
 
     return validSelect;
 
@@ -390,15 +406,11 @@ var validation = (function() {
     validateElement: validateElement
   };
 
-})();
+};
 
 
 
-if (typeof jQuery === 'undefined' && typeof $ === 'undefined') {
-  throw new Error('ritsu.js requires jQuery or a jQuery-compatible API');
-}
-
-var ritsu = (function() {
+var core = function(rules, validation) {
 
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
@@ -659,6 +671,8 @@ var ritsu = (function() {
 
   };
 
+};
+
+
+return core(rules(), validation(rules()));
 })();
-
-

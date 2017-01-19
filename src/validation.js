@@ -1,4 +1,4 @@
-var validation = (function() {
+var validation = function(rules) {
 
   var validateElement = function(element) {
 
@@ -21,35 +21,32 @@ var validation = (function() {
   //Private Methods ************************************************************
   var _validateInput = function(element) {
 
-    var $element = $(element);
-
     var validInput = true;
 
-    var isAlpha = $element.hasClass('alpha');
-    var isNumeric = $element.hasClass('numeric');
-    var isOptional = $element.hasClass('optional');
+    var isAlpha = element.classList.contains('alpha');
+    var isNumeric = element.classList.contains('numeric');
+    var isRequired = element.hasAttribute('required');
 
-    var fieldValue = $element.val();
+    var fieldValue = element.value;
     var isEmpty = $.trim(fieldValue) === '' || fieldValue === undefined;
 
-    var noValidationNeeded = isEmpty && isOptional;
+    var noValidationNeeded = isEmpty && !isRequired;
     if (noValidationNeeded) return validInput;
 
     if (isAlpha) validInput = _validateAlphaField(element);
     if (isNumeric) validInput = _validateNumericField(element);
+    if (!isAlpha && !isNumeric && isRequired) validInput = !isEmpty; //Anything is allowed, just can't be blank
 
     return validInput;
   };
 
   var _validateSelect = function(element) {
 
-    var $element = $(element);
-
-    var valueSelected = $element.val();
-    var isOptional = $element.hasClass('optional');
+    var valueSelected = element.options[element.selectedIndex].value;
+    var isRequired = element.hasAttribute('required');
     var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
 
-    var validSelect = isOptional && isEmpty || !isEmpty;
+    var validSelect = isEmpty && !isRequired || !isEmpty;
 
     return validSelect;
 
@@ -136,6 +133,6 @@ var validation = (function() {
     validateElement: validateElement
   };
 
-})();
+};
 
-module.exports = validation;
+module.exports = function(rules) {return validation(rules);};

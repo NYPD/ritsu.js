@@ -4,19 +4,33 @@ module.exports = function(grunt) {
 
     pkg: grunt.file.readJSON('package.json'),
     banner: '/* ritsu.js v<%= pkg.version %> \n' +
-      ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
-      ' * Licensed under the <%= pkg.license %> license\n' +
-      ' * Source code can be found here: <%= pkg.repository.url %> \n' +
-      ' */\n',
-
+            ' * Created <%= grunt.template.today("yyyy-mm-dd") %>\n' +
+            ' * Licensed under the <%= pkg.license %> license\n' +
+            ' * Source code can be found here: <%= pkg.repository.url %> \n' +
+            ' */\n',
+    jqueryCheck: 'if (typeof jQuery === \'undefined\' && typeof $ === \'undefined\') {\n' +
+                 '  throw new Error(\'ritsu.js requires jQuery or a jQuery-compatible API\');\n' +
+                 '}\n',
+    ritsuHeader: 'var ritsu = (function() {',
+    ritsuFooter: 'return core(rules(), validation(rules()));\n' +
+                 '})();',
     /* grunt stamp ************************************************************/
     stamp: {
-      options: {
-        banner: '<%= banner %>'
-      },
-      yourTarget: {
+      js: {
+        options: {
+          banner: '<%= banner %>\n<%= jqueryCheck %>\n<%= ritsuHeader %>',
+          footer: '<%= ritsuFooter %>'
+        },
         files: {
-          src: 'dist/**'
+          src: ['dist/**/*.js']
+        }
+      },
+      css: {
+        options: {
+          banner: '<%= banner %>'
+        },
+        files: {
+          src: ['dist/**/*.css']
         }
       }
     },
@@ -58,6 +72,7 @@ module.exports = function(grunt) {
         src: ['src/rules.js', 'src/validation.js', 'src/core.js'],
         dest: 'dist/ritsu.js'
       }
+
     },
 
     /* Copy Task **************************************************************/
@@ -97,5 +112,5 @@ module.exports = function(grunt) {
 
   //Register dem tasks
   grunt.registerTask('default', ['watch']);
-  grunt.registerTask('build', ['copy', 'concat', 'uglify', 'cssmin', 'stamp']);
+  grunt.registerTask('build', ['copy', 'concat:dist', 'uglify', 'cssmin', 'stamp:js', 'stamp:css']);
 };

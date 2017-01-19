@@ -1,10 +1,11 @@
 /* eslint-env mocha */
-var chai = require('chai');
-var assert = chai.assert;
-var expect = chai.expect;
-var rules = require('../src/rules.js');
+const chai = require('chai');
+const assert = chai.assert;
+const expect = chai.expect;
+const rules = require('../src/rules.js')();
 
-var jsdom = require('jsdom').jsdom;
+const jsdom = require('jsdom').jsdom;
+
 global.document = jsdom('<html><body></body></html>');
 global.window = document.defaultView;
 global.navigator = window.navigator;
@@ -130,15 +131,26 @@ describe('rules', function() {
 
       var input = document.createElement('input');
       input.type = 'text';
+
       input.value = 'beans';
-
       var isValid = rule.validate(input);
+      assert.isTrue(isValid);
 
+      input.value = 'cool-beans';
+      isValid = rule.validate(input);
       assert.isTrue(isValid);
 
       input.value = 'b34ns';
       isValid = rule.validate(input);
+      assert.isFalse(isValid);
 
+      //Test space and no-space
+      input.value = 'cool beans';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.setAttribute('data-no-space', '');
+      isValid = rule.validate(input);
       assert.isFalse(isValid);
 
     });
@@ -195,15 +207,20 @@ describe('rules', function() {
       isValid = rule.validate(input);
       assert.isTrue(isValid);
 
-      input.value = 'C00L Beans';
-      isValid = rule.validate(input);
-      assert.isFalse(isValid);
-
       input.value = '19608-555';
       isValid = rule.validate(input);
       assert.isFalse(isValid);
 
       input.value = 'E.M.';
+      isValid = rule.validate(input);
+      assert.isFalse(isValid);
+
+      //Test space and no-space
+      input.value = 'C00L Beans';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.setAttribute('data-no-space', '');
       isValid = rule.validate(input);
       assert.isFalse(isValid);
 
@@ -369,6 +386,14 @@ describe('rules', function() {
       $('body').empty();
     });
 
+  });
+
+  after(function() {
+    delete global.document;
+    delete global.window;
+    delete global.navigator;
+    delete global.jQuery;
+    delete global.$;
   });
 
 });

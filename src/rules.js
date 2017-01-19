@@ -1,4 +1,4 @@
-var rules = (function() {
+var rules = function() {
 
   var _rules = [];
 
@@ -74,12 +74,19 @@ var rules = (function() {
   };
 
   var _validateAlphaOnly = function(element) {
+
+    var value = element.value;
+    var noSpace = element.hasAttribute('data-no-space');
+
     /*
-     * Any case insensitive Roman character with periods, dashes, and spaces.
+     * Any case insensitive Roman character with periods, dashes, and spaces (if allowed).
      *
      * e.g. cool | cool-beans | cool beans | beans.
      */
-    return /^([A-Za-z\s\.\-])+$/.test(element.value);
+    var alphaOnlyRegexString = '^([A-Za-z@\.\-])+$';
+    var alphaOnlyRegex = new RegExp(alphaOnlyRegexString.replace(/@/g, noSpace ? '' : '\\s'));
+
+    return alphaOnlyRegex.test(value);
   };
 
   var _validateAlphaZip = function(element) {
@@ -96,12 +103,19 @@ var rules = (function() {
   };
 
   var _validateAlphaNumeric = function(element) {
+
+    var value = element.value;
+    var noSpace = element.hasAttribute('data-no-space');
+
     /*
-     * Any case insensitive Roman character and digit
+     * Any case insensitive Roman character, digit, and spaces (if allowed)
      *
      * e.g. Cool | C00l
      */
-    return /^([a-zA-Z0-9]+)$/.test(element.value);
+    var alphaNumericRegexString = '^([a-zA-Z0-9@]+)$';
+    var alphaNumericRegex = new RegExp(alphaNumericRegexString.replace(/@/g, noSpace ? '' : '\\s'));
+
+    return alphaNumericRegex.test(value);
   };
 
 
@@ -242,6 +256,6 @@ var rules = (function() {
     addValidationRule: addValidationRule
   };
 
-})();
+};
 
-module.exports = rules;
+module.exports = function() {return rules();};

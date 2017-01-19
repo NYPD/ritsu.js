@@ -13,7 +13,8 @@
   "globals": {
     "rules": true,
     "validation": true,
-    "ritsu": true
+    "ritsu": true,
+    "core": true
   },
   "extends": "eslint:recommended"
 }
