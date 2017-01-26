@@ -58,7 +58,7 @@ describe('validation', function() {
 
     });
 
-    it('should not validate select element is optional and has no value', function() {
+    it('should not validate select element is optional and the selected option has no value', function() {
 
       var select = document.createElement('select');
       var optionEmpty = document.createElement('option');
@@ -69,6 +69,15 @@ describe('validation', function() {
 
       //Make sure its passes
       select.options[0].selected = true;
+
+      var validElement = validation.validateElement(select);
+      assert.isTrue(validElement);
+
+    });
+
+    it('should not validate select element is optional and has no options', function() {
+
+      var select = document.createElement('select');
 
       var validElement = validation.validateElement(select);
       assert.isTrue(validElement);

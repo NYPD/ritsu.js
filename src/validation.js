@@ -41,8 +41,8 @@ var validation = function(rules) {
   };
 
   var _validateSelect = function(element) {
-
-    var valueSelected = element.options[element.selectedIndex].value;
+                        //If nothing is selected or there is no options, make the value undefined to avoid a TypeError 
+    var valueSelected = element.selectedIndex === -1?  undefined: element.options[element.selectedIndex].value;
     var isRequired = element.hasAttribute('required');
     var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
 

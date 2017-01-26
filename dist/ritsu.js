@@ -1,5 +1,5 @@
-/* ritsu.js v1.0.0 
- * Created 2017-01-19
+/* ritsu.js v1.0.1 
+ * Created 2017-01-26
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -314,8 +314,8 @@ var validation = function(rules) {
   };
 
   var _validateSelect = function(element) {
-
-    var valueSelected = element.options[element.selectedIndex].value;
+                        //If nothing is selected or there is no options, make the value undefined to avoid a TypeError 
+    var valueSelected = element.selectedIndex === -1?  undefined: element.options[element.selectedIndex].value;
     var isRequired = element.hasAttribute('required');
     var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
 
