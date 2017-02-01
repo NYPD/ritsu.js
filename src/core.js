@@ -1,8 +1,10 @@
 var core = function(rules, validation) {
 
+  var jQueryIsPresent = typeof jQuery !== undefined || typeof $ !== undefined;
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
   var autoShowErrorMessages = false;
+
 
   var initialize = function(options) {
 
@@ -19,40 +21,34 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var storeInitialFormValues = function($selector) {
+  var storeInitialFormValues = function(selector) {
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    elementArray.forEach(function(element) {
 
-    $selector.each(function() {
-
-      var $this = $(this);
-
-      var isCheckbox = $this.is('input[type="checkbox"]');
-      var isRadio = $this.is('input[type="radio"]');
-      var isFile = $this.is('input[type="file"]');
+      var isCheckbox = element.type === 'checkbox';
+      var isRadio = element.type === 'radio';
+      var isFile = element.type === 'file';
 
       if (isCheckbox || isRadio) {
-        $this.data('initialValue', $this.is(':checked'));
+        element.setAttribute('data-initial-value', element.checked);
       } else if (isFile) {
 
-        var hasSimpleFileHash = $this.data('simple-file-hash') !== undefined;
+        var hasSimpleFileHash = this.getAttribute('data-simple-file-hash') !== undefined;
 
         if (hasSimpleFileHash) {
-          $this.data('initialValue', $this.data('simple-file-hash'));
+          element.setAttribute('data-initial-value', element.getAttribute('data-simple-file-hash'));
           return true;
         }
 
-        var hasFileAttached = this.files.length > 0;
-        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size : undefined;
+        var hasFileAttached = element.files.length > 0;
+        var initialValue = hasFileAttached ? element.files[0].name + element.files[0].size : undefined;
 
-        $this.data('initialValue', initialValue);
+        element.setAttribute('data-initial-value', initialValue);
 
       } else {
-        $this.data('initialValue', $this.val());
+        element.setAttribute('data-initial-value', element.value);
       }
 
     });
@@ -60,36 +56,32 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var isFormDirty = function($selector) {
+  var isFormDirty = function(selector) {
 
     var isDirty = false;
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    elementArray.forEach(function(element) {
 
-    $selector.each(function() {
-
-      var $this = $(this);
-
-      var noInitialValue = $this.data('initialValue') === undefined;
+      var noInitialValue = element.getAttribute('data-initial-value') === undefined;
       if (noInitialValue) return true;
 
-      var isCheckbox = $this.is('input[type="checkbox"]');
-      var isRadio = $this.is('input[type="radio"]');
-      var isFile = $this.is('input[type="file"]');
+      var isCheckbox = element.type === 'checkbox';
+      var isRadio = element.type === 'radio';
+      var isFile = element.type === 'file';
 
       var valueChanged = false;
 
+      var intialValue = element.getAttribute('data-initial-value');
+
       if (isCheckbox || isRadio) {
-        valueChanged = $this.data('initialValue') != $this.is(':checked');
+        valueChanged = intialValue != '' + element.checked;//Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
       } else if (isFile) {
-        var hasFileAttached = this.files.length > 0;
-        valueChanged = $this.data('initialValue') != (hasFileAttached ? this.files[0].name + this.files[0].size : $this.data('simple-file-hash'));
+        var hasFileAttached = element.files.length > 0;
+        valueChanged =  intialValue !== (hasFileAttached ? element.files[0].name + element.files[0].size : element.getAttribute('data-simple-file-hash'));
       } else {
-        valueChanged = $this.data('initialValue') != $this.val();
+        valueChanged = intialValue !== element.value;
       }
 
       //If one value has changed, mark the entire form dirty and return right away
@@ -208,6 +200,28 @@ var core = function(rules, validation) {
   };
 
   //Private Methods ************************************************************
+  var _getSelectorAsElementArray = function(selector) {
+
+    var isJquery = jQueryIsPresent? selector instanceof jQuery : false;
+    selector = isJquery ? selector.get() : selector;
+
+    var selectorUndefined = selector === undefined;
+    if (selectorUndefined) selector = Array.prototype.slice.call(document.querySelectorAll('input, textarea, select'));
+
+    var isNotArray = !Array.isArray(selector);
+    if(isNotArray) selector = [selector];
+
+    var nothingToStore = selector.length === 0;
+    if(nothingToStore) return;
+
+    var firstElement = selector[0];
+
+    var isNotInputs = ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(firstElement.nodeName) === -1;
+    if (isNotInputs) selector = Array.prototype.slice.call(firstElement.querySelectorAll('input, textarea, select'));
+
+    return selector;
+  };
+
   var _removeErrorMessage = function($input) {
 
     $input.closest('td').find('.error-label').remove();
