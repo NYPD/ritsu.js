@@ -76,10 +76,10 @@ var core = function(rules, validation) {
       var intialValue = element.getAttribute('data-initial-value');
 
       if (isCheckbox || isRadio) {
-        valueChanged = intialValue != '' + element.checked;//Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
+        valueChanged = intialValue != '' + element.checked; //Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
       } else if (isFile) {
         var hasFileAttached = element.files.length > 0;
-        valueChanged =  intialValue !== (hasFileAttached ? element.files[0].name + element.files[0].size : element.getAttribute('data-simple-file-hash'));
+        valueChanged = intialValue !== (hasFileAttached ? element.files[0].name + element.files[0].size : element.getAttribute('data-simple-file-hash'));
       } else {
         valueChanged = intialValue !== element.value;
       }
@@ -95,102 +95,111 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function($selector) {
+  var validate = function(selector) {
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
-
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
     var isValid = true;
 
-    $selector.each(function() {
+    elementArray.forEach(function(element) {
 
-      var $element = $(this);
-
-      var invalidElement = !validation.validateElement(this);
+      var invalidElement = !validation.validateElement(element);
 
       //Sets the entire form to false, just because their was at least 1 invalid field
       if (invalidElement) {
         isValid = false;
-        $element.data('invalid', true);
+        element.setAttribute('data-invalid', true);
       } else {
-        $element.data('invalid', false);
-        _removeErrorMessage($element);
+        element.setAttribute('data-invalid', false);
+        _removeErrorMessage(element);
       }
 
     });
 
-    if (autoMarkInvalidFields) markInvalidFields($selector);
-    if (autoShowErrorMessages) showErrorMessages($selector);
+    if (autoMarkInvalidFields) markInvalidFields(selector);
+    if (autoShowErrorMessages) showErrorMessages(selector);
 
     return isValid;
   };
 
-  var markInvalidFields = function($selector) {
+  var markInvalidFields = function(selector) {
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    elementArray.forEach(function(element) {
 
-    $selector.each(function() {
+      var errorElement = useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
 
-      var $this = $(this);
-      var $errorSelector = useBootstrap3Stlying ? $this.closest('.form-group') : $this;
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
 
-      var isInvalid = $this.data('invalid');
-
-      if (isInvalid) {
-        $errorSelector.addClass('has-error');
-      } else {
-        $errorSelector.removeClass('has-error');
-      }
+      if (isInvalid)
+        errorElement.classList.add('has-error');
+      else
+        errorElement.classList.remove('has-error');
 
     });
 
     return this;
   };
 
-  var showErrorMessages = function($selector) {
+  var showErrorMessages = function(selector) {
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    elementArray.forEach(function(element) {
 
-    $selector.each(function() {
+      _removeErrorMessage(element); //Remove any previous old error messages
 
-      var $this = $(this);
-
-      _removeErrorMessage($this); //Remove any previous old error messages
-
-      var isValid = !$this.data('invalid');
+      var isValid = element.getAttribute('data-invalid') !== 'true';
       if (isValid) return true;
 
-      var errorMessage = _getErrorMessageForInput(this);
+      var errorMessage = _getErrorMessageForInput(element);
 
       if (useBootstrap3Stlying) {
 
-        var $formGroup = $this.closest('.form-group');
-        var $helpBlock = $formGroup.find('.help-block');
+        var formGroup = _getClosestParentByClass(element, 'form-group');
+        var helpBlock = formGroup.querySelector('.help-block');
 
-        var hasHelpBlock = $helpBlock.length > 0;
+        var hasHelpBlock = helpBlock !== null;
 
-        if (hasHelpBlock)
-          $helpBlock.prepend('<b class="ritsu-error"><em>' + errorMessage + '</em></b><br class="ritsu-error">');
-        else
-          $formGroup.append('<span class="help-block ritsu-error"><b><em>' + errorMessage + '</em></b></span>');
+        var em = document.createElement('em');
+        em.innerHTML = errorMessage;
 
+        var b = document.createElement('b');
+
+        if (hasHelpBlock) {
+
+          var br = document.createElement('br');
+          br.className = 'ritsu-error';
+
+          b.className = 'ritsu-error';
+          b.appendChild(em);
+          b.appendChild(br);
+
+          helpBlock.insertBefore(b, parent.firstChild);
+        } else {
+
+          b.appendChild(em);
+
+          var span = document.createElement('span');
+          span.className = 'help-block ritsu-error';
+          span.appendChild(b);
+
+          helpBlock.appendChild(span);
+        }
 
       } else {
 
-        var id = $this.attr('id');
-        var $errorContainer = $this.closest('.error-label-container').length === 0 ? $this.parent() : $this.closest('.error-label-container');
-        $errorContainer.append('<label class="error-label"' + (id ? ' for="' + id + '"' : '') + '>' + errorMessage + '</label>');
+        var elementId = element.getAttribute('id');
+
+        var label = document.createElement('label');
+        label.className = 'error-label';
+        label.htmlFor = elementId ? elementId : '';
+        em.innerHTML = errorMessage;
+
+        var errorContainer = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
+
+        errorContainer.append(label);
 
       }
 
@@ -202,17 +211,17 @@ var core = function(rules, validation) {
   //Private Methods ************************************************************
   var _getSelectorAsElementArray = function(selector) {
 
-    var isJquery = jQueryIsPresent? selector instanceof jQuery : false;
+    var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
     selector = isJquery ? selector.get() : selector;
 
     var selectorUndefined = selector === undefined;
     if (selectorUndefined) selector = Array.prototype.slice.call(document.querySelectorAll('input, textarea, select'));
 
     var isNotArray = !Array.isArray(selector);
-    if(isNotArray) selector = [selector];
+    if (isNotArray) selector = [selector];
 
-    var nothingToStore = selector.length === 0;
-    if(nothingToStore) return;
+    var noElements = selector.length === 0;
+    if (noElements) return []; // return empty array to prevent kabooms in the console
 
     var firstElement = selector[0];
 
@@ -222,18 +231,32 @@ var core = function(rules, validation) {
     return selector;
   };
 
-  var _removeErrorMessage = function($input) {
+  var _getClosestParentByClass = function(element, className) {
 
-    $input.closest('td').find('.error-label').remove();
+    var originalElement = element;
 
-    if (useBootstrap3Stlying) {
-      $input.closest('.form-group').find('.ritsu-error').remove(); //Will find either the <b><em> and <br> or remove the <span> help block
-      return;
+    while (element) {
+
+      var parent = element.parentElement;
+
+      var isFormGroup = parent !== null && parent.classList.contains(className);
+      if (isFormGroup) return parent;
+
+      element = parent;
+
     }
 
-    var $labelParent = $input.closest('.error-label-container');
-    if ($labelParent.length === 0) $labelParent = $input.parent();
-    $labelParent.find('.error-label, .warning-label').remove();
+    return originalElement;
+
+  };
+
+  var _removeErrorMessage = function(element) {
+
+    var parentElement = _getClosestParentByClass(element, useBootstrap3Stlying? 'form-group': 'error-label-container');
+
+    Array.prototype.slice.call(parentElement.querySelectorAll(useBootstrap3Stlying? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
+      parentElement.removeChild(element);
+    });
 
   };
 
@@ -275,4 +298,6 @@ var core = function(rules, validation) {
 
 };
 
-module.exports = function(rules, validation) {return core(rules, validation);};
+module.exports = function(rules, validation) {
+  return core(rules, validation);
+};

@@ -265,69 +265,70 @@ describe('core', function() {
     //Cant test out a file input
     it('should return dirty for a file input element passed in', function() {});
 
+    after(function() {
+      global.document = null;
+    });
 
   });
 
-  // describe('#validate()', function() {
-  //
-  //   var $body = $('body');
-  //   var $input = $('<input type="text" class="alpha alpha-only"/>');
-  //
-  //   beforeEach(function() {
-  //     $body.empty();
-  //     core.initialize({});
-  //     $input.removeClass('has-error');
-  //   });
-  //
-  //   it('should validate an input element passed in', function() {
-  //
-  //     //Make sure its passes
-  //     $input.val('beans');
-  //     var isValid = core.validate($input);
-  //     assert.isTrue(isValid);
-  //
-  //     //Make sure its fails
-  //     $input.val('bea3ns');
-  //     isValid = core.validate($input);
-  //     assert.isFalse(isValid);
-  //
-  //   });
-  //
-  //   it('should validate an input element in the document since nothing was passed in', function() {
-  //
-  //     $body.html($input);
-  //
-  //     //Make sure its passes
-  //     $input.val('beans');
-  //     var isValid = core.validate();
-  //     assert.isTrue(isValid);
-  //
-  //     //Make sure its fails
-  //     $input.val('bea3ns');
-  //     isValid = core.validate();
-  //     assert.isFalse(isValid);
-  //
-  //   });
-  //
-  //   it('should validate an input element based on the jQuery container passed in', function() {
-  //
-  //     $body.append('<div class="cool"></div>');
-  //
-  //     var $cool = $('.cool');
-  //     $cool.html($input);
-  //
-  //     //Make sure its passes
-  //     $input.val('beans');
-  //     var isValid = core.validate($cool);
-  //     assert.isTrue(isValid);
-  //
-  //     //Make sure its fails
-  //     $input.val('bea3ns');
-  //     isValid = core.validate($cool);
-  //     assert.isFalse(isValid);
-  //
-  //   });
-  //
+  describe('#validate()', function() {
+
+
+    it('should validate an input element passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure its passes
+      input.value = 'beans';
+      var isValid = core.validate(input);
+      assert.isTrue(isValid);
+
+      //Make sure its fails
+      input.value = 'bea3ns';
+      isValid = core.validate(input);
+      assert.isFalse(isValid);
+
+    });
+
+    it('should validate an input element in the document since nothing was passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure its passes
+      input.value = 'beans';
+      var isValid = core.validate();
+      assert.isTrue(isValid);
+
+      //Make sure its fails
+      input.value = 'bea3ns';
+      isValid = core.validate();
+      assert.isFalse(isValid);
+
+    });
+
+    it('should validate an input element based on the jQuery container passed in', function() {
+
+      global.document = jsdom('<div><input type="text" class="alpha alpha-only"/></div>');
+
+      let div = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure its passes
+      input.value = 'beans';
+      var isValid = core.validate(div);
+      assert.isTrue(isValid);
+
+      //Make sure its fails
+      input.value = 'bea3ns';
+      isValid = core.validate(div);
+      assert.isFalse(isValid);
+
+    });
+
   //   it('should validate a select element passed in', function() {
   //
   //     var select = document.createElement('select');
@@ -446,13 +447,12 @@ describe('core', function() {
   //
   //   });
   //
-  //   after(function() {
-  //     core.initialize({});
-  //     $body.empty();
-  //   });
-  //
-  // });
-  //
+    after(function() {
+      //global.document = null;
+    });
+
+  });
+
   // describe('#showErrorMessages()', function() {
   //
   //   var $body = $('body');
