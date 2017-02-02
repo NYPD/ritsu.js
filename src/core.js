@@ -195,11 +195,11 @@ var core = function(rules, validation) {
         var label = document.createElement('label');
         label.className = 'error-label';
         label.htmlFor = elementId ? elementId : '';
-        em.innerHTML = errorMessage;
+        label.innerHTML = errorMessage;
 
         var errorContainer = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
 
-        errorContainer.append(label);
+        errorContainer.appendChild(label);
 
       }
 
@@ -233,8 +233,6 @@ var core = function(rules, validation) {
 
   var _getClosestParentByClass = function(element, className) {
 
-    var originalElement = element;
-
     while (element) {
 
       var parent = element.parentElement;
@@ -246,13 +244,14 @@ var core = function(rules, validation) {
 
     }
 
-    return originalElement;
+    return null;
 
   };
 
   var _removeErrorMessage = function(element) {
 
     var parentElement = _getClosestParentByClass(element, useBootstrap3Stlying? 'form-group': 'error-label-container');
+    if(parentElement === null) return; //nothing to remove, just exit
 
     Array.prototype.slice.call(parentElement.querySelectorAll(useBootstrap3Stlying? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
       parentElement.removeChild(element);

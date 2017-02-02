@@ -329,103 +329,127 @@ describe('core', function() {
 
     });
 
-  //   it('should validate a select element passed in', function() {
-  //
-  //     var select = document.createElement('select');
-  //     select.setAttribute('required', '');
-  //
-  //     var optionEmpty = document.createElement('option');
-  //     var optionNonEmpty = document.createElement('option');
-  //
-  //     optionEmpty.text = '';
-  //     optionNonEmpty.text = 'Beans';
-  //
-  //     select.appendChild(optionEmpty);
-  //     select.appendChild(optionNonEmpty);
-  //
-  //     //Make sure its fails
-  //     select.options[0].selected = true;
-  //     select.options[1].selected = false;
-  //     var isValid = core.validate($(select));
-  //     assert.isFalse(isValid);
-  //
-  //     //Make sure its passes
-  //     select.options[0].selected = false;
-  //     select.options[1].selected = true;
-  //     isValid = core.validate($(select));
-  //     assert.isTrue(isValid);
-  //
-  //   });
-  //
-  //   it('should set an input element passed in with a data attribute of invalid = true', function() {
-  //
-  //     $input.val('bean3s');
-  //     core.validate($input);
-  //
-  //     var hasDataInvalidAttr = $input.data('invalid') === true;
-  //     assert.isTrue(hasDataInvalidAttr);
-  //
-  //   });
-  //
-  //   it('should set an input element passed in with a data attribute of invalid = false', function() {
-  //
-  //     $input.val('beans');
-  //     core.validate($input);
-  //
-  //     var dataInvalidAttr = $input.data('invalid') === false;
-  //     assert.isTrue(dataInvalidAttr);
-  //
-  //   });
-  //
-  //   it('should mark an input element passed in with a .has-error class because autoMarkInvalidFields is true', function() {
-  //
-  //     core.initialize({
-  //       autoMarkInvalidFields: true
-  //     });
-  //
-  //     $input.val('b3ans');
-  //     core.validate($input);
-  //
-  //     var hasHasErrorClass = $input.hasClass('has-error');
-  //     assert.isTrue(hasHasErrorClass);
-  //
-  //   });
-  //
-  //
-  //   it('should not mark an input element passed in with a .has-error class because autoMarkInvalidFields is false', function() {
-  //
-  //     core.initialize({
-  //       autoMarkInvalidFields: false
-  //     });
-  //
-  //     $input.val('b3ans');
-  //     core.validate($input);
-  //
-  //     var hasHasErrorClass = $input.hasClass('has-error');
-  //     assert.isFalse(hasHasErrorClass);
-  //
-  //   });
-  //
-  //   it('should add an error message label next to the input since autoShowErrorMessages is true', function() {
-  //
-  //     core.initialize({
-  //       autoShowErrorMessages: true
-  //     });
-  //
-  //     $body.append($input);
-  //
-  //     //Check label does not exist
-  //     var labelExists = $input.next('label').length === 1;
-  //     assert.isFalse(labelExists);
-  //
-  //     core.validate($input);
-  //
-  //     //Check label exists
-  //     labelExists = $input.next('label').length === 1;
-  //     assert.isTrue(labelExists);
-  //
-  //   });
-  //
+    it('should validate a select element passed in', function() {
+
+      var select = document.createElement('select');
+      select.setAttribute('required', '');
+
+      var optionEmpty = document.createElement('option');
+      var optionNonEmpty = document.createElement('option');
+
+      optionEmpty.text = '';
+      optionNonEmpty.text = 'Beans';
+
+      select.appendChild(optionEmpty);
+      select.appendChild(optionNonEmpty);
+
+      //Make sure its fails
+      select.options[0].selected = true;
+      select.options[1].selected = false;
+      var isValid = core.validate($(select));
+      assert.isFalse(isValid);
+
+      //Make sure its passes
+      select.options[0].selected = false;
+      select.options[1].selected = true;
+      isValid = core.validate($(select));
+      assert.isTrue(isValid);
+
+    });
+
+    it('should set an input element passed in with a data attribute of invalid = true', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      input.value = 'bean3s';
+      core.validate(input);
+
+      var hasDataInvalidAttr = input.getAttribute('data-invalid') === 'true';
+      assert.isTrue(hasDataInvalidAttr);
+
+    });
+
+    it('should set an input element passed in with a data attribute of invalid = false', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      input.value = 'beans';
+      core.validate(input);
+
+      var dataInvalidAttr = input.getAttribute('data-invalid')  === 'false';
+      assert.isTrue(dataInvalidAttr);
+
+    });
+
+    it('should mark an input element passed in with a .has-error class because autoMarkInvalidFields is true', function() {
+
+      core.initialize({
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      input.value = 'b3ans';
+      core.validate(input);
+
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+      //Reset the core options
+      core.initialize({});
+
+    });
+
+
+    it('should not mark an input element passed in with a .has-error class because autoMarkInvalidFields is false', function() {
+
+      core.initialize({
+        autoMarkInvalidFields: false
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      input.value = 'b3ans';
+      core.validate(input);
+
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isFalse(hasHasErrorClass);
+
+      //Reset the core options
+      core.initialize({});
+
+    });
+
+    it('should add an error message label next to the input since autoShowErrorMessages is true', function() {
+
+      core.initialize({
+        autoShowErrorMessages: true
+      });
+
+      global.document = jsdom('<body><input type="text" class="alpha alpha-only" required/></body>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var labelExists = input.nextElementSibling !== null;
+      assert.isFalse(labelExists);
+
+      core.validate(input);
+
+      //Check label exists
+      labelExists = input.nextElementSibling !== null;
+      assert.isTrue(labelExists);
+
+    });
+
   //   it('should not add a error message next to an input since autoShowErrorMessages is false', function() {
   //
   //     core.initialize({
