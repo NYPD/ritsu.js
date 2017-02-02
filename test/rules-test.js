@@ -125,6 +125,12 @@ describe('rules', function() {
 
   describe('default rule validations', function() {
 
+    let document = null;
+
+    before(function() {
+      document = jsdom('<html><body></body></html>');
+    });
+
     it('alpha-only', function() {
 
       var rule = rules.getRuleByRuleClass('alpha-only');

@@ -478,107 +478,111 @@ describe('core', function() {
 
   });
 
-  // describe('#showErrorMessages()', function() {
-  //
-  //   var $body = $('body');
-  //   var $validinput = $('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
-  //   var $invalidinput = $('<input type="text" class="alpha alpha-only" data-invalid="true"/>');
-  //
-  //   beforeEach(function() {
-  //     core.initialize({});
-  //     $body.empty();
-  //   });
-  //
-  //   it('should add an error message label next to the input', function() {
-  //
-  //     $body.append($invalidinput);
-  //
-  //     //Check label does not exist
-  //     var labelExists = $invalidinput.next('label').length === 1;
-  //     assert.isFalse(labelExists);
-  //
-  //     core.showErrorMessages($invalidinput);
-  //
-  //     //Check label exists
-  //     labelExists = $invalidinput.next('label').length === 1;
-  //     assert.isTrue(labelExists);
-  //
-  //   });
-  //
-  //   it('should add an error message to a .form-group that has no .help-block when bootstrap is being used', function() {
-  //
-  //     core.initialize({
-  //       useBootstrap3Stlying: true
-  //     });
-  //
-  //     $body.append('<div class="form-group"></div>');
-  //
-  //     var $formGroup = $('.form-group');
-  //     $formGroup.append($invalidinput);
-  //
-  //     //Check .help=block does not exist
-  //     var helpBlockExists = $formGroup.find('.help-block').length === 1;
-  //     assert.isFalse(helpBlockExists);
-  //
-  //     core.showErrorMessages($invalidinput);
-  //
-  //     //Check .help=block does exist
-  //     helpBlockExists = $formGroup.find('.help-block').length === 1;
-  //     assert.isTrue(helpBlockExists);
-  //
-  //   });
-  //
-  //   it('should remove an error message from a .form-group that had no .help-block when bootstrap is being used', function() {
-  //
-  //     core.initialize({
-  //       useBootstrap3Stlying: true
-  //     });
-  //
-  //     $body.append('<div class="form-group">' +
-  //                    '<span class="help-block ritsu-error"></span>' +
-  //                  '</div>');
-  //
-  //     var $formGroup = $('.form-group');
-  //     $formGroup.append($validinput);
-  //
-  //     //.help block should be there
-  //     var helpBlockExists = $formGroup.find('.help-block').length === 1;
-  //     assert.isTrue(helpBlockExists);
-  //
-  //     core.showErrorMessages($validinput);
-  //
-  //     //.help block should have been removed
-  //     helpBlockExists = $formGroup.find('.help-block').length === 1;
-  //     assert.isFalse(helpBlockExists);
-  //
-  //   });
-  //
-  //   it('should add a error message to a .form-group that already has a .help-block from bootstrap being used', function() {
-  //
-  //     core.initialize({
-  //       useBootstrap3Stlying: true
-  //     });
-  //
-  //     $body.append('<div class="form-group"><span class="help-block"></span></div>');
-  //
-  //     var $formGroup = $('.form-group');
-  //     $formGroup.append($invalidinput);
-  //
-  //     //Make sure there is a help block but no ritsu-error <b>
-  //     var helpBlockExists = $formGroup.find('.help-block').length === 1;
-  //     var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
-  //     assert.isTrue(helpBlockExists);
-  //     assert.isFalse(ritsuErrorExists);
-  //
-  //     core.showErrorMessages($invalidinput);
-  //
-  //     //Make sure there is a help block and a ritsu-error <b>
-  //     helpBlockExists = $formGroup.find('.help-block').length === 1;
-  //     ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
-  //     assert.isTrue(helpBlockExists);
-  //     assert.isTrue(ritsuErrorExists);
-  //
-  //   });
+  describe('#showErrorMessages()', function() {
+
+    it('should add an error message label next to the input', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var labelExists = input.nextElementSibling !== null;
+      assert.isFalse(labelExists);
+
+      core.showErrorMessages(input);
+
+      //Check label exists
+      labelExists =  input.nextElementSibling !== null;
+      assert.isTrue(labelExists);
+
+    });
+
+    it('should add an error message to a .form-group that has no .help-block when bootstrap is being used', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      global.document = jsdom('<div class="form-group"><input type="text" class="alpha alpha-only" data-invalid="true" required/></div>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check .help=block does not exist
+      var helpBlockExists = formGroup.querySelector('.help-block') !== null;
+      assert.isFalse(helpBlockExists);
+
+      core.showErrorMessages(input);
+
+      //Check .help=block does exist
+      helpBlockExists = formGroup.querySelector('.help-block') !== null;
+      assert.isTrue(helpBlockExists);
+
+      //Reset core options
+      core.initialize({});
+
+    });
+
+    it('should remove an error message from a .form-group that had no .help-block when bootstrap is being used', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      global.document = jsdom('<div class="form-group">' +
+                                '<input type="text" class="alpha alpha-only" data-invalid="false"/>'+
+                                '<span class="help-block ritsu-error"></span>' +
+                              '</div>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //.help block should be there
+      var helpBlockExists = formGroup.querySelector('.help-block') !== null;
+      assert.isTrue(helpBlockExists);
+
+      core.showErrorMessages(input);
+
+      //.help block should have been removed
+      helpBlockExists = formGroup.querySelector('.help-block') !== null;
+      assert.isFalse(helpBlockExists);
+
+      //Reset core options
+      core.initialize({});
+
+    });
+
+    it('should add a error message to a .form-group that already has a .help-block from bootstrap being used', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      global.document = jsdom('<div class="form-group">' +
+                                '<input type="text" class="alpha alpha-only" data-invalid="true" required/>'+
+                                '<span class="help-block"></span>' +
+                              '</div>');
+
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is a help block but no ritsu-error <b>
+      var helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
+      var ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
+      assert.isTrue(helpBlockExists);
+      assert.isFalse(ritsuErrorExists);
+
+      core.showErrorMessages(input);
+
+      //Make sure there is a help block and a ritsu-error <b>
+      helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
+      ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
+      assert.isTrue(helpBlockExists);
+      assert.isTrue(ritsuErrorExists);
+
+    });
   //
   //   it('should remove a error message from a .form-group that already had a .help-block from bootstrap being used', function() {
   //
@@ -615,10 +619,10 @@ describe('core', function() {
   //     core.initialize({});
   //     $body.empty();
   //   });
-  //
-  // });
-  //
-  //
+
+  });
+
+
   // describe('#markInvalidFields()', function() {
   //
   //   var $body = $('body');

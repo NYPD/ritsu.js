@@ -176,7 +176,7 @@ var core = function(rules, validation) {
           b.appendChild(em);
           b.appendChild(br);
 
-          helpBlock.insertBefore(b, parent.firstChild);
+          helpBlock.insertBefore(b, helpBlock.firstChild);
         } else {
 
           b.appendChild(em);
@@ -185,7 +185,7 @@ var core = function(rules, validation) {
           span.className = 'help-block ritsu-error';
           span.appendChild(b);
 
-          helpBlock.appendChild(span);
+          formGroup.appendChild(span);
         }
 
       } else {
