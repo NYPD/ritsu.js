@@ -434,7 +434,7 @@ describe('core', function() {
         autoShowErrorMessages: true
       });
 
-      global.document = jsdom('<body><input type="text" class="alpha alpha-only" required/></body>');
+      global.document = jsdom('<input type="text" class="alpha alpha-only" required/>');
 
       let input = document.getElementsByTagName('input')[0];
 
@@ -450,29 +450,30 @@ describe('core', function() {
 
     });
 
-  //   it('should not add a error message next to an input since autoShowErrorMessages is false', function() {
-  //
-  //     core.initialize({
-  //       autoShowErrorMessages: false
-  //     });
-  //
-  //     $input.val('bean3s');
-  //     $body.append($input);
-  //
-  //     //Check label does not exist
-  //     var labelExists = $input.next('label').length === 1;
-  //     assert.isFalse(labelExists);
-  //
-  //     core.validate($input);
-  //
-  //     //Check label still does not exist
-  //     labelExists = $input.next('label').length === 1;
-  //     assert.isFalse(labelExists);
-  //
-  //   });
-  //
+    it('should not add a error message next to an input since autoShowErrorMessages is false', function() {
+
+      core.initialize({
+        autoShowErrorMessages: false
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var labelExists = input.nextElementSibling !== null;
+      assert.isFalse(labelExists);
+
+      core.validate(input);
+
+      //Check label still does not exist
+      labelExists = input.nextElementSibling !== null;
+      assert.isFalse(labelExists);
+
+    });
+
     after(function() {
-      //global.document = null;
+      global.document = null;
     });
 
   });
