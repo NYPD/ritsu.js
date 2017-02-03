@@ -519,9 +519,6 @@ describe('core', function() {
       helpBlockExists = formGroup.querySelector('.help-block') !== null;
       assert.isTrue(helpBlockExists);
 
-      //Reset core options
-      core.initialize({});
-
     });
 
     it('should remove an error message from a .form-group that had no .help-block when bootstrap is being used', function() {
@@ -547,9 +544,6 @@ describe('core', function() {
       //.help block should have been removed
       helpBlockExists = formGroup.querySelector('.help-block') !== null;
       assert.isFalse(helpBlockExists);
-
-      //Reset core options
-      core.initialize({});
 
     });
 
@@ -583,150 +577,137 @@ describe('core', function() {
       assert.isTrue(ritsuErrorExists);
 
     });
-  //
-  //   it('should remove a error message from a .form-group that already had a .help-block from bootstrap being used', function() {
-  //
-  //     core.initialize({
-  //       useBootstrap3Stlying: true
-  //     });
-  //
-  //     $body.append('<div class="form-group">' +
-  //                    '<span class="help-block">' +
-  //                      '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
-  //                    '</span>' +
-  //                  '</div>');
-  //
-  //     var $formGroup = $('.form-group');
-  //     $formGroup.append($validinput);
-  //
-  //     //Make sure there is a help block and a ritsu-error <b>
-  //     var helpBlockExists = $formGroup.find('.help-block').length === 1;
-  //     var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
-  //     assert.isTrue(helpBlockExists);
-  //     assert.isTrue(ritsuErrorExists);
-  //
-  //     core.showErrorMessages($validinput);
-  //
-  //     //Make sure there is a help block still but the ritsu-error <b> gone
-  //     helpBlockExists = $formGroup.find('.help-block').length === 1;
-  //     ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
-  //     assert.isTrue(helpBlockExists);
-  //     assert.isFalse(ritsuErrorExists);
-  //
-  //   });
-  //
-  //   after(function() {
-  //     core.initialize({});
-  //     $body.empty();
-  //   });
+
+    it('should remove a error message from a .form-group that already had a .help-block from bootstrap being used', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      global.document = jsdom('<div class="form-group">' +
+                                '<input type="text" class="alpha alpha-only" data-invalid="false"/>'+
+                                '<span class="help-block">' +
+                                  '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
+                                '</span>' +
+                              '</div>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is a help block and a ritsu-error <b>
+      var helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
+      var ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
+      assert.isTrue(helpBlockExists);
+      assert.isTrue(ritsuErrorExists);
+
+      core.showErrorMessages(input);
+
+      //Make sure there is a help block still but the ritsu-error <b> gone
+      helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
+      ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
+      assert.isTrue(helpBlockExists);
+      assert.isFalse(ritsuErrorExists);
+
+    });
+
+    afterEach(function() {
+      core.initialize({});
+    });
 
   });
 
 
-  // describe('#markInvalidFields()', function() {
-  //
-  //   var $body = $('body');
-  //   var $input = $('<input type="text" class="alpha alpha-only"/>');
-  //
-  //   beforeEach(function() {
-  //     $body.empty();
-  //     core.initialize({});
-  //     $input.removeClass('has-error');
-  //   });
-  //
-  //   it('should mark an input element passed in with a .has-error class', function() {
-  //
-  //     core.initialize({
-  //       autoMarkInvalidFields: true
-  //     });
-  //
-  //     $input.val('b3ans');
-  //     core.validate($input);
-  //
-  //     var hasHasErrorClass = $input.hasClass('has-error');
-  //     assert.isTrue(hasHasErrorClass);
-  //
-  //   });
-  //
-  //   it('should mark an input element with a .has-error class when nothing is passed in', function() {
-  //
-  //     core.initialize({
-  //       autoMarkInvalidFields: true
-  //     });
-  //
-  //     $input.val('b3ans');
-  //     $body.append($input);
-  //
-  //     //Make sure there is no class
-  //     var hasHasErrorClass = $input.hasClass('has-error');
-  //     assert.isFalse(hasHasErrorClass);
-  //
-  //     core.validate();
-  //
-  //     //Make sure there is a class
-  //     hasHasErrorClass = $input.hasClass('has-error');
-  //     assert.isTrue(hasHasErrorClass);
-  //
-  //   });
-  //
-  //   it('should mark an input element with a .has-error class when nothing a container is passed in', function() {
-  //
-  //     core.initialize({
-  //       autoMarkInvalidFields: true
-  //     });
-  //
-  //     $input.val('b3ans');
-  //     $body.append('<div class="form-group"></div>');
-  //
-  //     var $formGroup = $('.form-group');
-  //     $formGroup.append($input);
-  //
-  //     //Make sure there is no class
-  //     var hasHasErrorClass = $input.hasClass('has-error');
-  //     assert.isFalse(hasHasErrorClass);
-  //
-  //     core.validate($formGroup);
-  //
-  //     //Make sure there is a class
-  //     hasHasErrorClass = $input.hasClass('has-error');
-  //     assert.isTrue(hasHasErrorClass);
-  //
-  //   });
-  //
-  //   it('should mark a .form-group element with a .has-error class when useBootstrap3Stlying = true', function() {
-  //
-  //     core.initialize({
-  //       useBootstrap3Stlying: true,
-  //       autoMarkInvalidFields: true
-  //     });
-  //
-  //     $input.val('b3ans');
-  //     $body.append('<div class="form-group"></div>');
-  //
-  //     var $formGroup = $('.form-group');
-  //     $formGroup.append($input);
-  //
-  //     //Make sure there is no class
-  //     var hasHasErrorClass = $formGroup.hasClass('has-error');
-  //     assert.isFalse(hasHasErrorClass);
-  //
-  //     core.validate($formGroup);
-  //
-  //     //Make sure there is a class
-  //     hasHasErrorClass = $formGroup.hasClass('has-error');
-  //     assert.isTrue(hasHasErrorClass);
-  //
-  //   });
-  //
-  //   after(function() {
-  //     core.initialize({});
-  //     $body.empty();
-  //   });
-  //
-  // });
-  //
-  // after(function() {
-  //   delete global.window;
-  // });
+  describe('#markInvalidFields()', function() {
+
+    it('should mark an input element passed in with a .has-error class', function() {
+
+      core.initialize({
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      core.validate(input);
+
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
+    it('should mark an input element with a .has-error class when nothing is passed in', function() {
+
+      core.initialize({
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is no class
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isFalse(hasHasErrorClass);
+
+      core.validate();
+
+      //Make sure there is a class
+      hasHasErrorClass = input.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
+    it('should mark an input element with a .has-error class when nothing a container is passed in', function() {
+
+      core.initialize({
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<div class="form-group"><input type="text" class="alpha alpha-only" value="b3ans"/></div>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is no class
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isFalse(hasHasErrorClass);
+
+      core.validate(formGroup);
+
+      //Make sure there is a class
+      hasHasErrorClass = input.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
+    it('should mark a .form-group element with a .has-error class when useBootstrap3Stlying = true', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true,
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<div class="form-group"><input type="text" class="alpha alpha-only" value="b3ans"/></div>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+
+      //Make sure there is no class
+      var hasHasErrorClass = formGroup.classList.contains('has-error');
+      assert.isFalse(hasHasErrorClass);
+
+      core.validate(formGroup);
+
+      //Make sure there is a class
+      hasHasErrorClass = formGroup.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
+    afterEach(function() {
+      core.initialize({});
+    });
+
+  });
 
 });

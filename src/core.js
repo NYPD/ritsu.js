@@ -254,7 +254,7 @@ var core = function(rules, validation) {
     if(parentElement === null) return; //nothing to remove, just exit
 
     Array.prototype.slice.call(parentElement.querySelectorAll(useBootstrap3Stlying? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
-      parentElement.removeChild(element);
+      element.parentElement.removeChild(element);
     });
 
   };
