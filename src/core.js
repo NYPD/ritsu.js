@@ -1,6 +1,6 @@
 var core = function(rules, validation) {
 
-  var jQueryIsPresent = typeof jQuery !== undefined || typeof $ !== undefined;
+  var jQueryIsPresent = typeof jQuery !== 'undefined';
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
   var autoShowErrorMessages = false;
@@ -297,6 +297,4 @@ var core = function(rules, validation) {
 
 };
 
-module.exports = function(rules, validation) {
-  return core(rules, validation);
-};
+module.exports = function(rules, validation) {return core(rules, validation);};

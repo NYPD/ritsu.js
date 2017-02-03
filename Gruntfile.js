@@ -18,7 +18,7 @@ module.exports = function(grunt) {
     stamp: {
       js: {
         options: {
-          banner: '<%= banner %>\n<%= jqueryCheck %>\n<%= ritsuHeader %>',
+          banner: '<%= banner %>\n<%= ritsuHeader %>',
           footer: '<%= ritsuFooter %>'
         },
         files: {

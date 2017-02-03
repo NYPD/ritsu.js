@@ -6,13 +6,6 @@ const rules = require('../src/rules.js')();
 
 const jsdom = require('jsdom').jsdom;
 
-global.document = jsdom('<html><body></body></html>');
-global.window = document.defaultView;
-global.navigator = window.navigator;
-
-global.jQuery = global.$ = require('jquery');
-$.ui = require('jquery-ui-dist/jquery-ui.min');
-
 describe('rules', function() {
 
   describe('#getRuleByRuleClass()', function() {
@@ -31,7 +24,6 @@ describe('rules', function() {
     });
 
   });
-
 
   describe('#addValidationRule()', function() {
 
@@ -367,6 +359,13 @@ describe('rules', function() {
 
     it('numeric-jquery-date', function() {
 
+      global.document = document;
+      global.window = document.defaultView;
+      global.navigator = window.navigator;
+
+      global.jQuery = global.$ = require('jquery');
+      $.ui = require('jquery-ui-dist/jquery-ui.min');
+
       var rule = rules.getRuleByRuleClass('numeric-jquery-date');
 
       var input = document.createElement('input');
@@ -386,10 +385,6 @@ describe('rules', function() {
       isValid = rule.validate(input);
       assert.isTrue(isValid);
 
-    });
-
-    after(function() {
-      $('body').empty();
     });
 
   });

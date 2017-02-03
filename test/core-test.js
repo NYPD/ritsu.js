@@ -346,13 +346,13 @@ describe('core', function() {
       //Make sure its fails
       select.options[0].selected = true;
       select.options[1].selected = false;
-      var isValid = core.validate($(select));
+      var isValid = core.validate(select);
       assert.isFalse(isValid);
 
       //Make sure its passes
       select.options[0].selected = false;
       select.options[1].selected = true;
-      isValid = core.validate($(select));
+      isValid = core.validate(select);
       assert.isTrue(isValid);
 
     });
