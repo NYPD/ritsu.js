@@ -2,14 +2,13 @@ var validation = function(rules) {
 
   var validateElement = function(element) {
 
-    var $element = $(element);
     var validElement = true;
 
-    var isDisabled = $element.prop('disabled') === true;
+    var isDisabled = element.disabled === true;
     if (isDisabled) return validElement; //No need to validate just exit early
 
-    var isInputOrTextarea = $element.is('input, textarea');
-    var isSelect = $element.is('select');
+    var isInputOrTextarea = ['INPUT', 'TEXTAREA'].indexOf(element.nodeName) > -1;
+    var isSelect = element.nodeName === 'SELECT';
 
     if (isInputOrTextarea) validElement = _validateInput(element);
     if (isSelect) validElement = _validateSelect(element);
@@ -28,7 +27,7 @@ var validation = function(rules) {
     var isRequired = element.hasAttribute('required');
 
     var fieldValue = element.value;
-    var isEmpty = $.trim(fieldValue) === '' || fieldValue === undefined;
+    var isEmpty = fieldValue === undefined || fieldValue.trim() === '';
 
     var noValidationNeeded = isEmpty && !isRequired;
     if (noValidationNeeded) return validInput;
@@ -41,10 +40,10 @@ var validation = function(rules) {
   };
 
   var _validateSelect = function(element) {
-                        //If nothing is selected or there is no options, make the value undefined to avoid a TypeError 
+                        //If nothing is selected or there is no options, make the value undefined to avoid a TypeError
     var valueSelected = element.selectedIndex === -1?  undefined: element.options[element.selectedIndex].value;
     var isRequired = element.hasAttribute('required');
-    var isEmpty = $.trim(valueSelected) === '' || valueSelected === undefined;
+    var isEmpty = valueSelected === undefined || valueSelected.trim() === '';
 
     var validSelect = isEmpty && !isRequired || !isEmpty;
 

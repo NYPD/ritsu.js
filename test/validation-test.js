@@ -11,19 +11,13 @@ const validation = require('../src/validation.js')(rules);
 
 describe('validation', function() {
 
-  before(function (){
-    global.jQuery = global.$ = require('jquery');//Need jQuery cause ritsu still uses jquery
-  });
-
   describe('#validateElement()', function() {
 
     it('should not validate element because it is disabled', function() {
 
-      //Should fail since it aint disabled
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'alpha alpha-only';
-      input.disabled = false;
       input.value = '1337Speak';
       input.disabled = true;
 
@@ -35,10 +29,21 @@ describe('validation', function() {
 
     it('should not validate input element because it is optional and has no value', function() {
 
-      //Should fail since it aint optional
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'alpha alpha-only';
+
+      var validElement = validation.validateElement(input);
+      assert.isTrue(validElement);
+
+    });
+
+    it('should not validate input element because it is optional even with multiple blank spaces as a value', function() {
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha alpha-only';
+      input.value = '        ';
 
       var validElement = validation.validateElement(input);
       assert.isTrue(validElement);
@@ -58,7 +63,7 @@ describe('validation', function() {
 
     });
 
-    it('should not validate select element is optional and the selected option has no value', function() {
+    it('should not validate select because element is optional and the selected option has no value', function() {
 
       var select = document.createElement('select');
       var optionEmpty = document.createElement('option');
