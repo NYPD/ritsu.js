@@ -360,10 +360,10 @@ describe('rules', function() {
     it('numeric-jquery-date', function() {
 
       global.document = document;
-      global.window = document.defaultView;
+      global.window = jsdom().defaultView;
       global.navigator = window.navigator;
 
-      global.jQuery = global.$ = require('jquery');
+      global.jQuery = global.$ = require('jquery')(window);
       $.ui = require('jquery-ui-dist/jquery-ui.min');
 
       var rule = rules.getRuleByRuleClass('numeric-jquery-date');
@@ -385,16 +385,15 @@ describe('rules', function() {
       isValid = rule.validate(input);
       assert.isTrue(isValid);
 
+      //Clean up please
+      delete global.document;
+      delete global.window;
+      delete global.navigator;
+      delete global.jQuery;
+      delete global.$;
+
     });
 
-  });
-
-  after(function() {
-    delete global.document;
-    delete global.window;
-    delete global.navigator;
-    delete global.jQuery;
-    delete global.$;
   });
 
 });

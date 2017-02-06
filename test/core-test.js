@@ -4,6 +4,8 @@ const assert = chai.assert;
 const expect = chai.expect;
 
 const jsdom = require('jsdom').jsdom;
+const window = jsdom().defaultView;
+global.jQuery = require('jquery')(window);//need global for the jQueryIsPresent variable in core js
 
 const rules = require('../src/rules.js')();
 const validation = require('../src/validation.js')(rules);
@@ -56,6 +58,23 @@ describe('core', function() {
 
       let intialValue = input.getAttribute('data-initial-value');
       assert.strictEqual(intialValue, 'bob');
+
+    });
+
+    it('should store initialValue for a jQuery text input element passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="bob"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(jQuery(input));
+
+      //change the current value
+      input.value = 'crepes';
+
+      let intialValue = input.getAttribute('data-initial-value');
+      assert.strictEqual(intialValue, 'bob');
+
+      delete global.window;
 
     });
 
@@ -183,6 +202,21 @@ describe('core', function() {
 
     });
 
+    it('should return dirty for a jQuery text input element passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(jQuery(input));
+
+      //change the current value
+      input.value = 'crepes';
+
+      var isDirty = core.isFormDirty(input);
+      assert.isTrue(isDirty);
+
+    });
+
     it('should return dirty for a text input element on the document since nothing was passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
@@ -273,7 +307,6 @@ describe('core', function() {
 
   describe('#validate()', function() {
 
-
     it('should validate an input element passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
@@ -288,6 +321,25 @@ describe('core', function() {
       //Make sure its fails
       input.value = 'bea3ns';
       isValid = core.validate(input);
+      assert.isFalse(isValid);
+
+    });
+
+    it('should validate a jQuery input element passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      let $input = jQuery(input);
+
+      //Make sure its passes
+      input.value = 'beans';
+      var isValid = core.validate($input);
+      assert.isTrue(isValid);
+
+      //Make sure its fails
+      input.value = 'bea3ns';
+      isValid = core.validate($input);
       assert.isFalse(isValid);
 
     });
@@ -498,6 +550,24 @@ describe('core', function() {
 
     });
 
+    it('should add an error message label next to the jQuery input', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var labelExists = input.nextElementSibling !== null;
+      assert.isFalse(labelExists);
+
+      core.showErrorMessages(jQuery(input));
+
+      //Check label exists
+      labelExists =  input.nextElementSibling !== null;
+      assert.isTrue(labelExists);
+
+    });
+
     it('should add an error message to a .form-group that has no .help-block when bootstrap is being used', function() {
 
       core.initialize({
@@ -636,6 +706,23 @@ describe('core', function() {
 
     });
 
+    it('should mark a jQuery input element passed in with a .has-error class', function() {
+
+      core.initialize({
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      core.validate(jQuery(input));
+
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
     it('should mark an input element with a .has-error class when nothing is passed in', function() {
 
       core.initialize({
@@ -708,6 +795,10 @@ describe('core', function() {
       core.initialize({});
     });
 
+  });
+
+  after(function() {
+    delete global.jQuery;
   });
 
 });
