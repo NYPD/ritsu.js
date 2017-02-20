@@ -1,8 +1,10 @@
 var core = function(rules, validation) {
 
+  var jQueryIsPresent = typeof jQuery !== 'undefined';
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
   var autoShowErrorMessages = false;
+
 
   var initialize = function(options) {
 
@@ -19,40 +21,34 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var storeInitialFormValues = function($selector) {
+  var storeInitialFormValues = function(selector) {
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    elementArray.forEach(function(element) {
 
-    $selector.each(function() {
-
-      var $this = $(this);
-
-      var isCheckbox = $this.is('input[type="checkbox"]');
-      var isRadio = $this.is('input[type="radio"]');
-      var isFile = $this.is('input[type="file"]');
+      var isCheckbox = element.type === 'checkbox';
+      var isRadio = element.type === 'radio';
+      var isFile = element.type === 'file';
 
       if (isCheckbox || isRadio) {
-        $this.data('initialValue', $this.is(':checked'));
+        element.setAttribute('data-initial-value', element.checked);
       } else if (isFile) {
 
-        var hasSimpleFileHash = $this.data('simple-file-hash') !== undefined;
+        var hasSimpleFileHash = this.getAttribute('data-simple-file-hash') !== undefined;
 
         if (hasSimpleFileHash) {
-          $this.data('initialValue', $this.data('simple-file-hash'));
+          element.setAttribute('data-initial-value', element.getAttribute('data-simple-file-hash'));
           return true;
         }
 
-        var hasFileAttached = this.files.length > 0;
-        var initialValue = hasFileAttached ? this.files[0].name + this.files[0].size : undefined;
+        var hasFileAttached = element.files.length > 0;
+        var initialValue = hasFileAttached ? element.files[0].name + element.files[0].size : undefined;
 
-        $this.data('initialValue', initialValue);
+        element.setAttribute('data-initial-value', initialValue);
 
       } else {
-        $this.data('initialValue', $this.val());
+        element.setAttribute('data-initial-value', element.value);
       }
 
     });
@@ -60,36 +56,32 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var isFormDirty = function($selector) {
+  var isFormDirty = function(selector) {
 
     var isDirty = false;
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    elementArray.forEach(function(element) {
 
-    $selector.each(function() {
-
-      var $this = $(this);
-
-      var noInitialValue = $this.data('initialValue') === undefined;
+      var noInitialValue = element.getAttribute('data-initial-value') === undefined;
       if (noInitialValue) return true;
 
-      var isCheckbox = $this.is('input[type="checkbox"]');
-      var isRadio = $this.is('input[type="radio"]');
-      var isFile = $this.is('input[type="file"]');
+      var isCheckbox = element.type === 'checkbox';
+      var isRadio = element.type === 'radio';
+      var isFile = element.type === 'file';
 
       var valueChanged = false;
 
+      var intialValue = element.getAttribute('data-initial-value');
+
       if (isCheckbox || isRadio) {
-        valueChanged = $this.data('initialValue') != $this.is(':checked');
+        valueChanged = intialValue != '' + element.checked; //Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
       } else if (isFile) {
-        var hasFileAttached = this.files.length > 0;
-        valueChanged = $this.data('initialValue') != (hasFileAttached ? this.files[0].name + this.files[0].size : $this.data('simple-file-hash'));
+        var hasFileAttached = element.files.length > 0;
+        valueChanged = intialValue !== (hasFileAttached ? element.files[0].name + element.files[0].size : element.getAttribute('data-simple-file-hash'));
       } else {
-        valueChanged = $this.data('initialValue') != $this.val();
+        valueChanged = intialValue !== element.value;
       }
 
       //If one value has changed, mark the entire form dirty and return right away
@@ -103,102 +95,111 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function($selector) {
+  var validate = function(selector) {
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
-
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
     var isValid = true;
 
-    $selector.each(function() {
+    elementArray.forEach(function(element) {
 
-      var $element = $(this);
-
-      var invalidElement = !validation.validateElement(this);
+      var invalidElement = !validation.validateElement(element);
 
       //Sets the entire form to false, just because their was at least 1 invalid field
       if (invalidElement) {
         isValid = false;
-        $element.data('invalid', true);
+        element.setAttribute('data-invalid', true);
       } else {
-        $element.data('invalid', false);
-        _removeErrorMessage($element);
+        element.setAttribute('data-invalid', false);
+        _removeErrorMessage(element);
       }
 
     });
 
-    if (autoMarkInvalidFields) markInvalidFields($selector);
-    if (autoShowErrorMessages) showErrorMessages($selector);
+    if (autoMarkInvalidFields) markInvalidFields(selector);
+    if (autoShowErrorMessages) showErrorMessages(selector);
 
     return isValid;
   };
 
-  var markInvalidFields = function($selector) {
+  var markInvalidFields = function(selector) {
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    elementArray.forEach(function(element) {
 
-    $selector.each(function() {
+      var errorElement = useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
 
-      var $this = $(this);
-      var $errorSelector = useBootstrap3Stlying ? $this.closest('.form-group') : $this;
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
 
-      var isInvalid = $this.data('invalid');
-
-      if (isInvalid) {
-        $errorSelector.addClass('has-error');
-      } else {
-        $errorSelector.removeClass('has-error');
-      }
+      if (isInvalid)
+        errorElement.classList.add('has-error');
+      else
+        errorElement.classList.remove('has-error');
 
     });
 
     return this;
   };
 
-  var showErrorMessages = function($selector) {
+  var showErrorMessages = function(selector) {
 
-    var selectorUndefined = $selector === undefined;
-    if (selectorUndefined) $selector = $('input, textarea, select');
+    var elementArray = _getSelectorAsElementArray(selector);
 
-    var isNotInputs = !$selector.is('input, textarea, select');
-    if (isNotInputs) $selector = $selector.find('input, textarea, select');
+    elementArray.forEach(function(element) {
 
-    $selector.each(function() {
+      _removeErrorMessage(element); //Remove any previous old error messages
 
-      var $this = $(this);
-
-      _removeErrorMessage($this); //Remove any previous old error messages
-
-      var isValid = !$this.data('invalid');
+      var isValid = element.getAttribute('data-invalid') !== 'true';
       if (isValid) return true;
 
-      var errorMessage = _getErrorMessageForInput(this);
+      var errorMessage = _getErrorMessageForInput(element);
 
       if (useBootstrap3Stlying) {
 
-        var $formGroup = $this.closest('.form-group');
-        var $helpBlock = $formGroup.find('.help-block');
+        var formGroup = _getClosestParentByClass(element, 'form-group');
+        var helpBlock = formGroup.querySelector('.help-block');
 
-        var hasHelpBlock = $helpBlock.length > 0;
+        var hasHelpBlock = helpBlock !== null;
 
-        if (hasHelpBlock)
-          $helpBlock.prepend('<b class="ritsu-error"><em>' + errorMessage + '</em></b><br class="ritsu-error">');
-        else
-          $formGroup.append('<span class="help-block ritsu-error"><b><em>' + errorMessage + '</em></b></span>');
+        var em = document.createElement('em');
+        em.innerHTML = errorMessage;
 
+        var b = document.createElement('b');
+
+        if (hasHelpBlock) {
+
+          var br = document.createElement('br');
+          br.className = 'ritsu-error';
+
+          b.className = 'ritsu-error';
+          b.appendChild(em);
+          b.appendChild(br);
+
+          helpBlock.insertBefore(b, helpBlock.firstChild);
+        } else {
+
+          b.appendChild(em);
+
+          var span = document.createElement('span');
+          span.className = 'help-block ritsu-error';
+          span.appendChild(b);
+
+          formGroup.appendChild(span);
+        }
 
       } else {
 
-        var id = $this.attr('id');
-        var $errorContainer = $this.closest('.error-label-container').length === 0 ? $this.parent() : $this.closest('.error-label-container');
-        $errorContainer.append('<label class="error-label"' + (id ? ' for="' + id + '"' : '') + '>' + errorMessage + '</label>');
+        var elementId = element.getAttribute('id');
+
+        var label = document.createElement('label');
+        label.className = 'error-label';
+        label.htmlFor = elementId ? elementId : '';
+        label.innerHTML = errorMessage;
+
+        var errorContainer = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
+
+        errorContainer.appendChild(label);
 
       }
 
@@ -208,18 +209,53 @@ var core = function(rules, validation) {
   };
 
   //Private Methods ************************************************************
-  var _removeErrorMessage = function($input) {
+  var _getSelectorAsElementArray = function(selector) {
 
-    $input.closest('td').find('.error-label').remove();
+    var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
+    selector = isJquery ? selector.get() : selector;
 
-    if (useBootstrap3Stlying) {
-      $input.closest('.form-group').find('.ritsu-error').remove(); //Will find either the <b><em> and <br> or remove the <span> help block
-      return;
+    var selectorUndefined = selector === undefined;
+    if (selectorUndefined) selector = Array.prototype.slice.call(document.querySelectorAll('input, textarea, select'));
+
+    var isNotArray = !Array.isArray(selector);
+    if (isNotArray) selector = [selector];
+
+    var noElements = selector.length === 0;
+    if (noElements) return []; // return empty array to prevent kabooms in the console
+
+    var firstElement = selector[0];
+
+    var isNotInputs = ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(firstElement.nodeName) === -1;
+    if (isNotInputs) selector = Array.prototype.slice.call(firstElement.querySelectorAll('input, textarea, select'));
+
+    return selector;
+  };
+
+  var _getClosestParentByClass = function(element, className) {
+
+    while (element) {
+
+      var parent = element.parentElement;
+
+      var isFormGroup = parent !== null && parent.classList.contains(className);
+      if (isFormGroup) return parent;
+
+      element = parent;
+
     }
 
-    var $labelParent = $input.closest('.error-label-container');
-    if ($labelParent.length === 0) $labelParent = $input.parent();
-    $labelParent.find('.error-label, .warning-label').remove();
+    return null;
+
+  };
+
+  var _removeErrorMessage = function(element) {
+
+    var parentElement = _getClosestParentByClass(element, useBootstrap3Stlying? 'form-group': 'error-label-container');
+    if(parentElement === null) return; //nothing to remove, just exit
+
+    Array.prototype.slice.call(parentElement.querySelectorAll(useBootstrap3Stlying? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
+      element.parentElement.removeChild(element);
+    });
 
   };
 

@@ -6,13 +6,6 @@ const rules = require('../src/rules.js')();
 
 const jsdom = require('jsdom').jsdom;
 
-global.document = jsdom('<html><body></body></html>');
-global.window = document.defaultView;
-global.navigator = window.navigator;
-
-global.jQuery = global.$ = require('jquery');
-$.ui = require('jquery-ui-dist/jquery-ui.min');
-
 describe('rules', function() {
 
   describe('#getRuleByRuleClass()', function() {
@@ -31,7 +24,6 @@ describe('rules', function() {
     });
 
   });
-
 
   describe('#addValidationRule()', function() {
 
@@ -124,6 +116,12 @@ describe('rules', function() {
 
 
   describe('default rule validations', function() {
+
+    let document = null;
+
+    before(function() {
+      document = jsdom('<html><body></body></html>');
+    });
 
     it('alpha-only', function() {
 
@@ -361,6 +359,13 @@ describe('rules', function() {
 
     it('numeric-jquery-date', function() {
 
+      global.document = document;
+      global.window = jsdom().defaultView;
+      global.navigator = window.navigator;
+
+      global.jQuery = global.$ = require('jquery')(window);
+      $.ui = require('jquery-ui-dist/jquery-ui.min');
+
       var rule = rules.getRuleByRuleClass('numeric-jquery-date');
 
       var input = document.createElement('input');
@@ -380,20 +385,15 @@ describe('rules', function() {
       isValid = rule.validate(input);
       assert.isTrue(isValid);
 
+      //Clean up please
+      delete global.document;
+      delete global.window;
+      delete global.navigator;
+      delete global.jQuery;
+      delete global.$;
+
     });
 
-    after(function() {
-      $('body').empty();
-    });
-
-  });
-
-  after(function() {
-    delete global.document;
-    delete global.window;
-    delete global.navigator;
-    delete global.jQuery;
-    delete global.$;
   });
 
 });

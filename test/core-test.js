@@ -4,10 +4,9 @@ const assert = chai.assert;
 const expect = chai.expect;
 
 const jsdom = require('jsdom').jsdom;
-const document = jsdom('<html><body></body></html>');
-global.window = document.defaultView;
+const window = jsdom().defaultView;
+global.jQuery = require('jquery')(window);//need global for the jQueryIsPresent variable in core js
 
-const $ = require('jquery');
 const rules = require('../src/rules.js')();
 const validation = require('../src/validation.js')(rules);
 
@@ -46,159 +45,186 @@ describe('core', function() {
 
   describe('#storeInitialFormValues()', function() {
 
-    var $body = $('body');
-
-    afterEach(function() {
-      $body.empty();
-    });
 
     it('should store initialValue for a text input element passed in', function() {
 
-      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="bob"/>');
 
-      core.storeInitialFormValues($input);
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(input);
 
       //change the current value
-      $input.val('crepes');
+      input.value = 'crepes';
 
-      var intialValue = $input.data('initialValue');
+      let intialValue = input.getAttribute('data-initial-value');
+      assert.strictEqual(intialValue, 'bob');
 
-      assert.strictEqual(intialValue, 'benzi');
+    });
+
+    it('should store initialValue for a jQuery text input element passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="bob"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(jQuery(input));
+
+      //change the current value
+      input.value = 'crepes';
+
+      let intialValue = input.getAttribute('data-initial-value');
+      assert.strictEqual(intialValue, 'bob');
+
+      delete global.window;
 
     });
 
     it('should store initialValue for a text input element on the document since nothing was passed in', function() {
 
-      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
-      $body.append($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
       core.storeInitialFormValues();
+      let input = document.getElementsByTagName('input')[0];
 
       //change the current value
-      $input.val('crepes');
+      input.value = 'crepes';
 
-      var intialValue = $input.data('initialValue');
-
+      let intialValue = input.getAttribute('data-initial-value');
       assert.strictEqual(intialValue, 'benzi');
 
     });
 
     it('should store initialValue for a text input element on the document when a container is passed in', function() {
 
-      $body.append('<div></div>');
+      global.document = jsdom('<div><input type="text" class="alpha alpha-only" value="jeans"/></div>');
 
-      var $div = $('div');
-      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
-
-      $div.append($input);
-
-      core.storeInitialFormValues($div);
+      let div = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(div);
 
       //change the current value
-      $input.val('crepes');
+      input.value = 'crepes';
 
-      var intialValue = $input.data('initialValue');
-
-      assert.strictEqual(intialValue, 'benzi');
+      let intialValue = input.getAttribute('data-initial-value');
+      assert.strictEqual(intialValue, 'jeans');
 
     });
 
     it('should store initialValue for a checkbox input element passed in', function() {
 
-      var $checkbox = $('<input type="checkbox" checked/>');
+      global.document = jsdom('<input type="checkbox" checked/>');
 
-      core.storeInitialFormValues($checkbox);
+      let checkbox = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(checkbox);
 
       //Make sure this checkbox is checked
-      var checkboxIsChecked = $checkbox.is(':checked') === true;
+      var checkboxIsChecked = checkbox.checked === true;
       assert.isTrue(checkboxIsChecked);
 
       //change the current value
-      $checkbox.prop('checked', false);
+      checkbox.checked = false;
 
       //Make sure it remembers the original checkbox state and this checkbox is unchecked
-      var intialValue = $checkbox.data('initialValue');
-      var checkboxIsUnchecked = $checkbox.is(':checked') === false;
+      var intialValue = checkbox.getAttribute('data-initial-value');
+      var checkboxIsUnchecked = checkbox.checked === false;
 
-      assert.strictEqual(intialValue, true);
+      assert.strictEqual(intialValue, 'true');
       assert.isTrue(checkboxIsUnchecked);
 
     });
 
     it('should store initialValue for a radio input element passed in', function() {
 
-      var $radio1 = $('<input type="radio" name="sex" value="male" id="male" checked/>');
-      var $radio2 = $('<input type="radio" name="sex" value="female" id="female"/>');
-
-      $body.append([$radio1, $radio2]);
+      global.document = jsdom('<input type="radio" name="sex" value="male" id="male" checked/>' +
+                              '<input type="radio" name="sex" value="female" id="female"/>');
 
       core.storeInitialFormValues();
 
+      let maleRadio = document.getElementById('male');
+      let femaleRadio = document.getElementById('female');
+
       //Make sure radio male button is checked
-      var currentRadioValue = $body.find('input[type="radio"]:checked').val();
-      assert.strictEqual(currentRadioValue, 'male');
+      assert.strictEqual(maleRadio.checked, true);
+      assert.strictEqual(femaleRadio.checked, false);
 
       //change the current value
-      $('#female').prop('checked', true);
+      femaleRadio.click();
 
       //Make sure it remembers the original radio states and that the female radio is checked
-      var intialValueOfMale = $('#male').data('initialValue');
-      var intialValueOfFemale = $('#female').data('initialValue');
-      currentRadioValue = $body.find('input[type="radio"]:checked').val();
+      let intialValueOfMale = document.getElementById('male').getAttribute('data-initial-value');
+      let intialValueOfFemale = document.getElementById('female').getAttribute('data-initial-value');
 
-      assert.strictEqual(intialValueOfMale, true);
-      assert.strictEqual(intialValueOfFemale, false);
-      assert.strictEqual(currentRadioValue, 'female');
+      assert.strictEqual(intialValueOfMale, 'true');
+      assert.strictEqual(intialValueOfFemale, 'false');
+
+
+      //Make sure radio female button is checked
+      assert.strictEqual(maleRadio.checked, false);
+      assert.strictEqual(femaleRadio.checked, true);
 
     });
 
     //Cant test out a file input
     it('should store initialValue for a file input element passed in', function() {});
 
+
+    after(function() {
+      global.document = null;
+    });
+
   });
 
   describe('#isFormDirty()', function() {
 
-    var $body = $('body');
-
-    afterEach(function() {
-      $body.empty();
-    });
-
     it('should not return dirty since nothing changed', function() {
 
-      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
-      core.storeInitialFormValues($input);
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(input);
 
-      var isDirty = core.isFormDirty($input);
+      var isDirty = core.isFormDirty(input);
       assert.isFalse(isDirty);
 
     });
 
     it('should return dirty for a text input element passed in', function() {
 
-      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
-      core.storeInitialFormValues($input);
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(input);
 
       //change the current value
-      $input.val('crepes');
+      input.value = 'crepes';
 
-      var isDirty = core.isFormDirty($input);
+      var isDirty = core.isFormDirty(input);
+      assert.isTrue(isDirty);
+
+    });
+
+    it('should return dirty for a jQuery text input element passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(jQuery(input));
+
+      //change the current value
+      input.value = 'crepes';
+
+      var isDirty = core.isFormDirty(input);
       assert.isTrue(isDirty);
 
     });
 
     it('should return dirty for a text input element on the document since nothing was passed in', function() {
 
-      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
-      $body.append($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
       core.storeInitialFormValues();
 
       //change the current value
-      $input.val('crepes');
+      document.getElementsByTagName('input')[0].value = 'crepes';
 
       var isDirty = core.isFormDirty();
       assert.isTrue(isDirty);
@@ -207,66 +233,63 @@ describe('core', function() {
 
     it('should return dirty for a text input element on the document when a container is passed in', function() {
 
-      $body.append('<div></div>');
+      global.document = jsdom('<div><input type="text" class="alpha alpha-only" value="jeans"/></div>');
 
-      var $div = $('div');
-      var $input = $('<input type="text" class="alpha alpha-only" value="benzi"/>');
+      let div = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
 
-      $div.append($input);
-
-      core.storeInitialFormValues($input);
+      core.storeInitialFormValues(input);
 
       //change the current value
-      $input.val('crepes');
+      input.value = 'crepes';
 
-      var isDirty = core.isFormDirty($div);
+      var isDirty = core.isFormDirty(div);
       assert.isTrue(isDirty);
 
     });
 
     it('should return dirty for a checkbox input element passed in', function() {
 
-      var $checkbox = $('<input type="checkbox" checked/>');
+      global.document = jsdom('<input type="checkbox" checked/>');
 
-      core.storeInitialFormValues($checkbox);
+      let checkbox = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(checkbox);
 
       //Make sure this checkbox is checked
-      var checkboxIsChecked = $checkbox.is(':checked') === true;
+      var checkboxIsChecked = checkbox.checked === true;
       assert.isTrue(checkboxIsChecked);
 
       //change the current value
-      $checkbox.prop('checked', false);
+      checkbox.checked = false;
 
-      var isDirty = core.isFormDirty($checkbox);
+      var isDirty = core.isFormDirty(checkbox);
       assert.isTrue(isDirty);
 
     });
 
     it('should return dirty for a radio input element passed in', function() {
 
-      var $radio1 = $('<input type="radio" name="sex" value="male" id="male" checked/>');
-      var $radio2 = $('<input type="radio" name="sex" value="female" id="female"/>');
-
-      $body.append([$radio1, $radio2]);
+      global.document = jsdom('<input type="radio" name="sex" value="male" id="male" checked/>' +
+                              '<input type="radio" name="sex" value="female" id="female"/>');
 
       core.storeInitialFormValues();
 
-      var $male = $('#male');
-      var $female = $('#female');
+      let maleRadio = document.getElementById('male');
+      let femaleRadio = document.getElementById('female');
 
       //Make sure radios are not dirty
-      var isDirtyMale = core.isFormDirty($male);
-      var isDirtyFemale = core.isFormDirty($female);
+      let isDirtyMale = core.isFormDirty(maleRadio);
+      let isDirtyFemale = core.isFormDirty(femaleRadio);
 
       assert.isFalse(isDirtyMale);
       assert.isFalse(isDirtyFemale);
 
       //change the current value
-      $('#female').prop('checked', true);
+      femaleRadio.click();
 
       //Make sure both radios are now dirty
-      isDirtyMale = core.isFormDirty($male);
-      isDirtyFemale = core.isFormDirty($female);
+      isDirtyMale = core.isFormDirty(maleRadio);
+      isDirtyFemale = core.isFormDirty(femaleRadio);
 
       assert.isTrue(isDirtyMale);
       assert.isTrue(isDirtyFemale);
@@ -276,29 +299,46 @@ describe('core', function() {
     //Cant test out a file input
     it('should return dirty for a file input element passed in', function() {});
 
+    after(function() {
+      global.document = null;
+    });
 
   });
 
   describe('#validate()', function() {
 
-    var $body = $('body');
-    var $input = $('<input type="text" class="alpha alpha-only"/>');
-
-    beforeEach(function() {
-      $body.empty();
-      core.initialize({});
-      $input.removeClass('has-error');
-    });
-
     it('should validate an input element passed in', function() {
 
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
       //Make sure its passes
-      $input.val('beans');
+      input.value = 'beans';
+      var isValid = core.validate(input);
+      assert.isTrue(isValid);
+
+      //Make sure its fails
+      input.value = 'bea3ns';
+      isValid = core.validate(input);
+      assert.isFalse(isValid);
+
+    });
+
+    it('should validate a jQuery input element passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      let $input = jQuery(input);
+
+      //Make sure its passes
+      input.value = 'beans';
       var isValid = core.validate($input);
       assert.isTrue(isValid);
 
       //Make sure its fails
-      $input.val('bea3ns');
+      input.value = 'bea3ns';
       isValid = core.validate($input);
       assert.isFalse(isValid);
 
@@ -306,15 +346,17 @@ describe('core', function() {
 
     it('should validate an input element in the document since nothing was passed in', function() {
 
-      $body.html($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
+
+      let input = document.getElementsByTagName('input')[0];
 
       //Make sure its passes
-      $input.val('beans');
+      input.value = 'beans';
       var isValid = core.validate();
       assert.isTrue(isValid);
 
       //Make sure its fails
-      $input.val('bea3ns');
+      input.value = 'bea3ns';
       isValid = core.validate();
       assert.isFalse(isValid);
 
@@ -322,19 +364,19 @@ describe('core', function() {
 
     it('should validate an input element based on the jQuery container passed in', function() {
 
-      $body.append('<div class="cool"></div>');
+      global.document = jsdom('<div><input type="text" class="alpha alpha-only"/></div>');
 
-      var $cool = $('.cool');
-      $cool.html($input);
+      let div = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
 
       //Make sure its passes
-      $input.val('beans');
-      var isValid = core.validate($cool);
+      input.value = 'beans';
+      var isValid = core.validate(div);
       assert.isTrue(isValid);
 
       //Make sure its fails
-      $input.val('bea3ns');
-      isValid = core.validate($cool);
+      input.value = 'bea3ns';
+      isValid = core.validate(div);
       assert.isFalse(isValid);
 
     });
@@ -356,33 +398,41 @@ describe('core', function() {
       //Make sure its fails
       select.options[0].selected = true;
       select.options[1].selected = false;
-      var isValid = core.validate($(select));
+      var isValid = core.validate(select);
       assert.isFalse(isValid);
 
       //Make sure its passes
       select.options[0].selected = false;
       select.options[1].selected = true;
-      isValid = core.validate($(select));
+      isValid = core.validate(select);
       assert.isTrue(isValid);
 
     });
 
     it('should set an input element passed in with a data attribute of invalid = true', function() {
 
-      $input.val('bean3s');
-      core.validate($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
 
-      var hasDataInvalidAttr = $input.data('invalid') === true;
+      let input = document.getElementsByTagName('input')[0];
+
+      input.value = 'bean3s';
+      core.validate(input);
+
+      var hasDataInvalidAttr = input.getAttribute('data-invalid') === 'true';
       assert.isTrue(hasDataInvalidAttr);
 
     });
 
     it('should set an input element passed in with a data attribute of invalid = false', function() {
 
-      $input.val('beans');
-      core.validate($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
 
-      var dataInvalidAttr = $input.data('invalid') === false;
+      let input = document.getElementsByTagName('input')[0];
+
+      input.value = 'beans';
+      core.validate(input);
+
+      var dataInvalidAttr = input.getAttribute('data-invalid')  === 'false';
       assert.isTrue(dataInvalidAttr);
 
     });
@@ -393,11 +443,18 @@ describe('core', function() {
         autoMarkInvalidFields: true
       });
 
-      $input.val('b3ans');
-      core.validate($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
 
-      var hasHasErrorClass = $input.hasClass('has-error');
+      let input = document.getElementsByTagName('input')[0];
+
+      input.value = 'b3ans';
+      core.validate(input);
+
+      var hasHasErrorClass = input.classList.contains('has-error');
       assert.isTrue(hasHasErrorClass);
+
+      //Reset the core options
+      core.initialize({});
 
     });
 
@@ -408,11 +465,18 @@ describe('core', function() {
         autoMarkInvalidFields: false
       });
 
-      $input.val('b3ans');
-      core.validate($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
 
-      var hasHasErrorClass = $input.hasClass('has-error');
+      let input = document.getElementsByTagName('input')[0];
+
+      input.value = 'b3ans';
+      core.validate(input);
+
+      var hasHasErrorClass = input.classList.contains('has-error');
       assert.isFalse(hasHasErrorClass);
+
+      //Reset the core options
+      core.initialize({});
 
     });
 
@@ -422,16 +486,18 @@ describe('core', function() {
         autoShowErrorMessages: true
       });
 
-      $body.append($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
 
       //Check label does not exist
-      var labelExists = $input.next('label').length === 1;
+      var labelExists = input.nextElementSibling !== null;
       assert.isFalse(labelExists);
 
-      core.validate($input);
+      core.validate(input);
 
       //Check label exists
-      labelExists = $input.next('label').length === 1;
+      labelExists = input.nextElementSibling !== null;
       assert.isTrue(labelExists);
 
     });
@@ -442,51 +508,62 @@ describe('core', function() {
         autoShowErrorMessages: false
       });
 
-      $input.val('bean3s');
-      $body.append($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
 
       //Check label does not exist
-      var labelExists = $input.next('label').length === 1;
+      var labelExists = input.nextElementSibling !== null;
       assert.isFalse(labelExists);
 
-      core.validate($input);
+      core.validate(input);
 
       //Check label still does not exist
-      labelExists = $input.next('label').length === 1;
+      labelExists = input.nextElementSibling !== null;
       assert.isFalse(labelExists);
 
     });
 
     after(function() {
-      core.initialize({});
-      $body.empty();
+      global.document = null;
     });
 
   });
 
   describe('#showErrorMessages()', function() {
 
-    var $body = $('body');
-    var $validinput = $('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
-    var $invalidinput = $('<input type="text" class="alpha alpha-only" data-invalid="true"/>');
-
-    beforeEach(function() {
-      core.initialize({});
-      $body.empty();
-    });
-
     it('should add an error message label next to the input', function() {
 
-      $body.append($invalidinput);
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
 
       //Check label does not exist
-      var labelExists = $invalidinput.next('label').length === 1;
+      var labelExists = input.nextElementSibling !== null;
       assert.isFalse(labelExists);
 
-      core.showErrorMessages($invalidinput);
+      core.showErrorMessages(input);
 
       //Check label exists
-      labelExists = $invalidinput.next('label').length === 1;
+      labelExists =  input.nextElementSibling !== null;
+      assert.isTrue(labelExists);
+
+    });
+
+    it('should add an error message label next to the jQuery input', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var labelExists = input.nextElementSibling !== null;
+      assert.isFalse(labelExists);
+
+      core.showErrorMessages(jQuery(input));
+
+      //Check label exists
+      labelExists =  input.nextElementSibling !== null;
       assert.isTrue(labelExists);
 
     });
@@ -497,19 +574,19 @@ describe('core', function() {
         useBootstrap3Stlying: true
       });
 
-      $body.append('<div class="form-group"></div>');
+      global.document = jsdom('<div class="form-group"><input type="text" class="alpha alpha-only" data-invalid="true" required/></div>');
 
-      var $formGroup = $('.form-group');
-      $formGroup.append($invalidinput);
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
 
       //Check .help=block does not exist
-      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      var helpBlockExists = formGroup.querySelector('.help-block') !== null;
       assert.isFalse(helpBlockExists);
 
-      core.showErrorMessages($invalidinput);
+      core.showErrorMessages(input);
 
       //Check .help=block does exist
-      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      helpBlockExists = formGroup.querySelector('.help-block') !== null;
       assert.isTrue(helpBlockExists);
 
     });
@@ -520,21 +597,22 @@ describe('core', function() {
         useBootstrap3Stlying: true
       });
 
-      $body.append('<div class="form-group">' +
-                     '<span class="help-block ritsu-error"></span>' +
-                   '</div>');
+      global.document = jsdom('<div class="form-group">' +
+                                '<input type="text" class="alpha alpha-only" data-invalid="false"/>'+
+                                '<span class="help-block ritsu-error"></span>' +
+                              '</div>');
 
-      var $formGroup = $('.form-group');
-      $formGroup.append($validinput);
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
 
       //.help block should be there
-      var helpBlockExists = $formGroup.find('.help-block').length === 1;
+      var helpBlockExists = formGroup.querySelector('.help-block') !== null;
       assert.isTrue(helpBlockExists);
 
-      core.showErrorMessages($validinput);
+      core.showErrorMessages(input);
 
       //.help block should have been removed
-      helpBlockExists = $formGroup.find('.help-block').length === 1;
+      helpBlockExists = formGroup.querySelector('.help-block') !== null;
       assert.isFalse(helpBlockExists);
 
     });
@@ -545,22 +623,26 @@ describe('core', function() {
         useBootstrap3Stlying: true
       });
 
-      $body.append('<div class="form-group"><span class="help-block"></span></div>');
+      global.document = jsdom('<div class="form-group">' +
+                                '<input type="text" class="alpha alpha-only" data-invalid="true" required/>'+
+                                '<span class="help-block"></span>' +
+                              '</div>');
 
-      var $formGroup = $('.form-group');
-      $formGroup.append($invalidinput);
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
 
       //Make sure there is a help block but no ritsu-error <b>
-      var helpBlockExists = $formGroup.find('.help-block').length === 1;
-      var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+      var helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
+      var ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
       assert.isTrue(helpBlockExists);
       assert.isFalse(ritsuErrorExists);
 
-      core.showErrorMessages($invalidinput);
+      core.showErrorMessages(input);
 
       //Make sure there is a help block and a ritsu-error <b>
-      helpBlockExists = $formGroup.find('.help-block').length === 1;
-      ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+      helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
+      ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
       assert.isTrue(helpBlockExists);
       assert.isTrue(ritsuErrorExists);
 
@@ -572,34 +654,34 @@ describe('core', function() {
         useBootstrap3Stlying: true
       });
 
-      $body.append('<div class="form-group">' +
-                     '<span class="help-block">' +
-                       '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
-                     '</span>' +
-                   '</div>');
+      global.document = jsdom('<div class="form-group">' +
+                                '<input type="text" class="alpha alpha-only" data-invalid="false"/>'+
+                                '<span class="help-block">' +
+                                  '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
+                                '</span>' +
+                              '</div>');
 
-      var $formGroup = $('.form-group');
-      $formGroup.append($validinput);
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
 
       //Make sure there is a help block and a ritsu-error <b>
-      var helpBlockExists = $formGroup.find('.help-block').length === 1;
-      var ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+      var helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
+      var ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
       assert.isTrue(helpBlockExists);
       assert.isTrue(ritsuErrorExists);
 
-      core.showErrorMessages($validinput);
+      core.showErrorMessages(input);
 
       //Make sure there is a help block still but the ritsu-error <b> gone
-      helpBlockExists = $formGroup.find('.help-block').length === 1;
-      ritsuErrorExists = $formGroup.find('.ritsu-error').length > 0;
+      helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
+      ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
       assert.isTrue(helpBlockExists);
       assert.isFalse(ritsuErrorExists);
 
     });
 
-    after(function() {
+    afterEach(function() {
       core.initialize({});
-      $body.empty();
     });
 
   });
@@ -607,25 +689,36 @@ describe('core', function() {
 
   describe('#markInvalidFields()', function() {
 
-    var $body = $('body');
-    var $input = $('<input type="text" class="alpha alpha-only"/>');
-
-    beforeEach(function() {
-      $body.empty();
-      core.initialize({});
-      $input.removeClass('has-error');
-    });
-
     it('should mark an input element passed in with a .has-error class', function() {
 
       core.initialize({
         autoMarkInvalidFields: true
       });
 
-      $input.val('b3ans');
-      core.validate($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
 
-      var hasHasErrorClass = $input.hasClass('has-error');
+      let input = document.getElementsByTagName('input')[0];
+
+      core.validate(input);
+
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
+    it('should mark a jQuery input element passed in with a .has-error class', function() {
+
+      core.initialize({
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      core.validate(jQuery(input));
+
+      var hasHasErrorClass = input.classList.contains('has-error');
       assert.isTrue(hasHasErrorClass);
 
     });
@@ -636,17 +729,18 @@ describe('core', function() {
         autoMarkInvalidFields: true
       });
 
-      $input.val('b3ans');
-      $body.append($input);
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
+
+      let input = document.getElementsByTagName('input')[0];
 
       //Make sure there is no class
-      var hasHasErrorClass = $input.hasClass('has-error');
+      var hasHasErrorClass = input.classList.contains('has-error');
       assert.isFalse(hasHasErrorClass);
 
       core.validate();
 
       //Make sure there is a class
-      hasHasErrorClass = $input.hasClass('has-error');
+      hasHasErrorClass = input.classList.contains('has-error');
       assert.isTrue(hasHasErrorClass);
 
     });
@@ -657,20 +751,19 @@ describe('core', function() {
         autoMarkInvalidFields: true
       });
 
-      $input.val('b3ans');
-      $body.append('<div class="form-group"></div>');
+      global.document = jsdom('<div class="form-group"><input type="text" class="alpha alpha-only" value="b3ans"/></div>');
 
-      var $formGroup = $('.form-group');
-      $formGroup.append($input);
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
 
       //Make sure there is no class
-      var hasHasErrorClass = $input.hasClass('has-error');
+      var hasHasErrorClass = input.classList.contains('has-error');
       assert.isFalse(hasHasErrorClass);
 
-      core.validate($formGroup);
+      core.validate(formGroup);
 
       //Make sure there is a class
-      hasHasErrorClass = $input.hasClass('has-error');
+      hasHasErrorClass = input.classList.contains('has-error');
       assert.isTrue(hasHasErrorClass);
 
     });
@@ -682,33 +775,30 @@ describe('core', function() {
         autoMarkInvalidFields: true
       });
 
-      $input.val('b3ans');
-      $body.append('<div class="form-group"></div>');
+      global.document = jsdom('<div class="form-group"><input type="text" class="alpha alpha-only" value="b3ans"/></div>');
 
-      var $formGroup = $('.form-group');
-      $formGroup.append($input);
+      let formGroup = document.getElementsByTagName('div')[0];
 
       //Make sure there is no class
-      var hasHasErrorClass = $formGroup.hasClass('has-error');
+      var hasHasErrorClass = formGroup.classList.contains('has-error');
       assert.isFalse(hasHasErrorClass);
 
-      core.validate($formGroup);
+      core.validate(formGroup);
 
       //Make sure there is a class
-      hasHasErrorClass = $formGroup.hasClass('has-error');
+      hasHasErrorClass = formGroup.classList.contains('has-error');
       assert.isTrue(hasHasErrorClass);
 
     });
 
-    after(function() {
+    afterEach(function() {
       core.initialize({});
-      $body.empty();
     });
 
   });
 
   after(function() {
-    delete global.window;
+    delete global.jQuery;
   });
 
 });
