@@ -10,12 +10,10 @@ This all started as a need to easily validate my own forms fields without being 
 Perhaps someone else will find this useful.
 
 ## Dependencies?
-ritsu.js requires jQuery `v1.2.3` or greater to be included in your project. It also will try to with jQuery-compatible API's like [Zepto.js](http://zeptojs.com/).
-
-As far as styling is concerned, ritsu.js uses [Bootstrap](http://getbootstrap.com/) default styling class names. If Bootstrap is not being used in your project, include the ritsu.min.css / ritsu.css file in your page. Feel free to adapt your own styles if you want by implementing the CSS styles used in ritsu.js.
+No dependencies! Uses pure javascript. Make sure to checkout the browser [compatibility table.](https://github.com/NYPD/ritsu.js/wiki#compatibility-table)
 
 ## Documentation
 Read the [wiki.](https://github.com/NYPD/ritsu.js/wiki) Also there is probably tons of spelling mistakes and stuff. Please let me know if you find any.
 
 ## Anything else?
-Down the road I am planning to remove the jQuery dependency and go with a pure JavaScript approach.
+I'm wondering I should switch this from a singleton apporach to something else.
