@@ -35,7 +35,7 @@ var core = function(rules, validation) {
         element.setAttribute('data-initial-value', element.checked);
       } else if (isFile) {
 
-        var hasSimpleFileHash = this.getAttribute('data-simple-file-hash') !== undefined;
+        var hasSimpleFileHash = element.getAttribute('data-simple-file-hash') !== undefined;
 
         if (hasSimpleFileHash) {
           element.setAttribute('data-initial-value', element.getAttribute('data-simple-file-hash'));
@@ -129,6 +129,10 @@ var core = function(rules, validation) {
     elementArray.forEach(function(element) {
 
       var errorElement = useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
+
+      //If the user is using bootstrap and does not have the input in a form-group for some reason
+      if(errorElement === null)
+        errorElement = element;
 
       var isInvalid = element.getAttribute('data-invalid') === 'true';
 

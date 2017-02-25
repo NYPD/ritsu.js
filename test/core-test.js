@@ -163,8 +163,18 @@ describe('core', function() {
 
     });
 
-    //Cant test out a file input
-    it('should store initialValue for a file input element passed in', function() {});
+    //Cant test out a file input too well. Just check to see if an initial value is stored
+    it('should store initialValue for a file input element passed in', function() {
+
+      global.document = jsdom('<input type="file" data-simple-file-hash="easyFileHash420" />');
+
+      let fileInput = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(fileInput);
+
+      var intialValue = fileInput.getAttribute('data-initial-value');
+      assert.strictEqual(intialValue, 'easyFileHash420');
+
+    });
 
 
     after(function() {
@@ -787,6 +797,29 @@ describe('core', function() {
 
       //Make sure there is a class
       hasHasErrorClass = formGroup.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
+    it('should mark an input element with a .has-error class when useBootstrap3Stlying = true and is not in a form group', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true,
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is no class
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isFalse(hasHasErrorClass);
+
+      core.validate(input);
+
+      //Make sure there is a class
+      hasHasErrorClass = input.classList.contains('has-error');
       assert.isTrue(hasHasErrorClass);
 
     });
