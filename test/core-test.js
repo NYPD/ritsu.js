@@ -801,6 +801,29 @@ describe('core', function() {
 
     });
 
+    it('should mark an input element with a .has-error class when useBootstrap3Stlying = true and is not in a form group', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true,
+        autoMarkInvalidFields: true
+      });
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is no class
+      var hasHasErrorClass = input.classList.contains('has-error');
+      assert.isFalse(hasHasErrorClass);
+
+      core.validate(input);
+
+      //Make sure there is a class
+      hasHasErrorClass = input.classList.contains('has-error');
+      assert.isTrue(hasHasErrorClass);
+
+    });
+
     afterEach(function() {
       core.initialize({});
     });

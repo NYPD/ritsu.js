@@ -130,6 +130,10 @@ var core = function(rules, validation) {
 
       var errorElement = useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
 
+      //If the user is using bootstrap and does not have the input in a form-group for some reason
+      if(errorElement === null)
+        errorElement = element;
+
       var isInvalid = element.getAttribute('data-invalid') === 'true';
 
       if (isInvalid)
