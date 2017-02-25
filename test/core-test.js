@@ -163,8 +163,18 @@ describe('core', function() {
 
     });
 
-    //Cant test out a file input
-    it('should store initialValue for a file input element passed in', function() {});
+    //Cant test out a file input too well. Just check to see if an initial value is stored
+    it('should store initialValue for a file input element passed in', function() {
+
+      global.document = jsdom('<input type="file" data-simple-file-hash="easyFileHash420" />');
+
+      let fileInput = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(fileInput);
+
+      var intialValue = fileInput.getAttribute('data-initial-value');
+      assert.strictEqual(intialValue, 'easyFileHash420');
+
+    });
 
 
     after(function() {

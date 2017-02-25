@@ -30,8 +30,6 @@
   "author": {
     "name": "NYPD"
   },
-  "contributors": [
-    {}
-  ],
+  "contributors": [{}],
   "license": "MIT"
 }

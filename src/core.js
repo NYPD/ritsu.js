@@ -35,7 +35,7 @@ var core = function(rules, validation) {
         element.setAttribute('data-initial-value', element.checked);
       } else if (isFile) {
 
-        var hasSimpleFileHash = this.getAttribute('data-simple-file-hash') !== undefined;
+        var hasSimpleFileHash = element.getAttribute('data-simple-file-hash') !== undefined;
 
         if (hasSimpleFileHash) {
           element.setAttribute('data-initial-value', element.getAttribute('data-simple-file-hash'));
