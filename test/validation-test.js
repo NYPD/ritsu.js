@@ -13,6 +13,18 @@ describe('validation', function() {
 
   describe('#validateElement()', function() {
 
+    it('should not validate input element because it a hidden input', function() {
+
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.className = 'alpha alpha-only';
+      input.value = '5465466654fdsfdsf';
+
+      var validElement = validation.validateElement(input);
+      assert.isTrue(validElement);
+
+    });
+
     it('should not validate element because it is disabled', function() {
 
       var input = document.createElement('input');
@@ -32,6 +44,16 @@ describe('validation', function() {
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'alpha alpha-only';
+
+      var validElement = validation.validateElement(input);
+      assert.isTrue(validElement);
+
+    });
+
+    it('should not validate file input element because it is optional', function() {
+
+      var input = document.createElement('input');
+      input.type = 'file';
 
       var validElement = validation.validateElement(input);
       assert.isTrue(validElement);
@@ -219,6 +241,24 @@ describe('validation', function() {
       input.value = '1339';
       validElement = validation.validateElement(input);
       assert.isFalse(validElement);
+
+    });
+
+    it('should validate a required file input that has no files but has a data-simple-file-hash', function() {
+
+      //Should fail
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.setAttribute('required', '');
+
+      var validElement = validation.validateElement(input);
+      assert.isFalse(validElement);
+
+        input.setAttribute('data-simple-file-hash', 'coolHashBro');
+
+      //Should pass since there is a data-simple-file-hash
+      validElement = validation.validateElement(input);
+      assert.isTrue(validElement);
 
     });
 

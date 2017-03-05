@@ -22,26 +22,31 @@ var validation = function(rules) {
 
     var validInput = true;
 
+    var isHidden = element.type === 'hidden';
+    if (isHidden) return validInput;
+
     var isAlpha = element.classList.contains('alpha');
     var isNumeric = element.classList.contains('numeric');
+    var isFile = element.type === 'file';
     var isRequired = element.hasAttribute('required');
 
     var fieldValue = element.value;
     var isEmpty = fieldValue === undefined || fieldValue.trim() === '';
 
-    var noValidationNeeded = isEmpty && !isRequired;
+    var noValidationNeeded = isEmpty && !isRequired && !isFile;//Cant check value of file inputs like this, let the _validateFileField() do it
     if (noValidationNeeded) return validInput;
 
     if (isAlpha) validInput = _validateAlphaField(element);
     if (isNumeric) validInput = _validateNumericField(element);
-    if (!isAlpha && !isNumeric && isRequired) validInput = !isEmpty; //Anything is allowed, just can't be blank
+    if (isFile) validInput = _validateFileField(element);
+    if (!isAlpha && !isNumeric && !isFile && isRequired) validInput = !isEmpty; //Anything is allowed, just can't be blank
 
     return validInput;
   };
 
   var _validateSelect = function(element) {
-                        //If nothing is selected or there is no options, make the value undefined to avoid a TypeError
-    var valueSelected = element.selectedIndex === -1?  undefined: element.options[element.selectedIndex].value;
+    //If nothing is selected or there is no options, make the value undefined to avoid a TypeError
+    var valueSelected = element.selectedIndex === -1 ? undefined : element.options[element.selectedIndex].value;
     var isRequired = element.hasAttribute('required');
     var isEmpty = valueSelected === undefined || valueSelected.trim() === '';
 
@@ -49,6 +54,21 @@ var validation = function(rules) {
 
     return validSelect;
 
+  };
+
+  var _validateFileField = function(element) {
+    var validFile = true;
+
+    var isNotRequired = !element.hasAttribute('required');
+    if(isNotRequired) return validFile; //We dont care at all if it is not required (we cant eve validate it)
+
+    var simpleFileHash = element.getAttribute('data-simple-file-hash');
+
+    var noSimpleFileHash = !(simpleFileHash !== null && simpleFileHash.trim() !== '');
+    var noFilesAttached = element.files.length === 0;
+
+    if (noFilesAttached && noSimpleFileHash) validFile = false;
+    return validFile;
   };
 
   var _validateAlphaField = function(element) {
