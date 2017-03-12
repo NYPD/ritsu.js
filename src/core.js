@@ -216,10 +216,13 @@ var core = function(rules, validation) {
   var _getSelectorAsElementArray = function(selector) {
 
     var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
-    selector = isJquery ? selector.get() : selector;
+    if(isJquery) selector = selector.get();
 
     var selectorUndefined = selector === undefined;
     if (selectorUndefined) selector = Array.prototype.slice.call(document.querySelectorAll('input, textarea, select'));
+
+    var isStringSelector = typeof selector === 'string';
+    if (isStringSelector) selector = Array.prototype.slice.call(document.querySelectorAll(selector));
 
     var isNotArray = !Array.isArray(selector);
     if (isNotArray) selector = [selector];

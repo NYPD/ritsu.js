@@ -354,6 +354,24 @@ describe('core', function() {
 
     });
 
+    it('should validate a string selector passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" id="cool-input"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure its passes
+      input.value = 'beans';
+      var isValid = core.validate('#cool-input');
+      assert.isTrue(isValid);
+
+      //Make sure its fails
+      input.value = 'bea3ns';
+      isValid = core.validate('#cool-input');
+      assert.isFalse(isValid);
+
+    });
+
     it('should validate an input element in the document since nothing was passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
