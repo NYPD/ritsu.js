@@ -56,6 +56,15 @@ var core = function(rules, validation) {
     return this;
   };
 
+  var getInitialFormValue = function(selector) {
+
+    var elementArray = _getSelectorAsElementArray(selector);
+    if(elementArray.length === 0) return null;
+
+    return elementArray[0].getAttribute('data-initial-value');
+
+  };
+
   var isFormDirty = function(selector) {
 
     var isDirty = false;
@@ -295,6 +304,7 @@ var core = function(rules, validation) {
 
     initialize: initialize,
     storeInitialFormValues: storeInitialFormValues,
+    getInitialFormValue : getInitialFormValue,
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,

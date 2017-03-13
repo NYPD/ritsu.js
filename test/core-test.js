@@ -183,6 +183,31 @@ describe('core', function() {
 
   });
 
+  describe('#getInitialFormValue()', function() {
+
+    it('should get the intial value of an input', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(input);
+
+      var initalValue = core.getInitialFormValue(input);
+      assert.strictEqual(initalValue, 'benzi');
+
+    });
+
+
+    it('should return null if no element is found to get the intial value', function() {
+
+      var initalValue = core.getInitialFormValue('#no-element');
+      assert.strictEqual(initalValue, null);
+
+    });
+
+
+  });
+
   describe('#isFormDirty()', function() {
 
     it('should not return dirty since nothing changed', function() {
