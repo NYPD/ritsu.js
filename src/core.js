@@ -65,6 +65,17 @@ var core = function(rules, validation) {
 
   };
 
+  var resetIntialFormValues = function(selector) {
+
+    var elementArray = _getSelectorAsElementArray(selector);
+
+    elementArray.forEach(function(element) {
+      var hasInitialValue = element.hasAttribute('data-initial-value');
+      if(hasInitialValue) element.value = element.getAttribute('data-initial-value');
+    });
+
+  };
+
   var isFormDirty = function(selector) {
 
     var isDirty = false;
@@ -305,6 +316,7 @@ var core = function(rules, validation) {
     initialize: initialize,
     storeInitialFormValues: storeInitialFormValues,
     getInitialFormValue : getInitialFormValue,
+    resetIntialFormValues: resetIntialFormValues,
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,

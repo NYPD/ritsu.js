@@ -208,6 +208,53 @@ describe('core', function() {
 
   });
 
+  describe('#resetIntialFormValues()', function() {
+
+    it('should reset the intial value of an input', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(input);
+
+      input.value = 'new value';
+
+      var isDirty = core.isFormDirty();
+      assert.strictEqual(isDirty, true);
+
+      core.resetIntialFormValues(input);
+
+      isDirty = core.isFormDirty();
+      assert.strictEqual(isDirty, false);
+
+    });
+
+    it('should reset the intial value of inputs', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" id="input1"  value="benzi"/>' +
+                              '<input type="text" class="alpha alpha-only" id="input2"  value="benzi"/>');
+
+      let input1 = document.querySelector('#input1');
+      let input2 = document.querySelector('#input2');
+
+      core.storeInitialFormValues();
+
+      input1.value = 'new val1';
+      input2.value = 'new val2';
+
+      var isDirty = core.isFormDirty();
+      assert.strictEqual(isDirty, true);
+
+      core.resetIntialFormValues();
+
+      isDirty = core.isFormDirty();
+      assert.strictEqual(isDirty, false);
+
+    });
+
+
+  });
+
   describe('#isFormDirty()', function() {
 
     it('should not return dirty since nothing changed', function() {
