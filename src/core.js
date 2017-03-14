@@ -65,6 +65,7 @@ var core = function(rules, validation) {
 
   };
 
+
   var resetIntialFormValues = function(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);

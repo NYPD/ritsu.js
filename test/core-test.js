@@ -205,7 +205,6 @@ describe('core', function() {
 
     });
 
-
   });
 
   describe('#resetIntialFormValues()', function() {
