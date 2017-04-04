@@ -5,7 +5,7 @@ const expect = chai.expect;
 
 const jsdom = require('jsdom').jsdom;
 const window = jsdom().defaultView;
-global.jQuery = require('jquery')(window);//need global for the jQueryIsPresent variable in core js
+global.jQuery = require('jquery')(window); //need global for the jQueryIsPresent variable in core js
 
 const rules = require('../src/rules.js')();
 const validation = require('../src/validation.js')(rules);
@@ -34,6 +34,29 @@ describe('core', function() {
         core.initialize(options);
       }).to.not.throw(Error);
 
+    });
+
+    it('should throw an Error when the errorHandler property passed in is not a function', function() {
+      expect(function() {
+
+        var options = {
+          errorHandler: 'cool beans'
+        };
+
+        core.initialize(options);
+      }).to.throw(Error);
+    });
+
+    it('should pass when the errorHandler property passed in is a function', function() {
+      expect(function() {
+
+        var options = {
+          errorHandler: function() {}
+        };
+
+        core.initialize(options);
+
+      }).to.not.throw(Error);
     });
 
     //Clean up the ristu object to the defaults
@@ -135,7 +158,7 @@ describe('core', function() {
     it('should store initialValue for a radio input element passed in', function() {
 
       global.document = jsdom('<input type="radio" name="sex" value="male" id="male" checked/>' +
-                              '<input type="radio" name="sex" value="female" id="female"/>');
+        '<input type="radio" name="sex" value="female" id="female"/>');
 
       core.storeInitialFormValues();
 
@@ -231,7 +254,7 @@ describe('core', function() {
     it('should reset the intial value of inputs', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" id="input1"  value="benzi"/>' +
-                              '<input type="text" class="alpha alpha-only" id="input2"  value="benzi"/>');
+        '<input type="text" class="alpha alpha-only" id="input2"  value="benzi"/>');
 
       let input1 = document.querySelector('#input1');
       let input2 = document.querySelector('#input2');
@@ -351,7 +374,7 @@ describe('core', function() {
     it('should return dirty for a radio input element passed in', function() {
 
       global.document = jsdom('<input type="radio" name="sex" value="male" id="male" checked/>' +
-                              '<input type="radio" name="sex" value="female" id="female"/>');
+        '<input type="radio" name="sex" value="female" id="female"/>');
 
       core.storeInitialFormValues();
 
@@ -531,7 +554,7 @@ describe('core', function() {
       input.value = 'beans';
       core.validate(input);
 
-      var dataInvalidAttr = input.getAttribute('data-invalid')  === 'false';
+      var dataInvalidAttr = input.getAttribute('data-invalid') === 'false';
       assert.isTrue(dataInvalidAttr);
 
     });
@@ -644,7 +667,7 @@ describe('core', function() {
       core.showErrorMessages(input);
 
       //Check label exists
-      labelExists =  input.nextElementSibling !== null;
+      labelExists = input.nextElementSibling !== null;
       assert.isTrue(labelExists);
 
     });
@@ -662,7 +685,7 @@ describe('core', function() {
       core.showErrorMessages(jQuery(input));
 
       //Check label exists
-      labelExists =  input.nextElementSibling !== null;
+      labelExists = input.nextElementSibling !== null;
       assert.isTrue(labelExists);
 
     });
@@ -697,9 +720,9 @@ describe('core', function() {
       });
 
       global.document = jsdom('<div class="form-group">' +
-                                '<input type="text" class="alpha alpha-only" data-invalid="false"/>'+
-                                '<span class="help-block ritsu-error"></span>' +
-                              '</div>');
+        '<input type="text" class="alpha alpha-only" data-invalid="false"/>' +
+        '<span class="help-block ritsu-error"></span>' +
+        '</div>');
 
       let formGroup = document.getElementsByTagName('div')[0];
       let input = document.getElementsByTagName('input')[0];
@@ -723,9 +746,9 @@ describe('core', function() {
       });
 
       global.document = jsdom('<div class="form-group">' +
-                                '<input type="text" class="alpha alpha-only" data-invalid="true" required/>'+
-                                '<span class="help-block"></span>' +
-                              '</div>');
+        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
+        '<span class="help-block"></span>' +
+        '</div>');
 
 
       let formGroup = document.getElementsByTagName('div')[0];
@@ -754,11 +777,11 @@ describe('core', function() {
       });
 
       global.document = jsdom('<div class="form-group">' +
-                                '<input type="text" class="alpha alpha-only" data-invalid="false"/>'+
-                                '<span class="help-block">' +
-                                  '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
-                                '</span>' +
-                              '</div>');
+        '<input type="text" class="alpha alpha-only" data-invalid="false"/>' +
+        '<span class="help-block">' +
+        '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
+        '</span>' +
+        '</div>');
 
       let formGroup = document.getElementsByTagName('div')[0];
       let input = document.getElementsByTagName('input')[0];
@@ -778,6 +801,35 @@ describe('core', function() {
       assert.isFalse(ritsuErrorExists);
 
     });
+
+
+    it('should add an error message into the cool-div div because we intialized ritsu with a errorHandler', function() {
+
+      core.initialize({
+        errorHandler: function () {
+          var p = document.createElement('p');
+          document.querySelector('#cool-div').appendChild(p);
+        }
+      });
+
+      global.document = jsdom('<div id="cool-div"></div>' +
+                              '<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let coolDiv = document.getElementById('cool-div');
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check if the cool-div div is empty
+      var emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isTrue(emptyCoolDiv);
+
+      core.showErrorMessages(input);
+
+      //Check label exists
+      emptyCoolDiv = coolDiv.querySelector('p') !== null;
+      assert.isTrue(emptyCoolDiv);
+
+    });
+
 
     afterEach(function() {
       core.initialize({});

@@ -4,7 +4,7 @@ var core = function(rules, validation) {
   var useBootstrap3Stlying = false;
   var autoMarkInvalidFields = true;
   var autoShowErrorMessages = false;
-
+  var errorHandler = null;
 
   var initialize = function(options) {
 
@@ -14,6 +14,13 @@ var core = function(rules, validation) {
     useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
     autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
+
+    if(options.errorHandler === undefined) errorHandler = null;
+
+    if (options.errorHandler !== undefined) {
+      if (typeof options.errorHandler !== 'function') throw new Error('errorHandler is not a funciton');
+      errorHandler = options.errorHandler;
+    }
 
     var validationRules = options.validationRules;
     if (validationRules !== undefined) rules.addValidationRule(validationRules);
@@ -59,7 +66,7 @@ var core = function(rules, validation) {
   var getInitialFormValue = function(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
-    if(elementArray.length === 0) return null;
+    if (elementArray.length === 0) return null;
 
     return elementArray[0].getAttribute('data-initial-value');
 
@@ -72,7 +79,7 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
       var hasInitialValue = element.hasAttribute('data-initial-value');
-      if(hasInitialValue) element.value = element.getAttribute('data-initial-value');
+      if (hasInitialValue) element.value = element.getAttribute('data-initial-value');
     });
 
   };
@@ -152,7 +159,7 @@ var core = function(rules, validation) {
       var errorElement = useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
 
       //If the user is using bootstrap and does not have the input in a form-group for some reason
-      if(errorElement === null)
+      if (errorElement === null)
         errorElement = element;
 
       var isInvalid = element.getAttribute('data-invalid') === 'true';
@@ -171,7 +178,15 @@ var core = function(rules, validation) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
-    elementArray.forEach(function(element) {
+    for (var i = 0; i < elementArray.length; i++) {
+
+      var element = elementArray[i];
+
+      //If an errorHandler was provided use that
+      if (errorHandler !== null) {
+        errorHandler(element);
+        continue;
+      }
 
       _removeErrorMessage(element); //Remove any previous old error messages
 
@@ -228,7 +243,7 @@ var core = function(rules, validation) {
 
       }
 
-    });
+    }
 
     return this;
   };
@@ -237,7 +252,7 @@ var core = function(rules, validation) {
   var _getSelectorAsElementArray = function(selector) {
 
     var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
-    if(isJquery) selector = selector.get();
+    if (isJquery) selector = selector.get();
 
     var selectorUndefined = selector === undefined;
     if (selectorUndefined) selector = Array.prototype.slice.call(document.querySelectorAll('input, textarea, select'));
@@ -278,10 +293,10 @@ var core = function(rules, validation) {
 
   var _removeErrorMessage = function(element) {
 
-    var parentElement = _getClosestParentByClass(element, useBootstrap3Stlying? 'form-group': 'error-label-container');
-    if(parentElement === null) return; //nothing to remove, just exit
+    var parentElement = _getClosestParentByClass(element, useBootstrap3Stlying ? 'form-group' : 'error-label-container');
+    if (parentElement === null) return; //nothing to remove, just exit
 
-    Array.prototype.slice.call(parentElement.querySelectorAll(useBootstrap3Stlying? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
+    Array.prototype.slice.call(parentElement.querySelectorAll(useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
       element.parentElement.removeChild(element);
     });
 
@@ -316,7 +331,7 @@ var core = function(rules, validation) {
 
     initialize: initialize,
     storeInitialFormValues: storeInitialFormValues,
-    getInitialFormValue : getInitialFormValue,
+    getInitialFormValue: getInitialFormValue,
     resetIntialFormValues: resetIntialFormValues,
     isFormDirty: isFormDirty,
     validate: validate,
@@ -327,4 +342,6 @@ var core = function(rules, validation) {
 
 };
 
-module.exports = function(rules, validation) {return core(rules, validation);};
+module.exports = function(rules, validation) {
+  return core(rules, validation);
+};
