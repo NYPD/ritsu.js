@@ -806,9 +806,12 @@ describe('core', function() {
     it('should add an error message into the cool-div div because we intialized ritsu with a errorHandler', function() {
 
       core.initialize({
-        errorHandler: function () {
-          var p = document.createElement('p');
+        errorHandler: function (errorMessage, element) {
+          let p = document.createElement('p');
+          p.innerHTML = errorMessage;
           document.querySelector('#cool-div').appendChild(p);
+
+          element.classList.add('its-wrong');
         }
       });
 
@@ -825,8 +828,13 @@ describe('core', function() {
       core.showErrorMessages(input);
 
       //Check label exists
-      emptyCoolDiv = coolDiv.querySelector('p') !== null;
-      assert.isTrue(emptyCoolDiv);
+      let p = coolDiv.querySelector('p');
+
+      emptyCoolDiv = p === null;
+      assert.isFalse(emptyCoolDiv);
+
+      expect(p.innerHTML).to.equal('Only letters, spaces, hypens, and periods are allowed');
+      expect(input.classList.contains('its-wrong')).to.equal(true);
 
     });
 

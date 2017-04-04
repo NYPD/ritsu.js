@@ -184,7 +184,7 @@ var core = function(rules, validation) {
 
       //If an errorHandler was provided use that
       if (errorHandler !== null) {
-        errorHandler(element);
+        errorHandler(_getErrorMessageForInput(element), element);
         continue;
       }
 
