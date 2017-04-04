@@ -40,7 +40,7 @@ describe('core', function() {
       expect(function() {
 
         var options = {
-          errorHandler: 'cool beans'
+          errorMessageHandler: 'cool beans'
         };
 
         core.initialize(options);
@@ -646,6 +646,37 @@ describe('core', function() {
 
     });
 
+    it('should validate an invalid input element and use the errorMessageHandler function passed in to display the error in the cool-div', function() {
+
+      core.initialize({
+        autoShowErrorMessages: true
+      });
+
+      global.document = jsdom('<div id="cool-div"></div>' +
+        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      input.value = 'bea3ns';
+
+      core.validate(input, function(errorMessage, element) {
+        let p = document.createElement('p');
+        p.innerHTML = errorMessage;
+        document.querySelector('#cool-div').appendChild(p);
+
+        element.classList.add('its-wrong');
+      });
+
+      //Check if the cool-div div is empty
+      var emptyCoolDiv = document.querySelector('#cool-div').innerHTML === '';
+      assert.isFalse(emptyCoolDiv);
+
+      let p = document.querySelector('p');
+
+      expect(p.innerHTML).to.equal('Only letters, spaces, hypens, and periods are allowed');
+      expect(input.classList.contains('its-wrong')).to.equal(true);
+
+    });
+
     after(function() {
       global.document = null;
     });
@@ -803,10 +834,10 @@ describe('core', function() {
     });
 
 
-    it('should add an error message into the cool-div div because we intialized ritsu with a errorHandler', function() {
+    it('should add an error message into the cool-div div because we intialized ritsu with a errorMessageHandler', function() {
 
       core.initialize({
-        errorHandler: function (errorMessage, element) {
+        errorMessageHandler: function(errorMessage, element) {
           let p = document.createElement('p');
           p.innerHTML = errorMessage;
           document.querySelector('#cool-div').appendChild(p);
@@ -816,7 +847,7 @@ describe('core', function() {
       });
 
       global.document = jsdom('<div id="cool-div"></div>' +
-                              '<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
 
       let coolDiv = document.getElementById('cool-div');
       let input = document.getElementsByTagName('input')[0];

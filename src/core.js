@@ -1,25 +1,27 @@
 var core = function(rules, validation) {
 
   var jQueryIsPresent = typeof jQuery !== 'undefined';
-  var useBootstrap3Stlying = false;
-  var autoMarkInvalidFields = true;
-  var autoShowErrorMessages = false;
-  var errorHandler = null;
+  var defaultOptions = {
+    useBootstrap3Stlying: false,
+    autoMarkInvalidFields: true,
+    autoShowErrorMessages: false,
+    errorMessageHandler: null
+  };
 
   var initialize = function(options) {
 
     var invalidOptions = typeof options !== 'object';
     if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
 
-    useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
-    autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
-    autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
+    defaultOptions.useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
+    defaultOptions.autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
+    defaultOptions.autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
 
-    if(options.errorHandler === undefined) errorHandler = null;
+    if (options.errorMessageHandler === undefined) defaultOptions.errorMessageHandler = null;
 
-    if (options.errorHandler !== undefined) {
-      if (typeof options.errorHandler !== 'function') throw new Error('errorHandler is not a funciton');
-      errorHandler = options.errorHandler;
+    if (options.errorMessageHandler !== undefined) {
+      if (typeof options.errorMessageHandler !== 'function') throw new Error('errorMessageHandler is not a funciton');
+      defaultOptions.errorMessageHandler = options.errorMessageHandler;
     }
 
     var validationRules = options.validationRules;
@@ -123,7 +125,7 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function(selector) {
+  var validate = function(selector, errorMessageHandler) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -144,8 +146,8 @@ var core = function(rules, validation) {
 
     });
 
-    if (autoMarkInvalidFields) markInvalidFields(selector);
-    if (autoShowErrorMessages) showErrorMessages(selector);
+    if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
+    if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector, errorMessageHandler);
 
     return isValid;
   };
@@ -156,7 +158,7 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
 
-      var errorElement = useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
+      var errorElement = defaultOptions.useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
 
       //If the user is using bootstrap and does not have the input in a form-group for some reason
       if (errorElement === null)
@@ -174,7 +176,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var showErrorMessages = function(selector) {
+  var showErrorMessages = function(selector, errorMessageHandler) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -182,9 +184,12 @@ var core = function(rules, validation) {
 
       var element = elementArray[i];
 
-      //If an errorHandler was provided use that
-      if (errorHandler !== null) {
-        errorHandler(_getErrorMessageForInput(element), element);
+      var tempErrorMessageHandlerProvided = errorMessageHandler !== undefined;
+
+      //If an errorMessageHandler was provided or intialized with use that
+      if (defaultOptions.errorMessageHandler !== null || tempErrorMessageHandlerProvided) {
+        tempErrorMessageHandlerProvided ? errorMessageHandler(_getErrorMessageForInput(element), element) :
+          defaultOptions.errorMessageHandler(_getErrorMessageForInput(element), element);
         continue;
       }
 
@@ -195,7 +200,7 @@ var core = function(rules, validation) {
 
       var errorMessage = _getErrorMessageForInput(element);
 
-      if (useBootstrap3Stlying) {
+      if (defaultOptions.useBootstrap3Stlying) {
 
         var formGroup = _getClosestParentByClass(element, 'form-group');
         var helpBlock = formGroup.querySelector('.help-block');
@@ -293,10 +298,10 @@ var core = function(rules, validation) {
 
   var _removeErrorMessage = function(element) {
 
-    var parentElement = _getClosestParentByClass(element, useBootstrap3Stlying ? 'form-group' : 'error-label-container');
+    var parentElement = _getClosestParentByClass(element, defaultOptions.useBootstrap3Stlying ? 'form-group' : 'error-label-container');
     if (parentElement === null) return; //nothing to remove, just exit
 
-    Array.prototype.slice.call(parentElement.querySelectorAll(useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
+    Array.prototype.slice.call(parentElement.querySelectorAll(defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
       element.parentElement.removeChild(element);
     });
 
