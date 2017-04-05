@@ -703,6 +703,33 @@ describe('core', function() {
 
     });
 
+    it('should remove an error message label that was put next to the input', function() {
+
+      global.document = jsdom('<div><input type="text" class="alpha alpha-only" data-invalid="true" required/></div>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var labelExists = input.nextElementSibling !== null;
+      assert.isFalse(labelExists);
+
+      core.showErrorMessages(input);
+
+      //Check label exists
+      labelExists = input.nextElementSibling !== null;
+      assert.isTrue(labelExists);
+
+
+      //Check label does not exist anymore
+      input.setAttribute('data-invalid', false);
+      core.showErrorMessages(input);
+
+      labelExists = input.nextElementSibling !== null;
+
+      assert.isFalse(labelExists);
+
+    });
+
     it('should add an error message label next to the jQuery input', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');

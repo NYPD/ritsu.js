@@ -298,7 +298,7 @@ var core = function(rules, validation) {
 
   var _removeErrorMessage = function(element) {
 
-    var parentElement = _getClosestParentByClass(element, defaultOptions.useBootstrap3Stlying ? 'form-group' : 'error-label-container');
+    var parentElement = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
     if (parentElement === null) return; //nothing to remove, just exit
 
     Array.prototype.slice.call(parentElement.querySelectorAll(defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
@@ -347,6 +347,4 @@ var core = function(rules, validation) {
 
 };
 
-module.exports = function(rules, validation) {
-  return core(rules, validation);
-};
+module.exports = function(rules, validation) {return core(rules, validation);};
