@@ -5,7 +5,7 @@ var core = function(rules, validation) {
     useBootstrap3Stlying: false,
     autoMarkInvalidFields: true,
     autoShowErrorMessages: false,
-    errorMessageHandler: null
+    errorCallback: null
   };
 
   var initialize = function(options) {
@@ -17,11 +17,11 @@ var core = function(rules, validation) {
     defaultOptions.autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     defaultOptions.autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
 
-    if (options.errorMessageHandler === undefined) {
-      defaultOptions.errorMessageHandler = null;
+    if (options.errorCallback === undefined) {
+      defaultOptions.errorCallback = null;
     } else {
-      if (typeof options.errorMessageHandler !== 'function') throw new Error('errorMessageHandler is not a funciton');
-      defaultOptions.errorMessageHandler = options.errorMessageHandler;
+      if (typeof options.errorCallback !== 'function') throw new Error('errorCallback is not a funciton');
+      defaultOptions.errorCallback = options.errorCallback;
     }
 
     var validationRules = options.validationRules;
@@ -125,7 +125,7 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function(selector, errorMessageHandler) {
+  var validate = function(selector, errorCallback) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -146,9 +146,22 @@ var core = function(rules, validation) {
 
     });
 
-    if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
-    if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector, errorMessageHandler);
+    var errorCallbackProvided = errorCallback !== undefined;
 
+    //If an errorCallback is provided use that always regardless of the "auto" settings
+    if(defaultOptions.errorCallback !== null || errorCallbackProvided) {
+
+      if(errorCallbackProvided)
+        _handleErrorCallback(selector, errorCallback);
+      else
+        _handleErrorCallback(selector, defaultOptions.errorCallback);
+
+    }else {
+
+      if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
+      if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);
+
+    }
     return isValid;
   };
 
@@ -176,7 +189,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var showErrorMessages = function(selector, errorMessageHandler) {
+  var showErrorMessages = function(selector, errorCallback) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -184,25 +197,26 @@ var core = function(rules, validation) {
 
       var element = elementArray[i];
 
-      var tempErrorMessageHandlerProvided = errorMessageHandler !== undefined;
-
-      //If an errorMessageHandler was provided or intialized with use that
-      if (defaultOptions.errorMessageHandler !== null || tempErrorMessageHandlerProvided) {
-
-        if(tempErrorMessageHandlerProvided)
-          errorMessageHandler(_getErrorMessageForInput(element), element);
-        else
-          defaultOptions.errorMessageHandler(_getErrorMessageForInput(element), element);
-
-        continue;
-      }
-
       _removeErrorMessage(element); //Remove any previous old error messages
 
       var isValid = element.getAttribute('data-invalid') !== 'true';
-      if (isValid) return true;
+      if (isValid) continue;
 
       var errorMessage = _getErrorMessageForInput(element);
+
+
+      var tempErrorCallbackProvided = errorCallback !== undefined;
+
+      //If an errorCallback was provided or intialized with use that
+      if (defaultOptions.errorCallback !== null || tempErrorCallbackProvided) {
+
+        if(tempErrorCallbackProvided)
+          errorCallback(_getErrorMessageForInput(element), element);
+        else
+          defaultOptions.errorCallback(_getErrorMessageForInput(element), element);
+
+        continue;
+      }
 
       if (defaultOptions.useBootstrap3Stlying) {
 
@@ -308,6 +322,25 @@ var core = function(rules, validation) {
     Array.prototype.slice.call(parentElement.querySelectorAll(defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
       element.parentElement.removeChild(element);
     });
+
+  };
+
+  var _handleErrorCallback = function(selector, errorCallback) {
+
+    var elementArray = _getSelectorAsElementArray(selector);
+
+    for (var i = 0; i < elementArray.length; i++) {
+
+      var element = elementArray[i];
+
+      var isValid = element.getAttribute('data-invalid') !== 'true';
+      if (isValid) continue;
+
+      var errorMessage = _getErrorMessageForInput(element);
+
+      errorCallback(errorMessage, element);
+
+    }
 
   };
 

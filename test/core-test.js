@@ -40,7 +40,7 @@ describe('core', function() {
       expect(function() {
 
         var options = {
-          errorMessageHandler: 'cool beans'
+          errorCallback: 'cool beans'
         };
 
         core.initialize(options);
@@ -646,7 +646,7 @@ describe('core', function() {
 
     });
 
-    it('should validate an invalid input element and use the errorMessageHandler function passed in to display the error in the cool-div', function() {
+    it('should validate an invalid input element and use the errorCallback function passed in to display the error in the cool-div', function() {
 
       core.initialize({
         autoShowErrorMessages: true
@@ -861,10 +861,10 @@ describe('core', function() {
     });
 
 
-    it('should add an error message into the cool-div div because we intialized ritsu with a errorMessageHandler', function() {
+    it('should add an error message into the cool-div div because we intialized ritsu with a errorCallback', function() {
 
       core.initialize({
-        errorMessageHandler: function(errorMessage, element) {
+        errorCallback: function(errorMessage, element) {
           let p = document.createElement('p');
           p.innerHTML = errorMessage;
           document.querySelector('#cool-div').appendChild(p);
