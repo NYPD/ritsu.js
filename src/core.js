@@ -188,8 +188,12 @@ var core = function(rules, validation) {
 
       //If an errorMessageHandler was provided or intialized with use that
       if (defaultOptions.errorMessageHandler !== null || tempErrorMessageHandlerProvided) {
-        tempErrorMessageHandlerProvided ? errorMessageHandler(_getErrorMessageForInput(element), element) :
+
+        if(tempErrorMessageHandlerProvided)
+          errorMessageHandler(_getErrorMessageForInput(element), element);
+        else
           defaultOptions.errorMessageHandler(_getErrorMessageForInput(element), element);
+
         continue;
       }
 
