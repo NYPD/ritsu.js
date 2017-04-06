@@ -17,9 +17,9 @@ var core = function(rules, validation) {
     defaultOptions.autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     defaultOptions.autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
 
-    if (options.errorMessageHandler === undefined) defaultOptions.errorMessageHandler = null;
-
-    if (options.errorMessageHandler !== undefined) {
+    if (options.errorMessageHandler === undefined) {
+      defaultOptions.errorMessageHandler = null;
+    } else {
       if (typeof options.errorMessageHandler !== 'function') throw new Error('errorMessageHandler is not a funciton');
       defaultOptions.errorMessageHandler = options.errorMessageHandler;
     }
