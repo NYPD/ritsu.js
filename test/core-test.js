@@ -860,43 +860,6 @@ describe('core', function() {
 
     });
 
-
-    it('should add an error message into the cool-div div because we intialized ritsu with a errorCallback', function() {
-
-      core.initialize({
-        errorCallback: function(errorMessage, element) {
-          let p = document.createElement('p');
-          p.innerHTML = errorMessage;
-          document.querySelector('#cool-div').appendChild(p);
-
-          element.classList.add('its-wrong');
-        }
-      });
-
-      global.document = jsdom('<div id="cool-div"></div>' +
-        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
-
-      let coolDiv = document.getElementById('cool-div');
-      let input = document.getElementsByTagName('input')[0];
-
-      //Check if the cool-div div is empty
-      var emptyCoolDiv = coolDiv.innerHTML === '';
-      assert.isTrue(emptyCoolDiv);
-
-      core.showErrorMessages(input);
-
-      //Check label exists
-      let p = coolDiv.querySelector('p');
-
-      emptyCoolDiv = p === null;
-      assert.isFalse(emptyCoolDiv);
-
-      expect(p.innerHTML).to.equal('Only letters, spaces, hypens, and periods are allowed');
-      expect(input.classList.contains('its-wrong')).to.equal(true);
-
-    });
-
-
     afterEach(function() {
       core.initialize({});
     });

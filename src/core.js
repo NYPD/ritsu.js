@@ -157,10 +157,7 @@ var core = function(rules, validation) {
         _handleErrorCallback(selector, defaultOptions.errorCallback);
 
     }else {
-
-      if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
-      if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);
-
+      _defaultErrorHandler(selector);
     }
     return isValid;
   };
@@ -189,7 +186,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var showErrorMessages = function(selector, errorCallback) {
+  var showErrorMessages = function(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -203,20 +200,6 @@ var core = function(rules, validation) {
       if (isValid) continue;
 
       var errorMessage = _getErrorMessageForInput(element);
-
-
-      var tempErrorCallbackProvided = errorCallback !== undefined;
-
-      //If an errorCallback was provided or intialized with use that
-      if (defaultOptions.errorCallback !== null || tempErrorCallbackProvided) {
-
-        if(tempErrorCallbackProvided)
-          errorCallback(_getErrorMessageForInput(element), element);
-        else
-          defaultOptions.errorCallback(_getErrorMessageForInput(element), element);
-
-        continue;
-      }
 
       if (defaultOptions.useBootstrap3Stlying) {
 
@@ -341,6 +324,13 @@ var core = function(rules, validation) {
       errorCallback(errorMessage, element);
 
     }
+
+  };
+
+  var _defaultErrorHandler = function(selector) {
+
+    if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
+    if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);
 
   };
 
