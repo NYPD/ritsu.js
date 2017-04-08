@@ -149,15 +149,15 @@ var core = function(rules, validation) {
     var errorCallbackProvided = errorCallback !== undefined;
 
     //If an errorCallback is provided use that always regardless of the "auto" settings
-    if(defaultOptions.errorCallback !== null || errorCallbackProvided) {
+    if (defaultOptions.errorCallback !== null || errorCallbackProvided) {
 
-      if(errorCallbackProvided)
+      if (errorCallbackProvided)
         _handleErrorCallback(selector, errorCallback);
       else
         _handleErrorCallback(selector, defaultOptions.errorCallback);
 
-    }else {
-      _defaultErrorHandler(selector);
+    } else {
+      _defaultErrorCallback(selector);
     }
     return isValid;
   };
@@ -184,6 +184,57 @@ var core = function(rules, validation) {
     });
 
     return this;
+  };
+
+  var getErrorMessage = function(selector) {
+
+    if (selector === undefined)
+      throw new Error('No selector passed in');
+
+    var elementArray = _getSelectorAsElementArray(selector);
+    var element = elementArray[0];
+
+    var noElementOrIsValid = element === undefined || element.getAttribute('data-invalid') !== 'true';
+    if(noElementOrIsValid) return null;
+
+    return _getErrorMessageForInput(elementArray[0]);
+
+  };
+
+  var getErrorMessages = function(selector) {
+
+    if (selector === undefined)
+      throw new Error('No selector passed in');
+
+    var elementArray = _getSelectorAsElementArray(selector);
+
+    var errorMessages = [];
+
+    elementArray.forEach(function(element) {
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
+      if(isInvalid) errorMessages.push(_getErrorMessageForInput(element));
+    });
+
+    return errorMessages;
+
+  };
+
+  var getErrorMessagesAsMap = function(selector) {
+
+    if (selector === undefined)
+      throw new Error('No selector passed in');
+
+    var elementArray = _getSelectorAsElementArray(selector);
+
+    var errorMessageMap = {};
+
+    elementArray.forEach(function(element) {
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
+      if(isInvalid) errorMessageMap[element] = _getErrorMessageForInput(element);
+    });
+
+    return errorMessageMap;
+
   };
 
   var showErrorMessages = function(selector) {
@@ -255,6 +306,8 @@ var core = function(rules, validation) {
   };
 
   //Private Methods ************************************************************
+
+  // Return an empty array if nothing is found
   var _getSelectorAsElementArray = function(selector) {
 
     var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
@@ -327,7 +380,7 @@ var core = function(rules, validation) {
 
   };
 
-  var _defaultErrorHandler = function(selector) {
+  var _defaultErrorCallback = function(selector) {
 
     if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
     if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);
@@ -368,10 +421,15 @@ var core = function(rules, validation) {
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,
-    showErrorMessages: showErrorMessages
+    showErrorMessages: showErrorMessages,
+    getErrorMessage: getErrorMessage,
+    getErrorMessages: getErrorMessages,
+    getErrorMessagesAsMap: getErrorMessagesAsMap
 
   };
 
 };
 
-module.exports = function(rules, validation) {return core(rules, validation);};
+module.exports = function(rules, validation) {
+  return core(rules, validation);
+};

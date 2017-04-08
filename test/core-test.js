@@ -683,6 +683,159 @@ describe('core', function() {
 
   });
 
+  describe('#getErrorMessage()', function() {
+
+    it('should get the error message from an input', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      let errorMessage = core.getErrorMessage(input);
+
+      expect(errorMessage).to.equal('Only letters, spaces, hypens, and periods are allowed');
+
+    });
+
+    it('should should throw an error when nothing is passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      expect(function() {
+
+        core.getErrorMessage();
+
+      }).to.throw(Error);
+
+    });
+
+    it('should get the error message for an input with a container selector passed in', function() {
+
+      global.document = jsdom('<div><input type="text" class="alpha alpha-only" data-invalid="true" required/></div>');
+
+      let errorMessage = core.getErrorMessage('div');
+
+      expect(errorMessage).to.equal('Only letters, spaces, hypens, and periods are allowed');
+
+    });
+
+    it('should return null for for a input that is not invalid', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
+
+      let errorMessage = core.getErrorMessage('.alpha');
+
+      expect(errorMessage).to.equal(null);
+
+    });
+
+    it('should return null for a input that does not exist', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
+
+      let errorMessage = core.getErrorMessage('.beans');
+      expect(errorMessage).to.equal(null);
+
+    });
+
+  });
+
+  describe('#getErrorMessages()', function() {
+
+    it('should get the error message from a single input', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      let errorMessages = core.getErrorMessages(input);
+
+      expect(errorMessages.length).to.equal(1);
+      expect(errorMessages[0]).to.equal('Only letters, spaces, hypens, and periods are allowed');
+
+    });
+
+    it('should should throw an error when nothing is passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      expect(function() {
+
+        core.getErrorMessages();
+
+      }).to.throw(Error);
+
+    });
+
+    it('should get the error messages for inputs with a container selector passed in', function() {
+
+      global.document = jsdom('<div>' +
+                               '<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
+                               '<input type="text" class="numeric numeric-whole" data-invalid="true" required/>' +
+                             '</div>');
+
+      let errorMessages = core.getErrorMessages('div');
+
+      expect(errorMessages.length).to.equal(2);
+
+    });
+
+    it('should return and empty array for a input that is not invalid', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
+
+      let errorMessages = core.getErrorMessages('.alpha');
+
+      expect(errorMessages.length).to.equal(0);
+
+    });
+
+  });
+
+  describe('#getErrorMessagesAsMap()', function() {
+
+    it('should get error message map from a single input', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      let errorMessageMap = core.getErrorMessagesAsMap(input);
+
+      expect(errorMessageMap.hasOwnProperty(input)).to.equal(true);
+
+    });
+
+    it('should get error message map for muliple inputs', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
+                              '<input type="text" class="numeric numeric-whole" data-invalid="true" required/>');
+
+      let alphaInput = document.querySelector('.alpha');
+      let numericInput = document.querySelector('.numeric');
+
+      let errorMessageMap = core.getErrorMessagesAsMap('input');
+
+      expect(errorMessageMap.hasOwnProperty(alphaInput)).to.equal(true);
+      expect(errorMessageMap.hasOwnProperty(numericInput)).to.equal(true);
+
+      var numericErrorMessage = errorMessageMap[numericInput];
+      assert.strictEqual(numericErrorMessage, 'Enter a whole number');
+
+    });
+
+    it('should return an empty map for a input that is not invalid', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
+
+      let errorMessageMap = core.getErrorMessagesAsMap('input');
+
+      var isEmptyMap = Object.keys(errorMessageMap).length === 0 && errorMessageMap.constructor === Object;
+
+      assert.strictEqual(isEmptyMap, true);
+
+    });
+
+  });
+
   describe('#showErrorMessages()', function() {
 
     it('should add an error message label next to the input', function() {
