@@ -430,6 +430,4 @@ var core = function(rules, validation) {
 
 };
 
-module.exports = function(rules, validation) {
-  return core(rules, validation);
-};
+module.exports = function(rules, validation) {return core(rules, validation);};
