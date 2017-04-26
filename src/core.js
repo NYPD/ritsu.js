@@ -157,7 +157,7 @@ var core = function(rules, validation) {
         _handleErrorCallback(selector, defaultOptions.errorCallback);
 
     } else {
-      _defaultErrorCallback(selector);
+      _defaultErrorCallback(elementArray);
     }
     return isValid;
   };
