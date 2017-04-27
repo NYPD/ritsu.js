@@ -139,9 +139,9 @@ var core = function(rules, validation) {
       if (defaultOptions.errorCallback !== null || errorCallbackProvided) {
 
         if (errorCallbackProvided)
-          _handleErrorCallback(element, errorCallback);
+          _handleErrorCallback(element, errorCallback, invalidElement);
         else
-          _handleErrorCallback(element, defaultOptions.errorCallback);
+          _handleErrorCallback(element, defaultOptions.errorCallback, invalidElement);
 
       }
 
@@ -363,8 +363,8 @@ var core = function(rules, validation) {
 
   };
 
-  var _handleErrorCallback = function(element, errorCallback) {
-    var errorMessage = _getErrorMessageForInput(element);
+  var _handleErrorCallback = function(element, errorCallback, invalidElement) {
+    var errorMessage = invalidElement? _getErrorMessageForInput(element): null;
     errorCallback(element, errorMessage);
   };
 
