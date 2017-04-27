@@ -658,7 +658,7 @@ describe('core', function() {
       let input = document.getElementsByTagName('input')[0];
       input.value = 'bea3ns';
 
-      core.validate(input, function(errorMessage, element) {
+      core.validate(input, function(element, errorMessage) {
         let p = document.createElement('p');
         p.innerHTML = errorMessage;
         document.querySelector('#cool-div').appendChild(p);

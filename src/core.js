@@ -127,6 +127,7 @@ var core = function(rules, validation) {
 
   var validate = function(selector, errorCallback) {
 
+    var errorCallbackProvided = errorCallback !== undefined;
     var elementArray = _getSelectorAsElementArray(selector);
 
     var isValid = true;
@@ -135,30 +136,31 @@ var core = function(rules, validation) {
 
       var invalidElement = !validation.validateElement(element);
 
+      if (defaultOptions.errorCallback !== null || errorCallbackProvided) {
+
+        if (errorCallbackProvided)
+          _handleErrorCallback(element, errorCallback);
+        else
+          _handleErrorCallback(element, defaultOptions.errorCallback);
+
+      }
+
       //Sets the entire form to false, just because their was at least 1 invalid field
       if (invalidElement) {
         isValid = false;
         element.setAttribute('data-invalid', true);
       } else {
         element.setAttribute('data-invalid', false);
-        _removeErrorMessage(element);
+
+        //If there is no callback go ahead and de the default remove error message
+        if (defaultOptions.errorCallback === null && !errorCallbackProvided) _removeErrorMessage(element);
       }
 
     });
 
-    var errorCallbackProvided = errorCallback !== undefined;
-
     //If an errorCallback is provided use that always regardless of the "auto" settings
-    if (defaultOptions.errorCallback !== null || errorCallbackProvided) {
+    if (defaultOptions.errorCallback === null && !errorCallbackProvided) _defaultErrorCallback(elementArray);
 
-      if (errorCallbackProvided)
-        _handleErrorCallback(selector, errorCallback);
-      else
-        _handleErrorCallback(selector, defaultOptions.errorCallback);
-
-    } else {
-      _defaultErrorCallback(elementArray);
-    }
     return isValid;
   };
 
@@ -361,23 +363,9 @@ var core = function(rules, validation) {
 
   };
 
-  var _handleErrorCallback = function(selector, errorCallback) {
-
-    var elementArray = _getSelectorAsElementArray(selector);
-
-    for (var i = 0; i < elementArray.length; i++) {
-
-      var element = elementArray[i];
-
-      var isValid = element.getAttribute('data-invalid') !== 'true';
-      if (isValid) continue;
-
-      var errorMessage = _getErrorMessageForInput(element);
-
-      errorCallback(errorMessage, element);
-
-    }
-
+  var _handleErrorCallback = function(element, errorCallback) {
+    var errorMessage = _getErrorMessageForInput(element);
+    errorCallback(element, errorMessage);
   };
 
   var _defaultErrorCallback = function(selector) {
