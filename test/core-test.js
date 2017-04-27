@@ -677,6 +677,33 @@ describe('core', function() {
 
     });
 
+    it('should validate a valid input element and use the errorCallback function passed in to remove the error in the cool-div', function() {
+
+      core.initialize({
+        autoShowErrorMessages: true
+      });
+
+      global.document = jsdom('<div id="cool-div"><span>Its invalid yo</span></div>' +
+        '<input type="text" class="alpha alpha-only" data-invalid="false"/>');
+
+      let coolDiv = document.querySelector('#cool-div');
+
+      //Check if the cool-div div is not empty
+      var emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isFalse(emptyCoolDiv);
+
+      let input = document.getElementsByTagName('input')[0];
+
+      core.validate(input, function(element, errorMessage) {
+        if(errorMessage === null) coolDiv.innerHTML = '';
+      });
+
+      //Check if the cool-div div is now empty
+      emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isTrue(emptyCoolDiv);
+
+    });
+
     after(function() {
       global.document = null;
     });
