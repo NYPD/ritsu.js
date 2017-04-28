@@ -231,17 +231,23 @@ var core = function(rules, validation) {
 
   };
 
-  var showErrorMessages = function(selector) {
+  var showErrorMessages = function(selector, messageCallback) {
 
     var elementArray = _getSelectorAsElementArray(selector);
+    var messageCallbackProvided = messageCallback !== undefined;
 
     for (var i = 0; i < elementArray.length; i++) {
 
       var element = elementArray[i];
 
-      _removeErrorMessage(element); //Remove any previous old error messages
-
       var isValid = element.getAttribute('data-invalid') !== 'true';
+
+      if (defaultOptions.errorCallback !== null || messageCallbackProvided) {
+        _handleErrorCallback(element, messageCallbackProvided? messageCallback : defaultOptions.errorCallback, !isValid);
+      } else {
+        _removeErrorMessage(element); //Remove any previous old error messages
+      }
+
       if (isValid) continue;
 
       var errorMessage = _getErrorMessageForInput(element);

@@ -695,7 +695,7 @@ describe('core', function() {
       let input = document.getElementsByTagName('input')[0];
 
       core.validate(input, function(element, errorMessage) {
-        if(errorMessage === null) coolDiv.innerHTML = '';
+        if (errorMessage === null) coolDiv.innerHTML = '';
       });
 
       //Check if the cool-div div is now empty
@@ -796,9 +796,9 @@ describe('core', function() {
     it('should get the error messages for inputs with a container selector passed in', function() {
 
       global.document = jsdom('<div>' +
-                               '<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
-                               '<input type="text" class="numeric numeric-whole" data-invalid="true" required/>' +
-                             '</div>');
+        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
+        '<input type="text" class="numeric numeric-whole" data-invalid="true" required/>' +
+        '</div>');
 
       let errorMessages = core.getErrorMessages('div');
 
@@ -834,7 +834,7 @@ describe('core', function() {
     it('should get error message map for muliple inputs', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
-                              '<input type="text" class="numeric numeric-whole" data-invalid="true" required/>');
+        '<input type="text" class="numeric numeric-whole" data-invalid="true" required/>');
 
       let alphaInput = document.querySelector('.alpha');
       let numericInput = document.querySelector('.numeric');
@@ -1037,6 +1037,126 @@ describe('core', function() {
       ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
       assert.isTrue(helpBlockExists);
       assert.isFalse(ritsuErrorExists);
+
+    });
+
+    it('should add an error message into the cool div with a messageCallback set in ritsu', function() {
+
+      global.document = jsdom('<div id="cool-div"></div>' +
+        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let coolDiv = document.getElementById('cool-div');
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isTrue(emptyCoolDiv);
+
+      core.initialize({
+        errorCallback: function(element, errorMessage) {
+          var hasErrorMessage = errorMessage !== null;
+          if (hasErrorMessage) document.getElementById('cool-div').innerHTML += errorMessage;
+        }
+      }).showErrorMessages(input);
+
+      //Check label exists
+      emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isFalse(emptyCoolDiv);
+
+    });
+
+    it('should remove an error message into the cool div with a messageCallback set in ritsu', function() {
+
+      global.document = jsdom('<div id="cool-div">' +
+        '<label for="cool-input"></label>' +
+        '</div>' +
+        '<input type="text" class="alpha alpha-only" data-invalid="false" name="cool-input"/>');
+
+      let coolDiv = document.getElementById('cool-div');
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isFalse(emptyCoolDiv);
+
+      core.initialize({
+        errorCallback: function(element, errorMessage) {
+
+          let coolDiv = document.getElementById('cool-div');
+
+          var hasErrorMessage = errorMessage !== null;
+          if (hasErrorMessage)
+            coolDiv.innerHTML += errorMessage;
+          else {
+            let errorLabel = coolDiv.querySelector('label[for="' + element.getAttribute('name') + '"]');
+            coolDiv.removeChild(errorLabel);
+          }
+
+        }
+      }).showErrorMessages(input);
+
+      //Check label exists
+      emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isTrue(emptyCoolDiv);
+
+    });
+
+    it('should add an error message into the cool div with a messageCallback passed in', function() {
+
+      global.document = jsdom('<div id="cool-div"></div>' +
+        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
+
+      let coolDiv = document.getElementById('cool-div');
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isTrue(emptyCoolDiv);
+
+      core.showErrorMessages(input, function(element, errorMessage) {
+
+        var hasErrorMessage = errorMessage !== null;
+        if (hasErrorMessage) document.getElementById('cool-div').innerHTML += errorMessage;
+
+      });
+
+      //Check label exists
+      emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isFalse(emptyCoolDiv);
+
+    });
+
+    it('should remove an error message from the cool div with a messageCallback passed in', function() {
+
+      global.document = jsdom('<div id="cool-div">' +
+        '<label for="cool-input"></label>' +
+        '</div>' +
+        '<input type="text" class="alpha alpha-only" data-invalid="false" name="cool-input"/>');
+
+      let coolDiv = document.getElementById('cool-div');
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check label does not exist
+      var emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isFalse(emptyCoolDiv);
+
+      core.showErrorMessages(input, function(element, errorMessage) {
+
+        let coolDiv = document.getElementById('cool-div');
+
+        var hasErrorMessage = errorMessage !== null;
+        if (hasErrorMessage)
+          coolDiv.innerHTML += errorMessage;
+        else {
+          let errorLabel = coolDiv.querySelector('label[for="' + element.getAttribute('name') + '"]');
+          coolDiv.removeChild(errorLabel);
+        }
+
+      });
+
+      //Check label exists
+      emptyCoolDiv = coolDiv.innerHTML === '';
+      assert.isTrue(emptyCoolDiv);
 
     });
 
