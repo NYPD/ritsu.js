@@ -191,17 +191,8 @@ var core = function(rules, validation) {
 
   var getErrorMessage = function(selector) {
 
-    if (selector === undefined)
-      throw new Error('No selector passed in');
-
-    var elementArray = _getSelectorAsElementArray(selector);
-    var element = elementArray[0];
-
-    var noElementOrIsValid = element === undefined || element.getAttribute('data-invalid') !== 'true';
-    if(noElementOrIsValid) return null;
-
-    return _getErrorMessageForInput(elementArray[0]);
-
+    var errorMessages = getErrorMessages(selector);
+    return errorMessages[0] === undefined? null: errorMessages[0];
   };
 
   var getErrorMessages = function(selector) {
