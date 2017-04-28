@@ -5,7 +5,7 @@ var core = function(rules, validation) {
     useBootstrap3Stlying: false,
     autoMarkInvalidFields: true,
     autoShowErrorMessages: false,
-    errorCallback: null
+    messageCallback: null
   };
 
   var initialize = function(options) {
@@ -17,11 +17,11 @@ var core = function(rules, validation) {
     defaultOptions.autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     defaultOptions.autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
 
-    if (options.errorCallback === undefined) {
-      defaultOptions.errorCallback = null;
+    if (options.messageCallback === undefined) {
+      defaultOptions.messageCallback = null;
     } else {
-      if (typeof options.errorCallback !== 'function') throw new Error('errorCallback is not a funciton');
-      defaultOptions.errorCallback = options.errorCallback;
+      if (typeof options.messageCallback !== 'function') throw new Error('messageCallback is not a funciton');
+      defaultOptions.messageCallback = options.messageCallback;
     }
 
     var validationRules = options.validationRules;
@@ -126,9 +126,9 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function(selector, errorCallback) {
+  var validate = function(selector, messageCallback) {
 
-    var errorCallbackProvided = errorCallback !== undefined;
+    var messageCallbackProvided = messageCallback !== undefined;
     var elementArray = _getSelectorAsElementArray(selector);
 
     var isValid = true;
@@ -137,12 +137,12 @@ var core = function(rules, validation) {
 
       var invalidElement = !validation.validateElement(element);
 
-      if (defaultOptions.errorCallback !== null || errorCallbackProvided) {
+      if (defaultOptions.messageCallback !== null || messageCallbackProvided) {
 
-        if (errorCallbackProvided)
-          _handleErrorCallback(element, errorCallback, invalidElement);
+        if (messageCallbackProvided)
+          _handlemessageCallback(element, messageCallback, invalidElement);
         else
-          _handleErrorCallback(element, defaultOptions.errorCallback, invalidElement);
+          _handlemessageCallback(element, defaultOptions.messageCallback, invalidElement);
 
       }
 
@@ -154,13 +154,13 @@ var core = function(rules, validation) {
         element.setAttribute('data-invalid', false);
 
         //If there is no callback go ahead and de the default remove error message
-        if (defaultOptions.errorCallback === null && !errorCallbackProvided) _removeErrorMessage(element);
+        if (defaultOptions.messageCallback === null && !messageCallbackProvided) _removeErrorMessage(element);
       }
 
     });
 
-    //If an errorCallback is provided use that always regardless of the "auto" settings
-    if (defaultOptions.errorCallback === null && !errorCallbackProvided) _defaultErrorCallback(elementArray);
+    //If an messageCallback is provided use that always regardless of the "auto" settings
+    if (defaultOptions.messageCallback === null && !messageCallbackProvided) _defaultmessageCallback(elementArray);
 
     return isValid;
   };
@@ -242,8 +242,8 @@ var core = function(rules, validation) {
 
       var isValid = element.getAttribute('data-invalid') !== 'true';
 
-      if (defaultOptions.errorCallback !== null || messageCallbackProvided) {
-        _handleErrorCallback(element, messageCallbackProvided? messageCallback : defaultOptions.errorCallback, !isValid);
+      if (defaultOptions.messageCallback !== null || messageCallbackProvided) {
+        _handlemessageCallback(element, messageCallbackProvided? messageCallback : defaultOptions.messageCallback, !isValid);
       } else {
         _removeErrorMessage(element); //Remove any previous old error messages
       }
@@ -361,12 +361,12 @@ var core = function(rules, validation) {
 
   };
 
-  var _handleErrorCallback = function(element, errorCallback, invalidElement) {
+  var _handlemessageCallback = function(element, messageCallback, invalidElement) {
     var errorMessage = invalidElement? _getErrorMessageForInput(element): null;
-    errorCallback(element, errorMessage);
+    messageCallback(element, errorMessage);
   };
 
-  var _defaultErrorCallback = function(selector) {
+  var _defaultmessageCallback = function(selector) {
 
     if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
     if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);

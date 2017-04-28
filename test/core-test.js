@@ -36,22 +36,22 @@ describe('core', function() {
 
     });
 
-    it('should throw an Error when the errorHandler property passed in is not a function', function() {
+    it('should throw an Error when the messageHandler property passed in is not a function', function() {
       expect(function() {
 
         var options = {
-          errorCallback: 'cool beans'
+          messageCallback: 'cool beans'
         };
 
         core.initialize(options);
       }).to.throw(Error);
     });
 
-    it('should pass when the errorHandler property passed in is a function', function() {
+    it('should pass when the messageHandler property passed in is a function', function() {
       expect(function() {
 
         var options = {
-          errorHandler: function() {}
+          messageHandler: function() {}
         };
 
         core.initialize(options);
@@ -646,7 +646,7 @@ describe('core', function() {
 
     });
 
-    it('should validate an invalid input element and use the errorCallback function passed in to display the error in the cool-div', function() {
+    it('should validate an invalid input element and use the messageCallback function passed in to display the error in the cool-div', function() {
 
       core.initialize({
         autoShowErrorMessages: true
@@ -677,7 +677,7 @@ describe('core', function() {
 
     });
 
-    it('should validate a valid input element and use the errorCallback function passed in to remove the error in the cool-div', function() {
+    it('should validate a valid input element and use the messageCallback function passed in to remove the error in the cool-div', function() {
 
       core.initialize({
         autoShowErrorMessages: true
@@ -1053,7 +1053,7 @@ describe('core', function() {
       assert.isTrue(emptyCoolDiv);
 
       core.initialize({
-        errorCallback: function(element, errorMessage) {
+        messageCallback: function(element, errorMessage) {
           var hasErrorMessage = errorMessage !== null;
           if (hasErrorMessage) document.getElementById('cool-div').innerHTML += errorMessage;
         }
@@ -1080,7 +1080,7 @@ describe('core', function() {
       assert.isFalse(emptyCoolDiv);
 
       core.initialize({
-        errorCallback: function(element, errorMessage) {
+        messageCallback: function(element, errorMessage) {
 
           let coolDiv = document.getElementById('cool-div');
 
