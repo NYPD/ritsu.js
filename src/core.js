@@ -291,7 +291,7 @@ var core = function(rules, validation) {
 
         var label = document.createElement('label');
         label.className = 'error-label';
-        label.htmlFor = elementId ? elementId : '';
+        label.htmlFor = elementId || '';
         label.innerHTML = errorMessage;
 
         var errorContainer = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
