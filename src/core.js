@@ -84,6 +84,7 @@ var core = function(rules, validation) {
       if (hasInitialValue) element.value = element.getAttribute('data-initial-value');
     });
 
+    return this;
   };
 
   var isFormDirty = function(selector) {
