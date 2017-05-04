@@ -1,6 +1,6 @@
 {
   "name": "ritsu.js",
-  "version": "1.2.0",
+  "version": "1.2.0-beta.1",
   "description": "HTML form validation",
   "devDependencies": {
     "chai": "^3.5.0",

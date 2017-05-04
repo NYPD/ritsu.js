@@ -1,4 +1,4 @@
-/* ritsu.js v1.2.0 
+/* ritsu.js v1.2.0-beta.1 
  * Created 2017-05-04
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
