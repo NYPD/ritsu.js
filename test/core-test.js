@@ -781,15 +781,12 @@ describe('core', function() {
 
     });
 
-    it('should should throw an error when nothing is passed in', function() {
+    it('should not throw an error when nothing is passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
 
-      expect(function() {
-
-        core.getErrorMessages();
-
-      }).to.throw(Error);
+      let errorMessages = core.getErrorMessages();
+      expect(errorMessages.length).to.equal(1);
 
     });
 

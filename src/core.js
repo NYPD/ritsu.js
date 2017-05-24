@@ -191,14 +191,14 @@ var core = function(rules, validation) {
 
   var getErrorMessage = function(selector) {
 
+    if (selector === undefined)
+      throw new Error('No selector passed in');
+
     var errorMessages = getErrorMessages(selector);
     return errorMessages[0] === undefined? null: errorMessages[0];
   };
 
   var getErrorMessages = function(selector) {
-
-    if (selector === undefined)
-      throw new Error('No selector passed in');
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -214,9 +214,6 @@ var core = function(rules, validation) {
   };
 
   var getErrorMessagesAsMap = function(selector) {
-
-    if (selector === undefined)
-      throw new Error('No selector passed in');
 
     var elementArray = _getSelectorAsElementArray(selector);
 
