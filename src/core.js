@@ -1,5 +1,6 @@
 var core = function(rules, validation) {
 
+  var version = '${version}';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -395,6 +396,7 @@ var core = function(rules, validation) {
   };
 
   return {
+    version: version,
     rules: rules, //Access to the Rules API
 
     initialize: initialize,
