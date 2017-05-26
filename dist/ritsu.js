@@ -1,5 +1,5 @@
-/* ritsu.js v1.2.0-beta.1 
- * Created 2017-05-04
+/* ritsu.js v1.2.0 
+ * Created 2017-05-26
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -427,6 +427,7 @@ var validation = function(rules) {
 
 var core = function(rules, validation) {
 
+  var version = '1.2.0';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -618,14 +619,14 @@ var core = function(rules, validation) {
 
   var getErrorMessage = function(selector) {
 
+    if (selector === undefined)
+      throw new Error('No selector passed in');
+
     var errorMessages = getErrorMessages(selector);
     return errorMessages[0] === undefined? null: errorMessages[0];
   };
 
   var getErrorMessages = function(selector) {
-
-    if (selector === undefined)
-      throw new Error('No selector passed in');
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -641,9 +642,6 @@ var core = function(rules, validation) {
   };
 
   var getErrorMessagesAsMap = function(selector) {
-
-    if (selector === undefined)
-      throw new Error('No selector passed in');
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -825,6 +823,7 @@ var core = function(rules, validation) {
   };
 
   return {
+    version: version,
     rules: rules, //Access to the Rules API
 
     initialize: initialize,
