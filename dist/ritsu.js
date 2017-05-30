@@ -1,5 +1,5 @@
 /* ritsu.js v1.2.0 
- * Created 2017-05-26
+ * Created 2017-05-30
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -843,5 +843,5 @@ var core = function(rules, validation) {
 };
 
 
-return core(rules(), validation(rules()));
+var r = rules(); return core(r, validation(r));
 })();
