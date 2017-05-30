@@ -2,7 +2,7 @@
 const chai = require('chai');
 const assert = chai.assert;
 const expect = chai.expect;
-const rules = require('../src/rules.js')();
+let rules = require('../src/rules.js')();
 
 const jsdom = require('jsdom').jsdom;
 
@@ -88,6 +88,31 @@ describe('rules', function() {
 
     });
 
+    it('should overwrite a validation rule with a new rule', function() {
+
+      var validationFunction = function() {return true;};
+
+      rules.addValidationRule({
+        ruleType: 'alpha',
+        ruleClass: 'alpha-only',
+        validationFunction: validationFunction
+      });
+
+      var rule = rules.getRuleByRuleClass('alpha-only');
+
+      var input = document.createElement('input');
+      input.type = 'text';
+
+      input.value = 'beans';
+      var isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+      input.value = 'b34ns';
+      isValid = rule.validate(input);
+      assert.isTrue(isValid);
+
+    });
+
     it('should throw an Error when trying to add a rule with an incorrect rule type', function() {
 
       expect(function() {
@@ -120,6 +145,7 @@ describe('rules', function() {
     let document = null;
 
     before(function() {
+      rules = require('../src/rules.js')();
       document = jsdom('<html><body></body></html>');
     });
 
