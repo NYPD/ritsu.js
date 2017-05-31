@@ -80,10 +80,33 @@ var core = function(rules, validation) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
-    elementArray.forEach(function(element) {
-      var hasInitialValue = element.hasAttribute('data-initial-value');
-      if (hasInitialValue) element.value = element.getAttribute('data-initial-value');
-    });
+    for (var i = 0; i < elementArray.length; i++) {
+
+      var element = elementArray[i];
+
+      var noInitialValue = !element.hasAttribute('data-initial-value');
+      if (noInitialValue) continue;
+
+      var isCheckbox = element.type === 'checkbox';
+      var isRadio = element.type === 'radio';
+      var isFile = element.type === 'file';
+      var intialValue = element.getAttribute('data-initial-value');
+
+      if (isCheckbox || isRadio) {
+        element.checked = intialValue == 'true';
+      } else if (isFile) {
+
+        var newElement = element.cloneNode(true);
+        newElement.removeAttribute('data-initial-value');
+        newElement.removeAttribute('data-simple-file-hash');
+
+        element.parentNode.replaceChild(newElement, element);
+
+      } else {
+        element.value = intialValue;
+      }
+
+    }
 
     return this;
   };

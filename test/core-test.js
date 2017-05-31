@@ -275,6 +275,50 @@ describe('core', function() {
     });
 
 
+    it('should reset the intial value of a checkbox', function() {
+
+      global.document = jsdom('<input type="checkbox" value="benzi" checked/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(input);
+
+      input.checked = false;
+
+      var isDirty = core.isFormDirty();
+      assert.strictEqual(isDirty, true);
+
+      core.resetIntialFormValues(input);
+
+      isDirty = core.isFormDirty();
+      assert.strictEqual(isDirty, false);
+
+    });
+
+    it('should blow up and replace a file input', function() {
+
+      global.document = jsdom('<input type="file" data-simple-file-hash="xx" data-initial-value="yy"/>');
+
+      let input = document.getElementsByTagName('input')[0];
+      core.storeInitialFormValues(input);
+
+      let hasInitialValue = input.hasAttribute('data-initial-value');
+      let hasFileHash = input.hasAttribute('data-simple-file-hash');
+
+      assert.strictEqual(hasInitialValue, true);
+      assert.strictEqual(hasFileHash, true);
+
+      core.resetIntialFormValues(input);
+
+      input = document.getElementsByTagName('input')[0]; //Its axtually a new element
+      hasInitialValue = input.hasAttribute('data-initial-value');
+      hasFileHash = input.hasAttribute('data-simple-file-hash');
+
+      assert.strictEqual(hasInitialValue, false);
+      assert.strictEqual(hasFileHash, false);
+
+    });
+
+
   });
 
   describe('#isFormDirty()', function() {
