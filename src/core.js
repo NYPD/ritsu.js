@@ -21,7 +21,7 @@ var core = function(rules, validation) {
     if (options.messageCallback === undefined) {
       defaultOptions.messageCallback = null;
     } else {
-      if (typeof options.messageCallback !== 'function') throw new Error('messageCallback is not a funciton');
+      if (typeof options.messageCallback !== 'function') throw new Error('messageCallback is not a function');
       defaultOptions.messageCallback = options.messageCallback;
     }
 
