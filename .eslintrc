@@ -1,8 +1,10 @@
 {
+  "extends": "eslint:recommended",
   "rules": {
     "no-unused-vars": ["error", {"varsIgnorePattern": "rules|ritsu|validation"}],
     "quotes": ["error", "single"],
-    "semi": ["error","always"]
+    "semi": ["error","always"],
+    "no-unneeded-ternary": ["error", { "defaultAssignment": false }]
   },
   "env": {
     "browser": true,
@@ -15,6 +17,6 @@
     "validation": true,
     "ritsu": true,
     "core": true
-  },
-  "extends": "eslint:recommended"
+  }
+
 }

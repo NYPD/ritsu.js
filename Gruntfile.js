@@ -12,7 +12,7 @@ module.exports = function(grunt) {
                  '  throw new Error(\'ritsu.js requires jQuery or a jQuery-compatible API\');\n' +
                  '}\n',
     ritsuHeader: 'var ritsu = (function() {',
-    ritsuFooter: 'return core(rules(), validation(rules()));\n' +
+    ritsuFooter: 'var r = rules(); return core(r, validation(r));\n' +
                  '})();',
     /* grunt stamp ************************************************************/
     stamp: {
@@ -65,7 +65,7 @@ module.exports = function(grunt) {
       options: {
         // Custom function to remove all module.exports
         process: function (src) {
-          return src.replace(/^(module\.exports).*/gm, '');
+          return src.replace(/^(module\.exports).*/gm, '').replace(/\$\{version\}*/, grunt.file.readJSON('package.json').version);
         }
       },
       dist: {

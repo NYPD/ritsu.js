@@ -1,5 +1,5 @@
-/* ritsu.js v1.1.2 
- * Created 2017-03-05
+/* ritsu.js v1.2.0 
+ * Created 2017-06-07
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -427,20 +427,30 @@ var validation = function(rules) {
 
 var core = function(rules, validation) {
 
+  var version = '1.2.0';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
-  var useBootstrap3Stlying = false;
-  var autoMarkInvalidFields = true;
-  var autoShowErrorMessages = false;
-
+  var defaultOptions = {
+    useBootstrap3Stlying: false,
+    autoMarkInvalidFields: true,
+    autoShowErrorMessages: false,
+    messageCallback: null
+  };
 
   var initialize = function(options) {
 
     var invalidOptions = typeof options !== 'object';
     if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
 
-    useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
-    autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
-    autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
+    defaultOptions.useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
+    defaultOptions.autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
+    defaultOptions.autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
+
+    if (options.messageCallback === undefined) {
+      defaultOptions.messageCallback = null;
+    } else {
+      if (typeof options.messageCallback !== 'function') throw new Error('messageCallback is not a funciton');
+      defaultOptions.messageCallback = options.messageCallback;
+    }
 
     var validationRules = options.validationRules;
     if (validationRules !== undefined) rules.addValidationRule(validationRules);
@@ -479,6 +489,51 @@ var core = function(rules, validation) {
       }
 
     });
+
+    return this;
+  };
+
+  var getInitialFormValue = function(selector) {
+
+    var elementArray = _getSelectorAsElementArray(selector);
+    if (elementArray.length === 0) return null;
+
+    return elementArray[0].getAttribute('data-initial-value');
+
+  };
+
+
+  var resetIntialFormValues = function(selector) {
+
+    var elementArray = _getSelectorAsElementArray(selector);
+
+    for (var i = 0; i < elementArray.length; i++) {
+
+      var element = elementArray[i];
+
+      var noInitialValue = !element.hasAttribute('data-initial-value');
+      if (noInitialValue) continue;
+
+      var isCheckbox = element.type === 'checkbox';
+      var isRadio = element.type === 'radio';
+      var isFile = element.type === 'file';
+      var intialValue = element.getAttribute('data-initial-value');
+
+      if (isCheckbox || isRadio) {
+        element.checked = intialValue == 'true';
+      } else if (isFile) {
+
+        var newElement = element.cloneNode(true);
+        newElement.removeAttribute('data-initial-value');
+        newElement.removeAttribute('data-simple-file-hash');
+
+        element.parentNode.replaceChild(newElement, element);
+
+      } else {
+        element.value = intialValue;
+      }
+
+    }
 
     return this;
   };
@@ -522,8 +577,9 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function(selector) {
+  var validate = function(selector, messageCallback) {
 
+    var messageCallbackProvided = messageCallback !== undefined;
     var elementArray = _getSelectorAsElementArray(selector);
 
     var isValid = true;
@@ -532,19 +588,30 @@ var core = function(rules, validation) {
 
       var invalidElement = !validation.validateElement(element);
 
+      if (defaultOptions.messageCallback !== null || messageCallbackProvided) {
+
+        if (messageCallbackProvided)
+          _handlemessageCallback(element, messageCallback, invalidElement);
+        else
+          _handlemessageCallback(element, defaultOptions.messageCallback, invalidElement);
+
+      }
+
       //Sets the entire form to false, just because their was at least 1 invalid field
       if (invalidElement) {
         isValid = false;
         element.setAttribute('data-invalid', true);
       } else {
         element.setAttribute('data-invalid', false);
-        _removeErrorMessage(element);
+
+        //If there is no callback go ahead and de the default remove error message
+        if (defaultOptions.messageCallback === null && !messageCallbackProvided) _removeErrorMessage(element);
       }
 
     });
 
-    if (autoMarkInvalidFields) markInvalidFields(selector);
-    if (autoShowErrorMessages) showErrorMessages(selector);
+    //If an messageCallback is provided use that always regardless of the "auto" settings
+    if (defaultOptions.messageCallback === null && !messageCallbackProvided) _defaultmessageCallback(elementArray);
 
     return isValid;
   };
@@ -555,10 +622,10 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
 
-      var errorElement = useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
+      var errorElement = defaultOptions.useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
 
       //If the user is using bootstrap and does not have the input in a form-group for some reason
-      if(errorElement === null)
+      if (errorElement === null)
         errorElement = element;
 
       var isInvalid = element.getAttribute('data-invalid') === 'true';
@@ -573,20 +640,67 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var showErrorMessages = function(selector) {
+  var getErrorMessage = function(selector) {
+
+    if (selector === undefined)
+      throw new Error('No selector passed in');
+
+    var errorMessages = getErrorMessages(selector);
+    return errorMessages[0] === undefined? null: errorMessages[0];
+  };
+
+  var getErrorMessages = function(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
-    elementArray.forEach(function(element) {
+    var errorMessages = [];
 
-      _removeErrorMessage(element); //Remove any previous old error messages
+    elementArray.forEach(function(element) {
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
+      if(isInvalid) errorMessages.push(_getErrorMessageForInput(element));
+    });
+
+    return errorMessages;
+
+  };
+
+  var getErrorMessagesAsMap = function(selector) {
+
+    var elementArray = _getSelectorAsElementArray(selector);
+
+    var errorMessageMap = {};
+
+    elementArray.forEach(function(element) {
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
+      if(isInvalid) errorMessageMap[element] = _getErrorMessageForInput(element);
+    });
+
+    return errorMessageMap;
+
+  };
+
+  var showErrorMessages = function(selector, messageCallback) {
+
+    var elementArray = _getSelectorAsElementArray(selector);
+    var messageCallbackProvided = messageCallback !== undefined;
+
+    for (var i = 0; i < elementArray.length; i++) {
+
+      var element = elementArray[i];
 
       var isValid = element.getAttribute('data-invalid') !== 'true';
-      if (isValid) return true;
+
+      if (defaultOptions.messageCallback !== null || messageCallbackProvided) {
+        _handlemessageCallback(element, messageCallbackProvided? messageCallback : defaultOptions.messageCallback, !isValid);
+      } else {
+        _removeErrorMessage(element); //Remove any previous old error messages
+      }
+
+      if (isValid) continue;
 
       var errorMessage = _getErrorMessageForInput(element);
 
-      if (useBootstrap3Stlying) {
+      if (defaultOptions.useBootstrap3Stlying) {
 
         var formGroup = _getClosestParentByClass(element, 'form-group');
         var helpBlock = formGroup.querySelector('.help-block');
@@ -625,7 +739,7 @@ var core = function(rules, validation) {
 
         var label = document.createElement('label');
         label.className = 'error-label';
-        label.htmlFor = elementId ? elementId : '';
+        label.htmlFor = elementId || '';
         label.innerHTML = errorMessage;
 
         var errorContainer = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
@@ -634,19 +748,24 @@ var core = function(rules, validation) {
 
       }
 
-    });
+    }
 
     return this;
   };
 
   //Private Methods ************************************************************
+
+  // Return an empty array if nothing is found
   var _getSelectorAsElementArray = function(selector) {
 
     var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
-    selector = isJquery ? selector.get() : selector;
+    if (isJquery) selector = selector.get();
 
     var selectorUndefined = selector === undefined;
     if (selectorUndefined) selector = Array.prototype.slice.call(document.querySelectorAll('input, textarea, select'));
+
+    var isStringSelector = typeof selector === 'string';
+    if (isStringSelector) selector = Array.prototype.slice.call(document.querySelectorAll(selector));
 
     var isNotArray = !Array.isArray(selector);
     if (isNotArray) selector = [selector];
@@ -681,12 +800,24 @@ var core = function(rules, validation) {
 
   var _removeErrorMessage = function(element) {
 
-    var parentElement = _getClosestParentByClass(element, useBootstrap3Stlying? 'form-group': 'error-label-container');
-    if(parentElement === null) return; //nothing to remove, just exit
+    var parentElement = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
+    if (parentElement === null) return; //nothing to remove, just exit
 
-    Array.prototype.slice.call(parentElement.querySelectorAll(useBootstrap3Stlying? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
+    Array.prototype.slice.call(parentElement.querySelectorAll(defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
       element.parentElement.removeChild(element);
     });
+
+  };
+
+  var _handlemessageCallback = function(element, messageCallback, invalidElement) {
+    var errorMessage = invalidElement? _getErrorMessageForInput(element): null;
+    messageCallback(element, errorMessage);
+  };
+
+  var _defaultmessageCallback = function(selector) {
+
+    if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
+    if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);
 
   };
 
@@ -715,19 +846,25 @@ var core = function(rules, validation) {
   };
 
   return {
+    version: version,
     rules: rules, //Access to the Rules API
 
     initialize: initialize,
     storeInitialFormValues: storeInitialFormValues,
+    getInitialFormValue: getInitialFormValue,
+    resetIntialFormValues: resetIntialFormValues,
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,
-    showErrorMessages: showErrorMessages
+    showErrorMessages: showErrorMessages,
+    getErrorMessage: getErrorMessage,
+    getErrorMessages: getErrorMessages,
+    getErrorMessagesAsMap: getErrorMessagesAsMap
 
   };
 
 };
 
 
-return core(rules(), validation(rules()));
+var r = rules(); return core(r, validation(r));
 })();

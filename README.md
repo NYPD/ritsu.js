@@ -16,4 +16,4 @@ No dependencies! Uses pure javascript. Make sure to checkout the browser [compat
 Read the [wiki.](https://github.com/NYPD/ritsu.js/wiki) Also there is probably tons of spelling mistakes and stuff. Please let me know if you find any.
 
 ## Anything else?
-I'm wondering if I should switch this from a singleton apporach to something else.
+I'm wondering if I should switch this from a singleton approach to something else.
