@@ -10,7 +10,7 @@ This all started as a need to easily validate my own forms fields without being 
 Perhaps someone else will find this useful.
 
 ## Dependencies?
-No dependencies! Uses pure javascript. Make sure to checkout the browser [compatibility table.](https://github.com/NYPD/ritsu.js/wiki#compatibility-table)
+No dependencies! Uses pure javascript. Make sure to check out the browser [compatibility table.](https://github.com/NYPD/ritsu.js/wiki#compatibility-table)
 
 ## Documentation
 Read the [wiki.](https://github.com/NYPD/ritsu.js/wiki) Also there is probably tons of spelling mistakes and stuff. Please let me know if you find any.
