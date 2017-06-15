@@ -146,21 +146,14 @@ describe('validation', function() {
 
     it('should validate an alpha input that has a validation pattern attribute', function() {
 
-      //Should fail
       var input = document.createElement('input');
       input.type = 'text';
-      input.className = 'alpha alpha-only';
-      input.value = '1337Speak';
-      input.setAttribute('required', '');
-
-      var validElement = validation.validateElement(input);
-      assert.isFalse(validElement);
-
+      input.value = '1338Speak';
       input.pattern = '1337Speak';
 
       //Should pass since there is a pattern attribute
-      validElement = validation.validateElement(input);
-      assert.isTrue(validElement);
+      let validElement = validation.validateElement(input);
+      assert.isFalse(validElement);
 
     });
 
@@ -169,18 +162,12 @@ describe('validation', function() {
       //Should fail
       var input = document.createElement('input');
       input.type = 'text';
-      input.className = 'numeric numeric-whole';
-      input.value = '1337Speak';
-      input.setAttribute('required', '');
-
-      var validElement = validation.validateElement(input);
-      assert.isFalse(validElement);
-
+      input.value = '1338Speak';
       input.pattern = '1337Speak';
 
       //Should pass since there is a pattern attribute
-      validElement = validation.validateElement(input);
-      assert.isTrue(validElement);
+      let validElement = validation.validateElement(input);
+      assert.isFalse(validElement);
 
     });
 
