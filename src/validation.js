@@ -33,7 +33,18 @@ var validation = function(rules) {
     var fieldValue = element.value;
     var isEmpty = fieldValue === undefined || fieldValue.trim() === '';
 
-    var noValidationNeeded = isEmpty && !isRequired && !isFile;//Cant check value of file inputs like this, let the _validateFileField() do it
+    var validationPattern = element.getAttribute('pattern');
+
+    var hasValidationPattern = validationPattern !== null;
+    if (hasValidationPattern) {
+
+      if (isEmpty && !isRequired) return validInput;
+
+      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      return userRegex.test(fieldValue);
+    }
+
+    var noValidationNeeded = isEmpty && !isRequired && !isFile; //Cant check value of file inputs like this, let the _validateFileField() do it
     if (noValidationNeeded) return validInput;
 
     if (isAlpha) validInput = _validateAlphaField(element);
@@ -60,7 +71,7 @@ var validation = function(rules) {
     var validFile = true;
 
     var isNotRequired = !element.hasAttribute('required');
-    if(isNotRequired) return validFile; //We dont care at all if it is not required (we cant eve validate it)
+    if (isNotRequired) return validFile; //We dont care at all if it is not required (we cant eve validate it)
 
     var simpleFileHash = element.getAttribute('data-simple-file-hash');
 
@@ -76,13 +87,6 @@ var validation = function(rules) {
 
     var validationPattern = element.getAttribute('pattern');
     var elementClassString = element.getAttribute('class');
-
-    var hasValidationPattern = validationPattern !== null;
-    //User supplied their own validation, use that instead
-    if (hasValidationPattern) {
-      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
-      return userRegex.test(element.value);
-    }
 
     var elementHasNoClasses = elementClassString === null || elementClassString === '';
     if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
@@ -101,20 +105,11 @@ var validation = function(rules) {
 
     var validNumeric = true;
 
-    var validationPattern = element.getAttribute('pattern');
-    var hasValidationPattern = validationPattern !== null;
+    var elementClassString = element.getAttribute('class');
+    var elementClasses = elementClassString ? elementClassString.split(' ') : ''; //In case there is no classes, make it empty strings for null safety
 
-    //User supplied their own validation, use that instead
-    if (hasValidationPattern) {
-      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
-      validNumeric = userRegex.test(element.value);
-    } else {
-      var elementClassString = element.getAttribute('class');
-      var elementClasses = elementClassString ? elementClassString.split(' ') : ''; //In case there is no classes, make it empty strings for null safety
-
-      var rule = rules.getRuleByRuleClass(elementClasses);
-      if (rule !== null) validNumeric = rule.validate(element);
-    }
+    var rule = rules.getRuleByRuleClass(elementClasses);
+    if (rule !== null) validNumeric = rule.validate(element);
 
     //If it is still valid, check min and max if it has any
     if (validNumeric) {
@@ -154,4 +149,4 @@ var validation = function(rules) {
 
 };
 
-module.exports = function(rules) {return validation(rules);};
+module.exports = function(rules) {  return validation(rules);};
