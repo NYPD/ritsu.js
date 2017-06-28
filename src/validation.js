@@ -40,7 +40,14 @@ var validation = function(rules) {
 
       if (isEmpty && !isRequired) return validInput;
 
-      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      var userRegex;
+
+      try {
+        userRegex = new RegExp(validationPattern, 'u');
+      } catch (exception) {
+        userRegex = new RegExp(validationPattern);
+      }
+
       return userRegex.test(fieldValue);
     }
 
@@ -149,4 +156,4 @@ var validation = function(rules) {
 
 };
 
-module.exports = function(rules) {  return validation(rules);};
+module.exports = function(rules) {return validation(rules);};

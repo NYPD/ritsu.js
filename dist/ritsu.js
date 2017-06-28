@@ -1,5 +1,5 @@
-/* ritsu.js v1.2.1 
- * Created 2017-06-23
+/* ritsu.js v1.2.2 
+ * Created 2017-06-28
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -309,7 +309,14 @@ var validation = function(rules) {
 
       if (isEmpty && !isRequired) return validInput;
 
-      var userRegex = new RegExp(validationPattern, 'u'); //unicode flag as that what the browser does with the pattern attribute
+      var userRegex;
+
+      try {
+        userRegex = new RegExp(validationPattern, 'u');
+      } catch (exception) {
+        userRegex = new RegExp(validationPattern);
+      }
+
       return userRegex.test(fieldValue);
     }
 
@@ -422,7 +429,7 @@ var validation = function(rules) {
 
 var core = function(rules, validation) {
 
-  var version = '1.2.1';
+  var version = '1.2.2';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
