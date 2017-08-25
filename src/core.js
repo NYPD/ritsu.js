@@ -76,7 +76,7 @@ var core = function(rules, validation) {
   };
 
 
-  var resetIntialFormValues = function(selector) {
+  var resetInitialFormValues = function(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -425,7 +425,8 @@ var core = function(rules, validation) {
     initialize: initialize,
     storeInitialFormValues: storeInitialFormValues,
     getInitialFormValue: getInitialFormValue,
-    resetIntialFormValues: resetIntialFormValues,
+    resetIntialFormValues: resetInitialFormValues, //DEPRECATED as of v1.2.3
+    resetInitialFormValues: resetInitialFormValues,
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,
