@@ -230,7 +230,7 @@ describe('core', function() {
 
   });
 
-  describe('#resetIntialFormValues()', function() {
+  describe('#resetInitialFormValues()', function() {
 
     it('should reset the intial value of an input', function() {
 
@@ -244,7 +244,7 @@ describe('core', function() {
       var isDirty = core.isFormDirty();
       assert.strictEqual(isDirty, true);
 
-      core.resetIntialFormValues(input);
+      core.resetInitialFormValues(input);
 
       isDirty = core.isFormDirty();
       assert.strictEqual(isDirty, false);
@@ -267,7 +267,7 @@ describe('core', function() {
       var isDirty = core.isFormDirty();
       assert.strictEqual(isDirty, true);
 
-      core.resetIntialFormValues();
+      core.resetInitialFormValues();
 
       isDirty = core.isFormDirty();
       assert.strictEqual(isDirty, false);
@@ -287,7 +287,7 @@ describe('core', function() {
       var isDirty = core.isFormDirty();
       assert.strictEqual(isDirty, true);
 
-      core.resetIntialFormValues(input);
+      core.resetInitialFormValues(input);
 
       isDirty = core.isFormDirty();
       assert.strictEqual(isDirty, false);
@@ -307,7 +307,7 @@ describe('core', function() {
       assert.strictEqual(hasInitialValue, true);
       assert.strictEqual(hasFileHash, true);
 
-      core.resetIntialFormValues(input);
+      core.resetInitialFormValues(input);
 
       input = document.getElementsByTagName('input')[0]; //Its axtually a new element
       hasInitialValue = input.hasAttribute('data-initial-value');
