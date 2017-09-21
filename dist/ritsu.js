@@ -1,5 +1,5 @@
-/* ritsu.js v1.2.2 
- * Created 2017-06-28
+/* ritsu.js v1.2.3 
+ * Created 2017-09-21
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -429,7 +429,7 @@ var validation = function(rules) {
 
 var core = function(rules, validation) {
 
-  var version = '1.2.2';
+  var version = '1.2.3';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -505,7 +505,7 @@ var core = function(rules, validation) {
   };
 
 
-  var resetIntialFormValues = function(selector) {
+  var resetInitialFormValues = function(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -854,7 +854,8 @@ var core = function(rules, validation) {
     initialize: initialize,
     storeInitialFormValues: storeInitialFormValues,
     getInitialFormValue: getInitialFormValue,
-    resetIntialFormValues: resetIntialFormValues,
+    resetIntialFormValues: resetInitialFormValues, //DEPRECATED as of v1.2.3
+    resetInitialFormValues: resetInitialFormValues,
     isFormDirty: isFormDirty,
     validate: validate,
     markInvalidFields: markInvalidFields,
