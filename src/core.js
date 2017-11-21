@@ -419,6 +419,9 @@ var core = function(rules, validation) {
   };
 
   return {
+    //For mocha tests temporarily
+    mocha_getSelectorAsElementArray : _getSelectorAsElementArray,
+
     version: version,
     rules: rules, //Access to the Rules API
 
