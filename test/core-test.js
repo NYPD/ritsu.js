@@ -5,6 +5,8 @@ const expect = chai.expect;
 
 const jsdom = require('jsdom').jsdom;
 const window = jsdom().defaultView;
+global.NodeList = window.NodeList;
+global.HTMLCollection = window.HTMLCollection;
 global.jQuery = require('jquery')(window); //need global for the jQueryIsPresent variable in core js
 
 const rules = require('../src/rules.js')();

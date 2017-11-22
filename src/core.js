@@ -340,6 +340,9 @@ var core = function(rules, validation) {
     var isStringSelector = typeof selector === 'string';
     if (isStringSelector) selector = Array.prototype.slice.call(document.querySelectorAll(selector));
 
+    var isNodeListOrHtmlCollection = selector instanceof NodeList || selector instanceof HTMLCollection;
+    if (isNodeListOrHtmlCollection) selector = Array.prototype.slice.call(selector);
+
     var isNotArray = !Array.isArray(selector);
     if (isNotArray) selector = [selector];
 
