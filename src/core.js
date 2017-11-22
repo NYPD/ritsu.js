@@ -349,12 +349,19 @@ var core = function(rules, validation) {
     var noElements = selector.length === 0;
     if (noElements) return []; // return empty array to prevent kabooms in the console
 
-    var firstElement = selector[0];
+    var containerInputs = [];
 
-    var isNotInputs = ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(firstElement.nodeName) === -1;
-    if (isNotInputs) selector = Array.prototype.slice.call(firstElement.querySelectorAll('input, textarea, select'));
+    selector.forEach(function(element) {
 
-    return selector;
+      var isNotInputs = ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(element.nodeName) === -1;
+
+      if (isNotInputs)
+        containerInputs = containerInputs.concat(Array.prototype.slice.call(element.querySelectorAll('input, textarea, select')));
+      else
+        containerInputs.push(element);
+    });
+
+    return containerInputs;
   };
 
   var _getClosestParentByClass = function(element, className) {

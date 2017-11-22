@@ -1214,13 +1214,12 @@ describe('core', function() {
 
     it('should return the same array of elements passed in', function() {
 
-      global.document = jsdom('<input type="text" class="alpha alpha-only" value="norf"/>');
+      global.document = jsdom('<input/>' + '<textarea></textarea>');
 
-      let inputArray = [document.querySelector('input')];
+      let inputArray = [document.querySelector('input'), document.querySelector('textarea')];
       let elementArray = core.mocha_getSelectorAsElementArray(inputArray);
 
-      expect(elementArray).to.have.lengthOf(1);
-      expect(elementArray).to.equal(inputArray);
+      expect(elementArray).to.have.lengthOf(2);
 
     });
 
@@ -1243,6 +1242,28 @@ describe('core', function() {
       let elementArray = core.mocha_getSelectorAsElementArray(inputs);
 
       expect(elementArray).to.have.lengthOf(2);
+
+    });
+
+    it('should return an array of 2 elements from two diffrent containers passed in', function() {
+
+      global.document = jsdom('<div id="1"><input/></div>' + '<div id="2"><input/></div>');
+
+      let div1 = document.getElementById('1');
+      let div2 = document.getElementById('2');
+      let elementArray = core.mocha_getSelectorAsElementArray([div1, div2]);
+
+      expect(elementArray).to.have.lengthOf(2);
+
+    });
+
+    it('should return an array of 3 elements from a css string selector of a container and an input', function() {
+
+      global.document = jsdom('<div><input/><input/></div>' + '<input class="lonely-driver"/>');
+
+      let elementArray = core.mocha_getSelectorAsElementArray('div, .lonely-driver');
+
+      expect(elementArray).to.have.lengthOf(3);
 
     });
 
