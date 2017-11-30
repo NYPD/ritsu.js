@@ -1,5 +1,5 @@
-/* ritsu.js v1.2.3 
- * Created 2017-09-21
+/* ritsu.js v1.3.0 
+ * Created 2017-11-29
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -90,7 +90,7 @@ var rules = function() {
      *
      * e.g. cool | cool-beans | cool beans | beans.
      */
-    var alphaOnlyRegexString = '^([A-Za-z@\.\-])+$';
+    var alphaOnlyRegexString = '^([A-Za-z@.-])+$';
     var alphaOnlyRegex = new RegExp(alphaOnlyRegexString.replace(/@/g, noSpace ? '' : '\\s'));
 
     return alphaOnlyRegex.test(value);
@@ -212,14 +212,22 @@ var rules = function() {
     return errorMessage;
   };
 
+  /**
+   * @deprecated Since v1.3.0. Use numeric-whole instead and specify a min/max on the element
+   */
   var _validateNumericFullYear = function(element) {
     /*
-     * A four digit number
-     *
-     * e.g. 1999 | 2010 | 0000
-     */
+       * A four digit number
+       *
+       * e.g. 1999 | 2010 | 0000
+       */
+    // eslint-disable-next-line no-console
+    console.warn(
+      'numeric-full-year has been deprecated since v1.3.0. Use numeric-whole instead and specify a min/max on the element'
+    );
     return /^(\d{4})$/.test(element.value);
   };
+
 
   var _getNumericFullYearErrorMessage = function(element) {
 
@@ -429,7 +437,7 @@ var validation = function(rules) {
 
 var core = function(rules, validation) {
 
-  var version = '1.2.3';
+  var version = '1.3.0';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -769,18 +777,28 @@ var core = function(rules, validation) {
     var isStringSelector = typeof selector === 'string';
     if (isStringSelector) selector = Array.prototype.slice.call(document.querySelectorAll(selector));
 
+    var isNodeListOrHtmlCollection = selector instanceof NodeList || selector instanceof HTMLCollection;
+    if (isNodeListOrHtmlCollection) selector = Array.prototype.slice.call(selector);
+
     var isNotArray = !Array.isArray(selector);
     if (isNotArray) selector = [selector];
 
     var noElements = selector.length === 0;
     if (noElements) return []; // return empty array to prevent kabooms in the console
 
-    var firstElement = selector[0];
+    var containerInputs = [];
 
-    var isNotInputs = ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(firstElement.nodeName) === -1;
-    if (isNotInputs) selector = Array.prototype.slice.call(firstElement.querySelectorAll('input, textarea, select'));
+    selector.forEach(function(element) {
 
-    return selector;
+      var isNotInputs = ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(element.nodeName) === -1;
+
+      if (isNotInputs)
+        containerInputs = containerInputs.concat(Array.prototype.slice.call(element.querySelectorAll('input, textarea, select')));
+      else
+        containerInputs.push(element);
+    });
+
+    return containerInputs;
   };
 
   var _getClosestParentByClass = function(element, className) {
@@ -848,6 +866,9 @@ var core = function(rules, validation) {
   };
 
   return {
+    //For mocha tests temporarily
+
+
     version: version,
     rules: rules, //Access to the Rules API
 
