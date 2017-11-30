@@ -65,7 +65,9 @@ module.exports = function(grunt) {
       options: {
         // Custom function to remove all module.exports
         process: function (src) {
-          return src.replace(/^(module\.exports).*/gm, '').replace(/\$\{version\}*/, grunt.file.readJSON('package.json').version);
+          return src.replace(/^(module\.exports).*/gm, '')
+                    .replace(/^(.*mocha_).*/gm, '')
+                    .replace(/\$\{version\}*/, grunt.file.readJSON('package.json').version);
         }
       },
       dist: {

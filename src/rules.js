@@ -83,7 +83,7 @@ var rules = function() {
      *
      * e.g. cool | cool-beans | cool beans | beans.
      */
-    var alphaOnlyRegexString = '^([A-Za-z@\.\-])+$';
+    var alphaOnlyRegexString = '^([A-Za-z@.-])+$';
     var alphaOnlyRegex = new RegExp(alphaOnlyRegexString.replace(/@/g, noSpace ? '' : '\\s'));
 
     return alphaOnlyRegex.test(value);
@@ -205,14 +205,22 @@ var rules = function() {
     return errorMessage;
   };
 
+  /**
+   * @deprecated Since v1.3.0. Use numeric-whole instead and specify a min/max on the element
+   */
   var _validateNumericFullYear = function(element) {
     /*
-     * A four digit number
-     *
-     * e.g. 1999 | 2010 | 0000
-     */
+       * A four digit number
+       *
+       * e.g. 1999 | 2010 | 0000
+       */
+    // eslint-disable-next-line no-console
+    console.warn(
+      'numeric-full-year has been deprecated since v1.3.0. Use numeric-whole instead and specify a min/max on the element'
+    );
     return /^(\d{4})$/.test(element.value);
   };
+
 
   var _getNumericFullYearErrorMessage = function(element) {
 

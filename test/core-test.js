@@ -5,6 +5,8 @@ const expect = chai.expect;
 
 const jsdom = require('jsdom').jsdom;
 const window = jsdom().defaultView;
+global.NodeList = window.NodeList;
+global.HTMLCollection = window.HTMLCollection;
 global.jQuery = require('jquery')(window); //need global for the jQueryIsPresent variable in core js
 
 const rules = require('../src/rules.js')();
@@ -16,18 +18,19 @@ describe('core', function() {
 
   describe('#initialize()', function() {
 
-    it('should throw an Error when the options passed in is not an object', function() {
+    it('should throw an error when the options parameter passed in is not an object', function() {
       expect(function() {
         core.initialize('init');
       }).to.throw(Error);
     });
 
-    it('should pass when the options passed in is any object', function() {
+    it('should pass when the options parameter passed in is any object', function() {
 
       var options = {
         useBootstrap3Stlying: true,
         autoMarkInvalidFields: false,
-        autoShowErrorMessages: true
+        autoShowErrorMessages: true,
+        coolBeans: 'really cool'
       };
 
       expect(function() {
@@ -36,7 +39,7 @@ describe('core', function() {
 
     });
 
-    it('should throw an Error when the messageHandler property passed in is not a function', function() {
+    it('should throw an Error when the messageCallback property passed in is not a function', function() {
       expect(function() {
 
         var options = {
@@ -47,7 +50,7 @@ describe('core', function() {
       }).to.throw(Error);
     });
 
-    it('should pass when the messageHandler property passed in is a function', function() {
+    it('should pass when the messageCallback property passed in is a function', function() {
       expect(function() {
 
         var options = {
@@ -68,8 +71,7 @@ describe('core', function() {
 
   describe('#storeInitialFormValues()', function() {
 
-
-    it('should store initialValue for a text input element passed in', function() {
+    it('should store the initial value of a text input element passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" value="bob"/>');
 
@@ -84,24 +86,7 @@ describe('core', function() {
 
     });
 
-    it('should store initialValue for a jQuery text input element passed in', function() {
-
-      global.document = jsdom('<input type="text" class="alpha alpha-only" value="bob"/>');
-
-      let input = document.getElementsByTagName('input')[0];
-      core.storeInitialFormValues(jQuery(input));
-
-      //change the current value
-      input.value = 'crepes';
-
-      let intialValue = input.getAttribute('data-initial-value');
-      assert.strictEqual(intialValue, 'bob');
-
-      delete global.window;
-
-    });
-
-    it('should store initialValue for a text input element on the document since nothing was passed in', function() {
+    it('should store the initial value of a text input element on the document since nothing was passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
@@ -116,23 +101,7 @@ describe('core', function() {
 
     });
 
-    it('should store initialValue for a text input element on the document when a container is passed in', function() {
-
-      global.document = jsdom('<div><input type="text" class="alpha alpha-only" value="jeans"/></div>');
-
-      let div = document.getElementsByTagName('div')[0];
-      let input = document.getElementsByTagName('input')[0];
-      core.storeInitialFormValues(div);
-
-      //change the current value
-      input.value = 'crepes';
-
-      let intialValue = input.getAttribute('data-initial-value');
-      assert.strictEqual(intialValue, 'jeans');
-
-    });
-
-    it('should store initialValue for a checkbox input element passed in', function() {
+    it('should store the initial value of a checkbox input element passed in', function() {
 
       global.document = jsdom('<input type="checkbox" checked/>');
 
@@ -155,7 +124,7 @@ describe('core', function() {
 
     });
 
-    it('should store initialValue for a radio input element passed in', function() {
+    it('should store the initial value of a radio input element passed in', function() {
 
       global.document = jsdom('<input type="radio" name="sex" value="male" id="male" checked/>' +
         '<input type="radio" name="sex" value="female" id="female"/>');
@@ -187,7 +156,7 @@ describe('core', function() {
     });
 
     //Cant test out a file input too well. Just check to see if an initial value is stored
-    it('should store initialValue for a file input element passed in', function() {
+    it('should store the initial value for a file input element passed in', function() {
 
       global.document = jsdom('<input type="file" data-simple-file-hash="easyFileHash420" />');
 
@@ -199,7 +168,6 @@ describe('core', function() {
 
     });
 
-
     after(function() {
       global.document = null;
     });
@@ -208,7 +176,7 @@ describe('core', function() {
 
   describe('#getInitialFormValue()', function() {
 
-    it('should get the intial value of an input', function() {
+    it('should get the intial value of a text input', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
@@ -232,7 +200,7 @@ describe('core', function() {
 
   describe('#resetInitialFormValues()', function() {
 
-    it('should reset the intial value of an input', function() {
+    it('should reset the intial value of a text input', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
 
@@ -251,7 +219,7 @@ describe('core', function() {
 
     });
 
-    it('should reset the intial value of inputs', function() {
+    it('should reset the intial value of mulitple inputs', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" id="input1"  value="benzi"/>' +
         '<input type="text" class="alpha alpha-only" id="input2"  value="benzi"/>');
@@ -318,7 +286,6 @@ describe('core', function() {
 
     });
 
-
   });
 
   describe('#isFormDirty()', function() {
@@ -350,21 +317,6 @@ describe('core', function() {
 
     });
 
-    it('should return dirty for a jQuery text input element passed in', function() {
-
-      global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
-
-      let input = document.getElementsByTagName('input')[0];
-      core.storeInitialFormValues(jQuery(input));
-
-      //change the current value
-      input.value = 'crepes';
-
-      var isDirty = core.isFormDirty(input);
-      assert.isTrue(isDirty);
-
-    });
-
     it('should return dirty for a text input element on the document since nothing was passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" value="benzi"/>');
@@ -375,23 +327,6 @@ describe('core', function() {
       document.getElementsByTagName('input')[0].value = 'crepes';
 
       var isDirty = core.isFormDirty();
-      assert.isTrue(isDirty);
-
-    });
-
-    it('should return dirty for a text input element on the document when a container is passed in', function() {
-
-      global.document = jsdom('<div><input type="text" class="alpha alpha-only" value="jeans"/></div>');
-
-      let div = document.getElementsByTagName('div')[0];
-      let input = document.getElementsByTagName('input')[0];
-
-      core.storeInitialFormValues(input);
-
-      //change the current value
-      input.value = 'crepes';
-
-      var isDirty = core.isFormDirty(div);
       assert.isTrue(isDirty);
 
     });
@@ -473,43 +408,6 @@ describe('core', function() {
 
     });
 
-    it('should validate a jQuery input element passed in', function() {
-
-      global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
-
-      let input = document.getElementsByTagName('input')[0];
-      let $input = jQuery(input);
-
-      //Make sure its passes
-      input.value = 'beans';
-      var isValid = core.validate($input);
-      assert.isTrue(isValid);
-
-      //Make sure its fails
-      input.value = 'bea3ns';
-      isValid = core.validate($input);
-      assert.isFalse(isValid);
-
-    });
-
-    it('should validate a string selector passed in', function() {
-
-      global.document = jsdom('<input type="text" class="alpha alpha-only" id="cool-input"/>');
-
-      let input = document.getElementsByTagName('input')[0];
-
-      //Make sure its passes
-      input.value = 'beans';
-      var isValid = core.validate('#cool-input');
-      assert.isTrue(isValid);
-
-      //Make sure its fails
-      input.value = 'bea3ns';
-      isValid = core.validate('#cool-input');
-      assert.isFalse(isValid);
-
-    });
-
     it('should validate an input element in the document since nothing was passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
@@ -524,25 +422,6 @@ describe('core', function() {
       //Make sure its fails
       input.value = 'bea3ns';
       isValid = core.validate();
-      assert.isFalse(isValid);
-
-    });
-
-    it('should validate an input element based on the jQuery container passed in', function() {
-
-      global.document = jsdom('<div><input type="text" class="alpha alpha-only"/></div>');
-
-      let div = document.getElementsByTagName('div')[0];
-      let input = document.getElementsByTagName('input')[0];
-
-      //Make sure its passes
-      input.value = 'beans';
-      var isValid = core.validate(div);
-      assert.isTrue(isValid);
-
-      //Make sure its fails
-      input.value = 'bea3ns';
-      isValid = core.validate(div);
       assert.isFalse(isValid);
 
     });
@@ -575,7 +454,7 @@ describe('core', function() {
 
     });
 
-    it('should set an input element passed in with a data attribute of invalid = true', function() {
+    it('should set an input element passed in with the attribute data-invalid equal to true', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
 
@@ -589,7 +468,7 @@ describe('core', function() {
 
     });
 
-    it('should set an input element passed in with a data attribute of invalid = false', function() {
+    it('should set an input element passed in with the attribute data-invalid equal to false', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only"/>');
 
@@ -780,17 +659,7 @@ describe('core', function() {
 
     });
 
-    it('should get the error message for an input with a container selector passed in', function() {
-
-      global.document = jsdom('<div><input type="text" class="alpha alpha-only" data-invalid="true" required/></div>');
-
-      let errorMessage = core.getErrorMessage('div');
-
-      expect(errorMessage).to.equal('Only letters, spaces, hypens, and periods are allowed');
-
-    });
-
-    it('should return null for for a input that is not invalid', function() {
+    it('should return null for a input that is not invalid', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
 
@@ -825,7 +694,7 @@ describe('core', function() {
 
     });
 
-    it('should not throw an error when nothing is passed in', function() {
+    it('should not throw an error and get all error messages when nothing is passed in', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
 
@@ -834,20 +703,7 @@ describe('core', function() {
 
     });
 
-    it('should get the error messages for inputs with a container selector passed in', function() {
-
-      global.document = jsdom('<div>' +
-        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
-        '<input type="text" class="numeric numeric-whole" data-invalid="true" required/>' +
-        '</div>');
-
-      let errorMessages = core.getErrorMessages('div');
-
-      expect(errorMessages.length).to.equal(2);
-
-    });
-
-    it('should return and empty array for a input that is not invalid', function() {
+    it('should return and empty array for a input that is valid', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
 
@@ -948,24 +804,6 @@ describe('core', function() {
       labelExists = input.nextElementSibling !== null;
 
       assert.isFalse(labelExists);
-
-    });
-
-    it('should add an error message label next to the jQuery input', function() {
-
-      global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
-
-      let input = document.getElementsByTagName('input')[0];
-
-      //Check label does not exist
-      var labelExists = input.nextElementSibling !== null;
-      assert.isFalse(labelExists);
-
-      core.showErrorMessages(jQuery(input));
-
-      //Check label exists
-      labelExists = input.nextElementSibling !== null;
-      assert.isTrue(labelExists);
 
     });
 
@@ -1227,23 +1065,6 @@ describe('core', function() {
 
     });
 
-    it('should mark a jQuery input element passed in with a .has-error class', function() {
-
-      core.initialize({
-        autoMarkInvalidFields: true
-      });
-
-      global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
-
-      let input = document.getElementsByTagName('input')[0];
-
-      core.validate(jQuery(input));
-
-      var hasHasErrorClass = input.classList.contains('has-error');
-      assert.isTrue(hasHasErrorClass);
-
-    });
-
     it('should mark an input element with a .has-error class when nothing is passed in', function() {
 
       core.initialize({
@@ -1259,29 +1080,6 @@ describe('core', function() {
       assert.isFalse(hasHasErrorClass);
 
       core.validate();
-
-      //Make sure there is a class
-      hasHasErrorClass = input.classList.contains('has-error');
-      assert.isTrue(hasHasErrorClass);
-
-    });
-
-    it('should mark an input element with a .has-error class when nothing a container is passed in', function() {
-
-      core.initialize({
-        autoMarkInvalidFields: true
-      });
-
-      global.document = jsdom('<div class="form-group"><input type="text" class="alpha alpha-only" value="b3ans"/></div>');
-
-      let formGroup = document.getElementsByTagName('div')[0];
-      let input = document.getElementsByTagName('input')[0];
-
-      //Make sure there is no class
-      var hasHasErrorClass = input.classList.contains('has-error');
-      assert.isFalse(hasHasErrorClass);
-
-      core.validate(formGroup);
 
       //Make sure there is a class
       hasHasErrorClass = input.classList.contains('has-error');
@@ -1341,7 +1139,138 @@ describe('core', function() {
 
   });
 
+  describe('#_getSelectorAsElementArray()', function() {
+
+    it('should return an empty array if no form elements are found', function() {
+
+      global.document = jsdom('<p>No form elements here boss</p>');
+
+      let elementArray = core.mocha_getSelectorAsElementArray('input');
+
+      expect(elementArray).to.have.lengthOf(0);
+
+    });
+
+    it('should return an array of one element of which was passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="norf"/>');
+
+      let input = document.querySelector('input');
+      let elementArray = core.mocha_getSelectorAsElementArray(input);
+
+      expect(elementArray).to.have.lengthOf(1);
+      expect(elementArray[0]).to.equal(input);
+
+    });
+
+    it('should return an array of one element with a css selector string passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="norf"/>');
+
+      let input = document.querySelector('input');
+      let elementArray = core.mocha_getSelectorAsElementArray('.alpha');
+
+      expect(elementArray).to.have.lengthOf(1);
+      expect(elementArray[0]).to.equal(input);
+
+    });
+
+    it('should return an array of one element from a jQuery element passed in', function() {
+
+      global.document = jsdom('<input type="text" class="alpha alpha-only" value="norf"/>');
+
+      global.jQuery = require('jquery')(document.defaultView); //need global for the jQueryIsPresent variable in core js
+
+      let input = document.getElementsByTagName('input')[0];
+      let elementArray = core.mocha_getSelectorAsElementArray(jQuery(input));
+
+      expect(elementArray).to.have.lengthOf(1);
+      expect(elementArray[0]).to.equal(input);
+
+    });
+
+    it('should return an array of all 3 elements on the document since nothing was passed in', function() {
+
+      global.document = jsdom(
+        '<input type="text" class="alpha alpha-only" value="norf"/>' + '<select></select>' + '<textarea></textarea>'
+      );
+
+      let elementArray = core.mocha_getSelectorAsElementArray();
+
+      expect(elementArray).to.have.lengthOf(3);
+
+    });
+
+    it('should return an array of all 2 elements in the div container of which was passed in', function() {
+
+      global.document = jsdom('<input/>' + '<input/>');
+
+      let div = document.getElementsByTagName('div')[0];
+      let elementArray = core.mocha_getSelectorAsElementArray(div);
+
+      expect(elementArray).to.have.lengthOf(2);
+
+    });
+
+    it('should return the same array of elements passed in', function() {
+
+      global.document = jsdom('<input/>' + '<textarea></textarea>');
+
+      let inputArray = [document.querySelector('input'), document.querySelector('textarea')];
+      let elementArray = core.mocha_getSelectorAsElementArray(inputArray);
+
+      expect(elementArray).to.have.lengthOf(2);
+
+    });
+
+    it('should return an array of 2 elements from a NodeList passed in', function() {
+
+      global.document = jsdom('<input/>' + '<input/>');
+
+      let inputs = document.querySelectorAll('input');
+      let elementArray = core.mocha_getSelectorAsElementArray(inputs);
+
+      expect(elementArray).to.have.lengthOf(2);
+
+    });
+
+    it('should return an array of 2 elements from a HTMLCollection passed in', function() {
+
+      global.document = jsdom('<input/>' + '<input/>');
+
+      let inputs = document.getElementsByTagName('input');
+      let elementArray = core.mocha_getSelectorAsElementArray(inputs);
+
+      expect(elementArray).to.have.lengthOf(2);
+
+    });
+
+    it('should return an array of 2 elements from two diffrent containers passed in', function() {
+
+      global.document = jsdom('<div id="1"><input/></div>' + '<div id="2"><input/></div>');
+
+      let div1 = document.getElementById('1');
+      let div2 = document.getElementById('2');
+      let elementArray = core.mocha_getSelectorAsElementArray([div1, div2]);
+
+      expect(elementArray).to.have.lengthOf(2);
+
+    });
+
+    it('should return an array of 3 elements from a css string selector of a container and an input', function() {
+
+      global.document = jsdom('<div><input/><input/></div>' + '<input class="lonely-driver"/>');
+
+      let elementArray = core.mocha_getSelectorAsElementArray('div, .lonely-driver');
+
+      expect(elementArray).to.have.lengthOf(3);
+
+    });
+
+  });
+
   after(function() {
+    delete global.document;
     delete global.jQuery;
   });
 

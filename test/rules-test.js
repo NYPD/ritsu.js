@@ -27,6 +27,12 @@ describe('rules', function() {
 
   describe('#addValidationRule()', function() {
 
+    let document = null;
+
+    before(function() {
+      document = jsdom('<html><body></body></html>');
+    });
+
     it('should add a new validation rule with multiple parameters', function() {
 
       var rule = rules.getRuleByRuleClass('numeric-beans');
@@ -137,6 +143,10 @@ describe('rules', function() {
 
     });
 
+    after(function() {
+      rules = require('../src/rules.js')();
+    });
+
   });
 
 
@@ -145,7 +155,6 @@ describe('rules', function() {
     let document = null;
 
     before(function() {
-      rules = require('../src/rules.js')();
       document = jsdom('<html><body></body></html>');
     });
 

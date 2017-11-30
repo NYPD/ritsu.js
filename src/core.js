@@ -340,18 +340,28 @@ var core = function(rules, validation) {
     var isStringSelector = typeof selector === 'string';
     if (isStringSelector) selector = Array.prototype.slice.call(document.querySelectorAll(selector));
 
+    var isNodeListOrHtmlCollection = selector instanceof NodeList || selector instanceof HTMLCollection;
+    if (isNodeListOrHtmlCollection) selector = Array.prototype.slice.call(selector);
+
     var isNotArray = !Array.isArray(selector);
     if (isNotArray) selector = [selector];
 
     var noElements = selector.length === 0;
     if (noElements) return []; // return empty array to prevent kabooms in the console
 
-    var firstElement = selector[0];
+    var containerInputs = [];
 
-    var isNotInputs = ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(firstElement.nodeName) === -1;
-    if (isNotInputs) selector = Array.prototype.slice.call(firstElement.querySelectorAll('input, textarea, select'));
+    selector.forEach(function(element) {
 
-    return selector;
+      var isNotInputs = ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(element.nodeName) === -1;
+
+      if (isNotInputs)
+        containerInputs = containerInputs.concat(Array.prototype.slice.call(element.querySelectorAll('input, textarea, select')));
+      else
+        containerInputs.push(element);
+    });
+
+    return containerInputs;
   };
 
   var _getClosestParentByClass = function(element, className) {
@@ -419,6 +429,9 @@ var core = function(rules, validation) {
   };
 
   return {
+    //For mocha tests temporarily
+    mocha_getSelectorAsElementArray : _getSelectorAsElementArray,
+
     version: version,
     rules: rules, //Access to the Rules API
 
