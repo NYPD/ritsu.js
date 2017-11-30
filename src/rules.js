@@ -83,7 +83,7 @@ var rules = function() {
      *
      * e.g. cool | cool-beans | cool beans | beans.
      */
-    var alphaOnlyRegexString = '^([A-Za-z@\.\-])+$';
+    var alphaOnlyRegexString = '^([A-Za-z@.-])+$';
     var alphaOnlyRegex = new RegExp(alphaOnlyRegexString.replace(/@/g, noSpace ? '' : '\\s'));
 
     return alphaOnlyRegex.test(value);
