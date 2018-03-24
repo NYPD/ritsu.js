@@ -1,5 +1,5 @@
-/* ritsu.js v1.3.0 
- * Created 2017-11-29
+/* ritsu.js v1.3.1 
+ * Created 2018-03-23
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -437,7 +437,7 @@ var validation = function(rules) {
 
 var core = function(rules, validation) {
 
-  var version = '1.3.0';
+  var version = '1.3.1';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -740,7 +740,7 @@ var core = function(rules, validation) {
           span.className = 'help-block ritsu-error';
           span.appendChild(b);
 
-          formGroup.appendChild(span);
+          element.parentElement.appendChild(span);
         }
 
       } else {
