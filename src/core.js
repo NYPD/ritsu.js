@@ -303,7 +303,7 @@ var core = function(rules, validation) {
           span.className = 'help-block ritsu-error';
           span.appendChild(b);
 
-          formGroup.appendChild(span);
+          element.parentElement.appendChild(span);
         }
 
       } else {

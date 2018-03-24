@@ -830,6 +830,36 @@ describe('core', function() {
 
     });
 
+    it('should add an error message to a the .col div in a form-horizontal when bootstrap is being used', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      global.document = jsdom('<form class="form-horizontal">' +
+                                '<div class="form-group">' +
+                                  '<label>Cool Label</label>' +
+                                  '<div class="col-xs-8">' +
+                                    '<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
+                                  '</div>' +
+                                '</div>'+
+                              '</form>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check .help=block does not exist
+      var colElements = formGroup.querySelectorAll('.col-xs-8 > *');
+      assert.isTrue(colElements.length === 1);
+
+      core.showErrorMessages(input);
+
+      //Check .help=block does exist
+      colElements = formGroup.querySelectorAll('.col-xs-8 > *');
+      assert.isTrue(colElements.length === 2);
+
+    });
+
     it('should remove an error message from a .form-group that had no .help-block when bootstrap is being used', function() {
 
       core.initialize({
