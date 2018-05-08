@@ -1,5 +1,5 @@
-/* ritsu.js v1.3.1 
- * Created 2018-03-23
+/* ritsu.js v1.3.2 
+ * Created 2018-05-07
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -437,7 +437,7 @@ var validation = function(rules) {
 
 var core = function(rules, validation) {
 
-  var version = '1.3.1';
+  var version = '1.3.2';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -709,10 +709,10 @@ var core = function(rules, validation) {
       if (isValid) continue;
 
       var errorMessage = _getErrorMessageForInput(element);
+      var formGroup = _getClosestParentByClass(element, 'form-group');
 
-      if (defaultOptions.useBootstrap3Stlying) {
+      if (defaultOptions.useBootstrap3Stlying  && formGroup != null) {
 
-        var formGroup = _getClosestParentByClass(element, 'form-group');
         var helpBlock = formGroup.querySelector('.help-block');
 
         var hasHelpBlock = helpBlock !== null;
