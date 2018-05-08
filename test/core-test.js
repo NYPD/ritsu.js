@@ -1069,6 +1069,24 @@ describe('core', function() {
 
     });
 
+    it('should not throw an exception when using bootstrap 3 and validating an input not in a .form-group', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      global.document = jsdom('<div>' +
+        '<input type="text" class="alpha alpha-only" data-invalid="true"/>' +
+        '</div>');
+
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is a help block and a ritsu-error <b>
+
+      core.showErrorMessages(input);
+
+    });
+
     afterEach(function() {
       core.initialize({});
     });

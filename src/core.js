@@ -272,10 +272,10 @@ var core = function(rules, validation) {
       if (isValid) continue;
 
       var errorMessage = _getErrorMessageForInput(element);
+      var formGroup = _getClosestParentByClass(element, 'form-group');
 
-      if (defaultOptions.useBootstrap3Stlying) {
+      if (defaultOptions.useBootstrap3Stlying  && formGroup != null) {
 
-        var formGroup = _getClosestParentByClass(element, 'form-group');
         var helpBlock = formGroup.querySelector('.help-block');
 
         var hasHelpBlock = helpBlock !== null;
