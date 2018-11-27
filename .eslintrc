@@ -4,7 +4,10 @@
     "no-unused-vars": ["error", {"varsIgnorePattern": "rules|ritsu|validation"}],
     "quotes": ["error", "single"],
     "semi": ["error","always"],
-    "no-unneeded-ternary": ["error", { "defaultAssignment": false }]
+    "no-unneeded-ternary": ["error", { "defaultAssignment": false }],
+    "no-new-wrappers": "error",
+    "radix": ["error", "always"],
+    "no-restricted-globals": ["error", "isNaN", "isFinite"]
   },
   "env": {
     "browser": true,
