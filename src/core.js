@@ -383,10 +383,14 @@ var core = function(rules, validation) {
 
   var _removeErrorMessage = function(element) {
 
-    var parentElement = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
-    if (parentElement === null) return; //nothing to remove, just exit
+    var parentElement = _getClosestParentByClass(element, 'form-group');
+    if (parentElement === null) parentElement = element.parentElement;
 
-    Array.prototype.slice.call(parentElement.querySelectorAll(defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
+    if (parentElement === null) return; //still nothing to remove, just exit
+
+    var querySelector = defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label';
+
+    Array.prototype.slice.call(parentElement.querySelectorAll(querySelector)).forEach(function(element) {
       element.parentElement.removeChild(element);
     });
 
