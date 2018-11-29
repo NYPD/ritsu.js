@@ -127,7 +127,7 @@ var validation = function(rules) {
        * This won't work in locales that use commas as decimal places.
        */
       var fieldValueAsNum = Number(element.value.replace(',', ''));
-      if (isNaN(fieldValueAsNum)) return validNumeric; //Not a number, just return
+      if (Number.isNaN(fieldValueAsNum)) return validNumeric; //Not a number, just return
 
       var minAttr = element.getAttribute('min');
       var maxAttr = element.getAttribute('max');

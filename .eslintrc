@@ -6,6 +6,8 @@
     "semi": ["error","always"],
     "no-unneeded-ternary": ["error", { "defaultAssignment": false }],
     "no-new-wrappers": "error",
+    "no-new-func": "error",
+    "no-loop-func": "error",
     "radix": ["error", "always"],
     "no-restricted-globals": ["error", "isNaN", "isFinite"]
   },

@@ -57,10 +57,12 @@ var rules = function() {
       throw new Error('The validation function for a new validation rule is missing or is not of type function');
 
     if (errorMessageParam === undefined)
-      errorMessageParam = new Function('', 'return "Invalid value";');
+      errorMessageParam = function defaultErrorMessage() { return 'Invalid value'; };
 
-    if (typeof errorMessageParam === 'string')
-      errorMessageParam = new Function('', 'return "' + errorMessageParam + '";');
+    if (typeof errorMessageParam === 'string') {
+      var customErrorMessage = errorMessageParam;
+      errorMessageParam = function defaultCustomErrorMessage() { return customErrorMessage; };
+    }
 
     //Remove exsiting rule if found
     var rule = getRuleByRuleClass(ruleClass);

@@ -131,7 +131,7 @@ var core = function(rules, validation) {
       var intialValue = element.getAttribute('data-initial-value');
 
       if (isCheckbox || isRadio) {
-        valueChanged = intialValue != '' + element.checked; //Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
+        valueChanged = intialValue != String(element.checked); //Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
       } else if (isFile) {
         var hasFileAttached = element.files.length > 0;
         valueChanged = intialValue !== (hasFileAttached ? element.files[0].name + element.files[0].size : element.getAttribute('data-simple-file-hash'));
@@ -425,7 +425,6 @@ var core = function(rules, validation) {
     if (rule !== null) errorMessage = rule.getErrorMessage(element);
 
     return errorMessage;
-
   };
 
   return {
