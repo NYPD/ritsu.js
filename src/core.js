@@ -383,7 +383,7 @@ var core = function(rules, validation) {
 
   var _removeErrorMessage = function(element) {
 
-    var parentElement = _getClosestParentByClass(element, 'form-group');
+    var parentElement = _getClosestParentByClass(element, 'form-group'); // TODO: might interfere with non bootstrap pages that have the same class.
     if (parentElement === null) parentElement = element.parentElement;
 
     if (parentElement === null) return; //still nothing to remove, just exit
