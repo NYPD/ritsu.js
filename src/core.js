@@ -75,17 +75,20 @@ var core = function(rules, validation) {
 
   };
 
-
   var resetInitialFormValues = function(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
-    for (var i = 0; i < elementArray.length; i++) {
+    var initialValueElements = elementArray.reduce(function(accumulator, element) {
 
-      var element = elementArray[i];
+      var hasInitialValue = element.hasAttribute('data-initial-value');
+      if(hasInitialValue) accumulator.push(element);
 
-      var noInitialValue = !element.hasAttribute('data-initial-value');
-      if (noInitialValue) continue;
+      return accumulator;
+
+    }, []);
+
+    initialValueElements.forEach(function(element) {
 
       var isCheckbox = element.type === 'checkbox';
       var isRadio = element.type === 'radio';
@@ -106,7 +109,7 @@ var core = function(rules, validation) {
         element.value = intialValue;
       }
 
-    }
+    });
 
     return this;
   };
@@ -257,22 +260,26 @@ var core = function(rules, validation) {
     var elementArray = _getSelectorAsElementArray(selector);
     var messageCallbackProvided = messageCallback !== undefined;
 
-    for (var i = 0; i < elementArray.length; i++) {
+    var invalidElements = elementArray.reduce(function(accumulator, element) {
 
-      var element = elementArray[i];
-
-      var isValid = element.getAttribute('data-invalid') !== 'true';
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
 
       if (defaultOptions.messageCallback !== null || messageCallbackProvided) {
-        _handlemessageCallback(element, messageCallbackProvided? messageCallback : defaultOptions.messageCallback, !isValid);
+        _handlemessageCallback(element, messageCallbackProvided? messageCallback : defaultOptions.messageCallback, isInvalid);
       } else {
         _removeErrorMessage(element); //Remove any previous old error messages
       }
 
-      if (isValid) continue;
+      if (isInvalid) accumulator.push(element);
 
-      var errorMessage = _getErrorMessageForInput(element);
-      var formGroup = _getClosestParentByClass(element, 'form-group');
+      return accumulator;
+
+    }, []);
+
+    invalidElements.forEach(function(invalidElement) {
+
+      var errorMessage = _getErrorMessageForInput(invalidElement);
+      var formGroup = _getClosestParentByClass(invalidElement, 'form-group');
 
       if (defaultOptions.useBootstrap3Stlying  && formGroup != null) {
 
@@ -303,25 +310,25 @@ var core = function(rules, validation) {
           span.className = 'help-block ritsu-error';
           span.appendChild(b);
 
-          element.parentElement.appendChild(span);
+          invalidElement.parentElement.appendChild(span);
         }
 
       } else {
 
-        var elementId = element.getAttribute('id');
+        var elementId = invalidElement.getAttribute('id');
 
         var label = document.createElement('label');
         label.className = 'error-label';
         label.htmlFor = elementId || '';
         label.innerHTML = errorMessage;
 
-        var errorContainer = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
+        var errorContainer = _getClosestParentByClass(invalidElement, 'form-group') === null ? invalidElement.parentElement : _getClosestParentByClass(invalidElement, 'form-group');
 
         errorContainer.appendChild(label);
 
       }
 
-    }
+    });
 
     return this;
   };

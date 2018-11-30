@@ -8,8 +8,10 @@
     "no-new-wrappers": "error",
     "no-new-func": "error",
     "no-loop-func": "error",
+    "no-iterator": "error",
     "radix": ["error", "always"],
-    "no-restricted-globals": ["error", "isNaN", "isFinite"]
+    "no-restricted-globals": ["error", "isNaN", "isFinite"],
+    "no-restricted-syntax": ["error", "ForStatement", "ForInStatement", "ForOfStatement"]
   },
   "env": {
     "browser": true,

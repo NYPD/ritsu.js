@@ -17,6 +17,7 @@ var rules = function() {
       break;
     }
     return rule;
+  
   };
 
   var addValidationRule = function(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
