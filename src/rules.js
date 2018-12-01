@@ -5,19 +5,21 @@ var rules = function() {
   //Public Methods *************************************************************
   var getRuleByRuleClass = function(ruleClasses) {
 
-    var isArray = Array.isArray(ruleClasses);
-    var rule = null;
+    var notAnArray = !Array.isArray(ruleClasses);
+    if (notAnArray) return _rules[ruleClasses] === undefined? null : _rules[ruleClasses];
 
-    for (var i = 0; i < _rules.length; i++) {
+    var ruleToFind = null;
+    ruleClasses.some(function(ruleClass) {
 
-      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
-      if (ruleDoesNotMatch) continue;
+      if(_rules[ruleClass] === undefined) return false;
 
-      rule = _rules[i];
-      break;
-    }
-    return rule;
-  
+      ruleToFind = _rules[ruleClass];
+      return true;
+
+    });
+
+    return ruleToFind;
+
   };
 
   var addValidationRule = function(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
@@ -72,7 +74,7 @@ var rules = function() {
       _rules.splice(ruleIndex, 1);
     }
 
-    _rules.push(new _Rule(ruleType, ruleClass, validationFunction, errorMessageParam));
+    _rules[ruleClass] = new _Rule(ruleType, ruleClass, validationFunction, errorMessageParam);
 
   };
 
