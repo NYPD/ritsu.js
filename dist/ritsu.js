@@ -1,32 +1,35 @@
-/* ritsu.js v1.3.2 
- * Created 2018-05-07
+/* ritsu.js v1.3.3 
+ * Created 2018-12-03
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
 
 var ritsu = (function() {
-var rules = function() {
+var rules = function rules() {
 
   var _rules = [];
 
   //Public Methods *************************************************************
-  var getRuleByRuleClass = function(ruleClasses) {
+  var getRuleByRuleClass = function getRuleByRuleClass(ruleClasses) {
 
-    var isArray = Array.isArray(ruleClasses);
-    var rule = null;
+    var notAnArray = !Array.isArray(ruleClasses);
+    if (notAnArray) return _rules[ruleClasses] === undefined ? null : _rules[ruleClasses];
 
-    for (var i = 0; i < _rules.length; i++) {
+    var ruleToFind = null;
+    ruleClasses.some(function(ruleClass) {
 
-      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
-      if (ruleDoesNotMatch) continue;
+      if (_rules[ruleClass] === undefined) return false;
 
-      rule = _rules[i];
-      break;
-    }
-    return rule;
+      ruleToFind = _rules[ruleClass];
+      return true;
+
+    });
+
+    return ruleToFind;
+
   };
 
-  var addValidationRule = function(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
+  var addValidationRule = function addValidationRule(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
 
     var isArray = Array.isArray(ruleTypeOrRules);
     var isRule = typeof ruleTypeOrRules === 'object' && !isArray;
@@ -45,14 +48,14 @@ var rules = function() {
   };
 
   //Private Methods ************************************************************
-  var _Rule = function(ruleType, ruleClass, validationFunction, errorMessageFunction) {
+  var _Rule = function _Rule(ruleType, ruleClass, validationFunction, errorMessageFunction) {
     this.ruleType = ruleType;
     this.ruleClass = ruleClass;
     this.validate = validationFunction;
     this.getErrorMessage = errorMessageFunction;
   };
 
-  var _upsertValidationRule = function(ruleType, ruleClass, validationFunction, errorMessageParam) {
+  var _upsertValidationRule = function _upsertValidationRule(ruleType, ruleClass, validationFunction, errorMessageParam) {
 
     if (ruleType !== 'alpha' && ruleType !== 'numeric')
       throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
@@ -64,10 +67,12 @@ var rules = function() {
       throw new Error('The validation function for a new validation rule is missing or is not of type function');
 
     if (errorMessageParam === undefined)
-      errorMessageParam = new Function('', 'return "Invalid value";');
+      errorMessageParam = function defaultErrorMessage() { return 'Invalid value'; };
 
-    if (typeof errorMessageParam === 'string')
-      errorMessageParam = new Function('', 'return "' + errorMessageParam + '";');
+    if (typeof errorMessageParam === 'string') {
+      var customErrorMessage = errorMessageParam;
+      errorMessageParam = function defaultCustomErrorMessage() { return customErrorMessage; };
+    }
 
     //Remove exsiting rule if found
     var rule = getRuleByRuleClass(ruleClass);
@@ -76,11 +81,11 @@ var rules = function() {
       _rules.splice(ruleIndex, 1);
     }
 
-    _rules.push(new _Rule(ruleType, ruleClass, validationFunction, errorMessageParam));
+    _rules[ruleClass] = new _Rule(ruleType, ruleClass, validationFunction, errorMessageParam);
 
   };
 
-  var _validateAlphaOnly = function(element) {
+  var _validateAlphaOnly = function _validateAlphaOnly(element) {
 
     var value = element.value;
     var noSpace = element.hasAttribute('data-no-space');
@@ -96,7 +101,7 @@ var rules = function() {
     return alphaOnlyRegex.test(value);
   };
 
-  var _validateAlphaZip = function(element) {
+  var _validateAlphaZip = function _validateAlphaZip(element) {
     /*
      * Matches all Canadian or American postal codes with different formats. For USA it is:
      * any 5 digits followed optionally by an optional space or dash or empty string and any 4 digits after the optional
@@ -109,7 +114,7 @@ var rules = function() {
     return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/.test(element.value);
   };
 
-  var _validateAlphaNumeric = function(element) {
+  var _validateAlphaNumeric = function _validateAlphaNumeric(element) {
 
     var value = element.value;
     var noSpace = element.hasAttribute('data-no-space');
@@ -126,7 +131,7 @@ var rules = function() {
   };
 
 
-  var _validateAlphaEmail = function(element) {
+  var _validateAlphaEmail = function _validateAlphaEmail(element) {
     /*
      * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
      * It does not check tld and special chacter validity.
@@ -137,7 +142,7 @@ var rules = function() {
   };
 
 
-  var _validateNumericWhole = function(element) {
+  var _validateNumericWhole = function _validateNumericWhole(element) {
 
     var value = element.value;
     var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
@@ -153,7 +158,7 @@ var rules = function() {
 
   };
 
-  var _getNumericWholeErrorMessage = function(element) {
+  var _getNumericWholeErrorMessage = function _getNumericWholeErrorMessage(element) {
 
     var errorMessage = 'Enter a whole number';
 
@@ -171,7 +176,7 @@ var rules = function() {
     return errorMessage;
   };
 
-  var _validateNumericDecimalString = function(element) {
+  var _validateNumericDecimalString = function _validateNumericDecimalString(element) {
 
     var value = element.value;
     var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
@@ -191,7 +196,7 @@ var rules = function() {
 
     return validNumericDecimal;
   };
-  var _getNumericDecimalErrorMessage = function(element) {
+  var _getNumericDecimalErrorMessage = function _getNumericDecimalErrorMessage(element) {
 
     var errorMessage = 'Please enter a number';
 
@@ -215,7 +220,7 @@ var rules = function() {
   /**
    * @deprecated Since v1.3.0. Use numeric-whole instead and specify a min/max on the element
    */
-  var _validateNumericFullYear = function(element) {
+  var _validateNumericFullYear = function _validateNumericFullYear(element) {
     /*
        * A four digit number
        *
@@ -229,7 +234,7 @@ var rules = function() {
   };
 
 
-  var _getNumericFullYearErrorMessage = function(element) {
+  var _getNumericFullYearErrorMessage = function _getNumericFullYearErrorMessage(element) {
 
     var errorMessage = 'Please enter a 4 digit year';
 
@@ -247,7 +252,7 @@ var rules = function() {
     return errorMessage;
   };
 
-  var _validateNumericJqueryDatePicker = function(element) {
+  var _validateNumericJqueryDatePicker = function _validateNumericJqueryDatePicker(element) {
 
     var $element = $(element);
     var isValid = $element.datepicker('getDate') !== null;
@@ -275,9 +280,9 @@ var rules = function() {
 
 
 
-var validation = function(rules) {
+var validation = function validation(rules) {
 
-  var validateElement = function(element) {
+  var validateElement = function validateElement(element) {
 
     var validElement = true;
 
@@ -295,7 +300,7 @@ var validation = function(rules) {
   };
 
   //Private Methods ************************************************************
-  var _validateInput = function(element) {
+  var _validateInput = function _validateInput(element) {
 
     var validInput = true;
 
@@ -339,7 +344,7 @@ var validation = function(rules) {
     return validInput;
   };
 
-  var _validateSelect = function(element) {
+  var _validateSelect = function _validateSelect(element) {
     //If nothing is selected or there is no options, make the value undefined to avoid a TypeError
     var valueSelected = element.selectedIndex === -1 ? undefined : element.options[element.selectedIndex].value;
     var isRequired = element.hasAttribute('required');
@@ -351,7 +356,7 @@ var validation = function(rules) {
 
   };
 
-  var _validateFileField = function(element) {
+  var _validateFileField = function _validateFileField(element) {
     var validFile = true;
 
     var isNotRequired = !element.hasAttribute('required');
@@ -366,7 +371,7 @@ var validation = function(rules) {
     return validFile;
   };
 
-  var _validateAlphaField = function(element) {
+  var _validateAlphaField = function _validateAlphaField(element) {
     var validAlpha = true;
 
     var validationPattern = element.getAttribute('pattern');
@@ -385,7 +390,7 @@ var validation = function(rules) {
     return validAlpha;
   };
 
-  var _validateNumericField = function(element) {
+  var _validateNumericField = function _validateNumericField(element) {
 
     var validNumeric = true;
 
@@ -404,7 +409,7 @@ var validation = function(rules) {
        * This won't work in locales that use commas as decimal places.
        */
       var fieldValueAsNum = Number(element.value.replace(',', ''));
-      if (isNaN(fieldValueAsNum)) return validNumeric; //Not a number, just return
+      if (Number.isNaN(fieldValueAsNum)) return validNumeric; //Not a number, just return
 
       var minAttr = element.getAttribute('min');
       var maxAttr = element.getAttribute('max');
@@ -435,9 +440,9 @@ var validation = function(rules) {
 
 
 
-var core = function(rules, validation) {
+var core = function core(rules, validation) {
 
-  var version = '1.3.2';
+  var version = '1.3.3';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -446,7 +451,7 @@ var core = function(rules, validation) {
     messageCallback: null
   };
 
-  var initialize = function(options) {
+  var initialize = function initilaize(options) {
 
     var invalidOptions = typeof options !== 'object';
     if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
@@ -468,7 +473,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var storeInitialFormValues = function(selector) {
+  var storeInitialFormValues = function storeInitialFormValues(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -503,7 +508,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var getInitialFormValue = function(selector) {
+  var getInitialFormValue = function getInitialFormValue(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
     if (elementArray.length === 0) return null;
@@ -512,17 +517,20 @@ var core = function(rules, validation) {
 
   };
 
-
-  var resetInitialFormValues = function(selector) {
+  var resetInitialFormValues = function resetInitialFormValues(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
-    for (var i = 0; i < elementArray.length; i++) {
+    var initialValueElements = elementArray.reduce(function(accumulator, element) {
 
-      var element = elementArray[i];
+      var hasInitialValue = element.hasAttribute('data-initial-value');
+      if (hasInitialValue) accumulator.push(element);
 
-      var noInitialValue = !element.hasAttribute('data-initial-value');
-      if (noInitialValue) continue;
+      return accumulator;
+
+    }, []);
+
+    initialValueElements.forEach(function(element) {
 
       var isCheckbox = element.type === 'checkbox';
       var isRadio = element.type === 'radio';
@@ -543,12 +551,12 @@ var core = function(rules, validation) {
         element.value = intialValue;
       }
 
-    }
+    });
 
     return this;
   };
 
-  var isFormDirty = function(selector) {
+  var isFormDirty = function isFormDirty(selector) {
 
     var isDirty = false;
 
@@ -568,7 +576,7 @@ var core = function(rules, validation) {
       var intialValue = element.getAttribute('data-initial-value');
 
       if (isCheckbox || isRadio) {
-        valueChanged = intialValue != '' + element.checked; //Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
+        valueChanged = intialValue != String(element.checked); //Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
       } else if (isFile) {
         var hasFileAttached = element.files.length > 0;
         valueChanged = intialValue !== (hasFileAttached ? element.files[0].name + element.files[0].size : element.getAttribute('data-simple-file-hash'));
@@ -587,7 +595,7 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function(selector, messageCallback) {
+  var validate = function validate(selector, messageCallback) {
 
     var messageCallbackProvided = messageCallback !== undefined;
     var elementArray = _getSelectorAsElementArray(selector);
@@ -626,7 +634,7 @@ var core = function(rules, validation) {
     return isValid;
   };
 
-  var markInvalidFields = function(selector) {
+  var markInvalidFields = function markInvalidFields(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -650,13 +658,13 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var getErrorMessage = function(selector) {
+  var getErrorMessage = function getErrorMessage(selector) {
 
     if (selector === undefined)
       throw new Error('No selector passed in');
 
     var errorMessages = getErrorMessages(selector);
-    return errorMessages[0] === undefined? null: errorMessages[0];
+    return errorMessages[0] === undefined ? null : errorMessages[0];
   };
 
   var getErrorMessages = function(selector) {
@@ -667,14 +675,14 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
       var isInvalid = element.getAttribute('data-invalid') === 'true';
-      if(isInvalid) errorMessages.push(_getErrorMessageForInput(element));
+      if (isInvalid) errorMessages.push(_getErrorMessageForInput(element));
     });
 
     return errorMessages;
 
   };
 
-  var getErrorMessagesAsMap = function(selector) {
+  var getErrorMessagesAsMap = function getErrorMessagesAsMap(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -682,34 +690,38 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
       var isInvalid = element.getAttribute('data-invalid') === 'true';
-      if(isInvalid) errorMessageMap[element] = _getErrorMessageForInput(element);
+      if (isInvalid) errorMessageMap[element] = _getErrorMessageForInput(element);
     });
 
     return errorMessageMap;
 
   };
 
-  var showErrorMessages = function(selector, messageCallback) {
+  var showErrorMessages = function showErrorMessages(selector, messageCallback) {
 
     var elementArray = _getSelectorAsElementArray(selector);
     var messageCallbackProvided = messageCallback !== undefined;
 
-    for (var i = 0; i < elementArray.length; i++) {
+    var invalidElements = elementArray.reduce(function(accumulator, element) {
 
-      var element = elementArray[i];
-
-      var isValid = element.getAttribute('data-invalid') !== 'true';
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
 
       if (defaultOptions.messageCallback !== null || messageCallbackProvided) {
-        _handlemessageCallback(element, messageCallbackProvided? messageCallback : defaultOptions.messageCallback, !isValid);
+        _handlemessageCallback(element, messageCallbackProvided ? messageCallback : defaultOptions.messageCallback, isInvalid);
       } else {
         _removeErrorMessage(element); //Remove any previous old error messages
       }
 
-      if (isValid) continue;
+      if (isInvalid) accumulator.push(element);
 
-      var errorMessage = _getErrorMessageForInput(element);
-      var formGroup = _getClosestParentByClass(element, 'form-group');
+      return accumulator;
+
+    }, []);
+
+    invalidElements.forEach(function(invalidElement) {
+
+      var errorMessage = _getErrorMessageForInput(invalidElement);
+      var formGroup = _getClosestParentByClass(invalidElement, 'form-group');
 
       if (defaultOptions.useBootstrap3Stlying  && formGroup != null) {
 
@@ -740,25 +752,25 @@ var core = function(rules, validation) {
           span.className = 'help-block ritsu-error';
           span.appendChild(b);
 
-          element.parentElement.appendChild(span);
+          invalidElement.parentElement.appendChild(span);
         }
 
       } else {
 
-        var elementId = element.getAttribute('id');
+        var elementId = invalidElement.getAttribute('id');
 
         var label = document.createElement('label');
         label.className = 'error-label';
         label.htmlFor = elementId || '';
         label.innerHTML = errorMessage;
 
-        var errorContainer = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
+        var errorContainer = _getClosestParentByClass(invalidElement, 'form-group') === null ? invalidElement.parentElement : _getClosestParentByClass(invalidElement, 'form-group');
 
         errorContainer.appendChild(label);
 
       }
 
-    }
+    });
 
     return this;
   };
@@ -766,7 +778,7 @@ var core = function(rules, validation) {
   //Private Methods ************************************************************
 
   // Return an empty array if nothing is found
-  var _getSelectorAsElementArray = function(selector) {
+  var _getSelectorAsElementArray = function _getSelectorAsElementArray(selector) {
 
     var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
     if (isJquery) selector = selector.get();
@@ -801,7 +813,7 @@ var core = function(rules, validation) {
     return containerInputs;
   };
 
-  var _getClosestParentByClass = function(element, className) {
+  var _getClosestParentByClass = function _getClosestParentByClass(element, className) {
 
     while (element) {
 
@@ -818,30 +830,34 @@ var core = function(rules, validation) {
 
   };
 
-  var _removeErrorMessage = function(element) {
+  var _removeErrorMessage = function _removeErrorMessage(element) {
 
-    var parentElement = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
-    if (parentElement === null) return; //nothing to remove, just exit
+    var parentElement = _getClosestParentByClass(element, 'form-group'); // TODO: might interfere with non bootstrap pages that have the same class.
+    if (parentElement === null) parentElement = element.parentElement;
 
-    Array.prototype.slice.call(parentElement.querySelectorAll(defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
+    if (parentElement === null) return; //still nothing to remove, just exit
+
+    var querySelector = defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label';
+
+    Array.prototype.slice.call(parentElement.querySelectorAll(querySelector)).forEach(function(element) {
       element.parentElement.removeChild(element);
     });
 
   };
 
-  var _handlemessageCallback = function(element, messageCallback, invalidElement) {
-    var errorMessage = invalidElement? _getErrorMessageForInput(element): null;
+  var _handlemessageCallback = function _handlemessageCallback(element, messageCallback, invalidElement) {
+    var errorMessage = invalidElement ? _getErrorMessageForInput(element) : null;
     messageCallback(element, errorMessage);
   };
 
-  var _defaultmessageCallback = function(selector) {
+  var _defaultmessageCallback = function _defaultmessageCallback(selector) {
 
     if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
     if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);
 
   };
 
-  var _getErrorMessageForInput = function(element) {
+  var _getErrorMessageForInput = function _getErrorMessageForInput(element) {
 
     var isDropdown = element.nodeName === 'SELECT';
     if (isDropdown) return 'Please select an option'; //Selects do not have rules
@@ -862,7 +878,6 @@ var core = function(rules, validation) {
     if (rule !== null) errorMessage = rule.getErrorMessage(element);
 
     return errorMessage;
-
   };
 
   return {
