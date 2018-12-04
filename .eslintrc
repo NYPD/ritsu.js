@@ -11,7 +11,10 @@
     "no-iterator": "error",
     "radix": ["error", "always"],
     "no-restricted-globals": ["error", "isNaN", "isFinite"],
-    "no-restricted-syntax": ["error", "ForStatement", "ForInStatement", "ForOfStatement"]
+    "no-restricted-syntax": ["error", "ForStatement", "ForInStatement", "ForOfStatement"],
+    "keyword-spacing": ["error", { "before": true }],
+    "indent": ["error", 2],
+    "space-infix-ops": ["error", {"int32Hint": false}]
   },
   "env": {
     "browser": true,

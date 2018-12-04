@@ -1,4 +1,4 @@
-var core = function(rules, validation) {
+var core = function core(rules, validation) {
 
   var version = '${version}';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
@@ -9,7 +9,7 @@ var core = function(rules, validation) {
     messageCallback: null
   };
 
-  var initialize = function(options) {
+  var initialize = function initilaize(options) {
 
     var invalidOptions = typeof options !== 'object';
     if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
@@ -31,7 +31,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var storeInitialFormValues = function(selector) {
+  var storeInitialFormValues = function storeInitialFormValues(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -66,7 +66,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var getInitialFormValue = function(selector) {
+  var getInitialFormValue = function getInitialFormValue(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
     if (elementArray.length === 0) return null;
@@ -75,14 +75,14 @@ var core = function(rules, validation) {
 
   };
 
-  var resetInitialFormValues = function(selector) {
+  var resetInitialFormValues = function resetInitialFormValues(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
     var initialValueElements = elementArray.reduce(function(accumulator, element) {
 
       var hasInitialValue = element.hasAttribute('data-initial-value');
-      if(hasInitialValue) accumulator.push(element);
+      if (hasInitialValue) accumulator.push(element);
 
       return accumulator;
 
@@ -114,7 +114,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var isFormDirty = function(selector) {
+  var isFormDirty = function isFormDirty(selector) {
 
     var isDirty = false;
 
@@ -153,7 +153,7 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function(selector, messageCallback) {
+  var validate = function validate(selector, messageCallback) {
 
     var messageCallbackProvided = messageCallback !== undefined;
     var elementArray = _getSelectorAsElementArray(selector);
@@ -192,7 +192,7 @@ var core = function(rules, validation) {
     return isValid;
   };
 
-  var markInvalidFields = function(selector) {
+  var markInvalidFields = function markInvalidFields(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -216,13 +216,13 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var getErrorMessage = function(selector) {
+  var getErrorMessage = function getErrorMessage(selector) {
 
     if (selector === undefined)
       throw new Error('No selector passed in');
 
     var errorMessages = getErrorMessages(selector);
-    return errorMessages[0] === undefined? null: errorMessages[0];
+    return errorMessages[0] === undefined ? null : errorMessages[0];
   };
 
   var getErrorMessages = function(selector) {
@@ -233,14 +233,14 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
       var isInvalid = element.getAttribute('data-invalid') === 'true';
-      if(isInvalid) errorMessages.push(_getErrorMessageForInput(element));
+      if (isInvalid) errorMessages.push(_getErrorMessageForInput(element));
     });
 
     return errorMessages;
 
   };
 
-  var getErrorMessagesAsMap = function(selector) {
+  var getErrorMessagesAsMap = function getErrorMessagesAsMap(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -248,14 +248,14 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
       var isInvalid = element.getAttribute('data-invalid') === 'true';
-      if(isInvalid) errorMessageMap[element] = _getErrorMessageForInput(element);
+      if (isInvalid) errorMessageMap[element] = _getErrorMessageForInput(element);
     });
 
     return errorMessageMap;
 
   };
 
-  var showErrorMessages = function(selector, messageCallback) {
+  var showErrorMessages = function showErrorMessages(selector, messageCallback) {
 
     var elementArray = _getSelectorAsElementArray(selector);
     var messageCallbackProvided = messageCallback !== undefined;
@@ -265,7 +265,7 @@ var core = function(rules, validation) {
       var isInvalid = element.getAttribute('data-invalid') === 'true';
 
       if (defaultOptions.messageCallback !== null || messageCallbackProvided) {
-        _handlemessageCallback(element, messageCallbackProvided? messageCallback : defaultOptions.messageCallback, isInvalid);
+        _handlemessageCallback(element, messageCallbackProvided ? messageCallback : defaultOptions.messageCallback, isInvalid);
       } else {
         _removeErrorMessage(element); //Remove any previous old error messages
       }
@@ -336,7 +336,7 @@ var core = function(rules, validation) {
   //Private Methods ************************************************************
 
   // Return an empty array if nothing is found
-  var _getSelectorAsElementArray = function(selector) {
+  var _getSelectorAsElementArray = function _getSelectorAsElementArray(selector) {
 
     var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
     if (isJquery) selector = selector.get();
@@ -371,7 +371,7 @@ var core = function(rules, validation) {
     return containerInputs;
   };
 
-  var _getClosestParentByClass = function(element, className) {
+  var _getClosestParentByClass = function _getClosestParentByClass(element, className) {
 
     while (element) {
 
@@ -388,7 +388,7 @@ var core = function(rules, validation) {
 
   };
 
-  var _removeErrorMessage = function(element) {
+  var _removeErrorMessage = function _removeErrorMessage(element) {
 
     var parentElement = _getClosestParentByClass(element, 'form-group'); // TODO: might interfere with non bootstrap pages that have the same class.
     if (parentElement === null) parentElement = element.parentElement;
@@ -403,19 +403,19 @@ var core = function(rules, validation) {
 
   };
 
-  var _handlemessageCallback = function(element, messageCallback, invalidElement) {
-    var errorMessage = invalidElement? _getErrorMessageForInput(element): null;
+  var _handlemessageCallback = function _handlemessageCallback(element, messageCallback, invalidElement) {
+    var errorMessage = invalidElement ? _getErrorMessageForInput(element) : null;
     messageCallback(element, errorMessage);
   };
 
-  var _defaultmessageCallback = function(selector) {
+  var _defaultmessageCallback = function _defaultmessageCallback(selector) {
 
     if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
     if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);
 
   };
 
-  var _getErrorMessageForInput = function(element) {
+  var _getErrorMessageForInput = function _getErrorMessageForInput(element) {
 
     var isDropdown = element.nodeName === 'SELECT';
     if (isDropdown) return 'Please select an option'; //Selects do not have rules
