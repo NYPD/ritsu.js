@@ -4,7 +4,17 @@
     "no-unused-vars": ["error", {"varsIgnorePattern": "rules|ritsu|validation"}],
     "quotes": ["error", "single"],
     "semi": ["error","always"],
-    "no-unneeded-ternary": ["error", { "defaultAssignment": false }]
+    "no-unneeded-ternary": ["error", { "defaultAssignment": false }],
+    "no-new-wrappers": "error",
+    "no-new-func": "error",
+    "no-loop-func": "error",
+    "no-iterator": "error",
+    "radix": ["error", "always"],
+    "no-restricted-globals": ["error", "isNaN", "isFinite"],
+    "no-restricted-syntax": ["error", "ForStatement", "ForInStatement", "ForOfStatement"],
+    "keyword-spacing": ["error", { "before": true }],
+    "indent": ["error", 2],
+    "space-infix-ops": ["error", {"int32Hint": false}]
   },
   "env": {
     "browser": true,

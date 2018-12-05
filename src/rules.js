@@ -1,25 +1,28 @@
-var rules = function() {
+var rules = function rules() {
 
   var _rules = [];
 
   //Public Methods *************************************************************
-  var getRuleByRuleClass = function(ruleClasses) {
+  var getRuleByRuleClass = function getRuleByRuleClass(ruleClasses) {
 
-    var isArray = Array.isArray(ruleClasses);
-    var rule = null;
+    var notAnArray = !Array.isArray(ruleClasses);
+    if (notAnArray) return _rules[ruleClasses] === undefined ? null : _rules[ruleClasses];
 
-    for (var i = 0; i < _rules.length; i++) {
+    var ruleToFind = null;
+    ruleClasses.some(function(ruleClass) {
 
-      var ruleDoesNotMatch = isArray ? ruleClasses.indexOf(_rules[i].ruleClass) === -1 : _rules[i].ruleClass !== ruleClasses;
-      if (ruleDoesNotMatch) continue;
+      if (_rules[ruleClass] === undefined) return false;
 
-      rule = _rules[i];
-      break;
-    }
-    return rule;
+      ruleToFind = _rules[ruleClass];
+      return true;
+
+    });
+
+    return ruleToFind;
+
   };
 
-  var addValidationRule = function(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
+  var addValidationRule = function addValidationRule(ruleTypeOrRules, ruleClass, validationFunction, errorMessageParam) {
 
     var isArray = Array.isArray(ruleTypeOrRules);
     var isRule = typeof ruleTypeOrRules === 'object' && !isArray;
@@ -38,14 +41,14 @@ var rules = function() {
   };
 
   //Private Methods ************************************************************
-  var _Rule = function(ruleType, ruleClass, validationFunction, errorMessageFunction) {
+  var _Rule = function _Rule(ruleType, ruleClass, validationFunction, errorMessageFunction) {
     this.ruleType = ruleType;
     this.ruleClass = ruleClass;
     this.validate = validationFunction;
     this.getErrorMessage = errorMessageFunction;
   };
 
-  var _upsertValidationRule = function(ruleType, ruleClass, validationFunction, errorMessageParam) {
+  var _upsertValidationRule = function _upsertValidationRule(ruleType, ruleClass, validationFunction, errorMessageParam) {
 
     if (ruleType !== 'alpha' && ruleType !== 'numeric')
       throw new Error('The rule type for a new validation rule must be either "alpha" or "numeric"');
@@ -57,10 +60,12 @@ var rules = function() {
       throw new Error('The validation function for a new validation rule is missing or is not of type function');
 
     if (errorMessageParam === undefined)
-      errorMessageParam = new Function('', 'return "Invalid value";');
+      errorMessageParam = function defaultErrorMessage() { return 'Invalid value'; };
 
-    if (typeof errorMessageParam === 'string')
-      errorMessageParam = new Function('', 'return "' + errorMessageParam + '";');
+    if (typeof errorMessageParam === 'string') {
+      var customErrorMessage = errorMessageParam;
+      errorMessageParam = function defaultCustomErrorMessage() { return customErrorMessage; };
+    }
 
     //Remove exsiting rule if found
     var rule = getRuleByRuleClass(ruleClass);
@@ -69,11 +74,11 @@ var rules = function() {
       _rules.splice(ruleIndex, 1);
     }
 
-    _rules.push(new _Rule(ruleType, ruleClass, validationFunction, errorMessageParam));
+    _rules[ruleClass] = new _Rule(ruleType, ruleClass, validationFunction, errorMessageParam);
 
   };
 
-  var _validateAlphaOnly = function(element) {
+  var _validateAlphaOnly = function _validateAlphaOnly(element) {
 
     var value = element.value;
     var noSpace = element.hasAttribute('data-no-space');
@@ -89,7 +94,7 @@ var rules = function() {
     return alphaOnlyRegex.test(value);
   };
 
-  var _validateAlphaZip = function(element) {
+  var _validateAlphaZip = function _validateAlphaZip(element) {
     /*
      * Matches all Canadian or American postal codes with different formats. For USA it is:
      * any 5 digits followed optionally by an optional space or dash or empty string and any 4 digits after the optional
@@ -102,7 +107,7 @@ var rules = function() {
     return /(^\d{5}([\s-]?\d{4})?$)|(^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} ?\d{1}[A-Z]{1}\d{1}$)/.test(element.value);
   };
 
-  var _validateAlphaNumeric = function(element) {
+  var _validateAlphaNumeric = function _validateAlphaNumeric(element) {
 
     var value = element.value;
     var noSpace = element.hasAttribute('data-no-space');
@@ -119,7 +124,7 @@ var rules = function() {
   };
 
 
-  var _validateAlphaEmail = function(element) {
+  var _validateAlphaEmail = function _validateAlphaEmail(element) {
     /*
      * One or more non space charater + literal '@', + One or more non space charater + literal '.' + One or more non space charater.
      * It does not check tld and special chacter validity.
@@ -130,7 +135,7 @@ var rules = function() {
   };
 
 
-  var _validateNumericWhole = function(element) {
+  var _validateNumericWhole = function _validateNumericWhole(element) {
 
     var value = element.value;
     var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
@@ -146,7 +151,7 @@ var rules = function() {
 
   };
 
-  var _getNumericWholeErrorMessage = function(element) {
+  var _getNumericWholeErrorMessage = function _getNumericWholeErrorMessage(element) {
 
     var errorMessage = 'Enter a whole number';
 
@@ -164,7 +169,7 @@ var rules = function() {
     return errorMessage;
   };
 
-  var _validateNumericDecimalString = function(element) {
+  var _validateNumericDecimalString = function _validateNumericDecimalString(element) {
 
     var value = element.value;
     var noThousandsSeparator = element.hasAttribute('data-no-thousands-separator');
@@ -184,7 +189,7 @@ var rules = function() {
 
     return validNumericDecimal;
   };
-  var _getNumericDecimalErrorMessage = function(element) {
+  var _getNumericDecimalErrorMessage = function _getNumericDecimalErrorMessage(element) {
 
     var errorMessage = 'Please enter a number';
 
@@ -208,7 +213,7 @@ var rules = function() {
   /**
    * @deprecated Since v1.3.0. Use numeric-whole instead and specify a min/max on the element
    */
-  var _validateNumericFullYear = function(element) {
+  var _validateNumericFullYear = function _validateNumericFullYear(element) {
     /*
        * A four digit number
        *
@@ -222,7 +227,7 @@ var rules = function() {
   };
 
 
-  var _getNumericFullYearErrorMessage = function(element) {
+  var _getNumericFullYearErrorMessage = function _getNumericFullYearErrorMessage(element) {
 
     var errorMessage = 'Please enter a 4 digit year';
 
@@ -240,7 +245,7 @@ var rules = function() {
     return errorMessage;
   };
 
-  var _validateNumericJqueryDatePicker = function(element) {
+  var _validateNumericJqueryDatePicker = function _validateNumericJqueryDatePicker(element) {
 
     var $element = $(element);
     var isValid = $element.datepicker('getDate') !== null;

@@ -1,6 +1,6 @@
-var validation = function(rules) {
+var validation = function validation(rules) {
 
-  var validateElement = function(element) {
+  var validateElement = function validateElement(element) {
 
     var validElement = true;
 
@@ -18,7 +18,7 @@ var validation = function(rules) {
   };
 
   //Private Methods ************************************************************
-  var _validateInput = function(element) {
+  var _validateInput = function _validateInput(element) {
 
     var validInput = true;
 
@@ -62,7 +62,7 @@ var validation = function(rules) {
     return validInput;
   };
 
-  var _validateSelect = function(element) {
+  var _validateSelect = function _validateSelect(element) {
     //If nothing is selected or there is no options, make the value undefined to avoid a TypeError
     var valueSelected = element.selectedIndex === -1 ? undefined : element.options[element.selectedIndex].value;
     var isRequired = element.hasAttribute('required');
@@ -74,7 +74,7 @@ var validation = function(rules) {
 
   };
 
-  var _validateFileField = function(element) {
+  var _validateFileField = function _validateFileField(element) {
     var validFile = true;
 
     var isNotRequired = !element.hasAttribute('required');
@@ -89,7 +89,7 @@ var validation = function(rules) {
     return validFile;
   };
 
-  var _validateAlphaField = function(element) {
+  var _validateAlphaField = function _validateAlphaField(element) {
     var validAlpha = true;
 
     var validationPattern = element.getAttribute('pattern');
@@ -108,7 +108,7 @@ var validation = function(rules) {
     return validAlpha;
   };
 
-  var _validateNumericField = function(element) {
+  var _validateNumericField = function _validateNumericField(element) {
 
     var validNumeric = true;
 
@@ -127,7 +127,7 @@ var validation = function(rules) {
        * This won't work in locales that use commas as decimal places.
        */
       var fieldValueAsNum = Number(element.value.replace(',', ''));
-      if (isNaN(fieldValueAsNum)) return validNumeric; //Not a number, just return
+      if (Number.isNaN(fieldValueAsNum)) return validNumeric; //Not a number, just return
 
       var minAttr = element.getAttribute('min');
       var maxAttr = element.getAttribute('max');

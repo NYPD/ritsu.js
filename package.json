@@ -1,6 +1,6 @@
 {
   "name": "ritsu.js",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "HTML form validation",
   "devDependencies": {
     "chai": "^3.5.0",
@@ -14,7 +14,7 @@
     "jquery": "^3.1.1",
     "jquery-ui-dist": "^1.12.1",
     "jsdom": "^9.9.1",
-    "mocha": "^3.2.0"
+    "mocha": "^5.2.0"
   },
   "scripts": {
     "test": "mocha",

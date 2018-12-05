@@ -1,4 +1,4 @@
-var core = function(rules, validation) {
+var core = function core(rules, validation) {
 
   var version = '${version}';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
@@ -9,7 +9,7 @@ var core = function(rules, validation) {
     messageCallback: null
   };
 
-  var initialize = function(options) {
+  var initialize = function initilaize(options) {
 
     var invalidOptions = typeof options !== 'object';
     if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
@@ -31,7 +31,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var storeInitialFormValues = function(selector) {
+  var storeInitialFormValues = function storeInitialFormValues(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -66,7 +66,7 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var getInitialFormValue = function(selector) {
+  var getInitialFormValue = function getInitialFormValue(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
     if (elementArray.length === 0) return null;
@@ -75,17 +75,20 @@ var core = function(rules, validation) {
 
   };
 
-
-  var resetInitialFormValues = function(selector) {
+  var resetInitialFormValues = function resetInitialFormValues(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
-    for (var i = 0; i < elementArray.length; i++) {
+    var initialValueElements = elementArray.reduce(function(accumulator, element) {
 
-      var element = elementArray[i];
+      var hasInitialValue = element.hasAttribute('data-initial-value');
+      if (hasInitialValue) accumulator.push(element);
 
-      var noInitialValue = !element.hasAttribute('data-initial-value');
-      if (noInitialValue) continue;
+      return accumulator;
+
+    }, []);
+
+    initialValueElements.forEach(function(element) {
 
       var isCheckbox = element.type === 'checkbox';
       var isRadio = element.type === 'radio';
@@ -106,12 +109,12 @@ var core = function(rules, validation) {
         element.value = intialValue;
       }
 
-    }
+    });
 
     return this;
   };
 
-  var isFormDirty = function(selector) {
+  var isFormDirty = function isFormDirty(selector) {
 
     var isDirty = false;
 
@@ -131,7 +134,7 @@ var core = function(rules, validation) {
       var intialValue = element.getAttribute('data-initial-value');
 
       if (isCheckbox || isRadio) {
-        valueChanged = intialValue != '' + element.checked; //Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
+        valueChanged = intialValue != String(element.checked); //Need to convert it to a string to properly compare, since JS does not convert string to boolean for us http://www.ecma-international.org/ecma-262/5.1/#sec-11.9.3
       } else if (isFile) {
         var hasFileAttached = element.files.length > 0;
         valueChanged = intialValue !== (hasFileAttached ? element.files[0].name + element.files[0].size : element.getAttribute('data-simple-file-hash'));
@@ -150,7 +153,7 @@ var core = function(rules, validation) {
     return isDirty;
   };
 
-  var validate = function(selector, messageCallback) {
+  var validate = function validate(selector, messageCallback) {
 
     var messageCallbackProvided = messageCallback !== undefined;
     var elementArray = _getSelectorAsElementArray(selector);
@@ -189,7 +192,7 @@ var core = function(rules, validation) {
     return isValid;
   };
 
-  var markInvalidFields = function(selector) {
+  var markInvalidFields = function markInvalidFields(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -213,13 +216,13 @@ var core = function(rules, validation) {
     return this;
   };
 
-  var getErrorMessage = function(selector) {
+  var getErrorMessage = function getErrorMessage(selector) {
 
     if (selector === undefined)
       throw new Error('No selector passed in');
 
     var errorMessages = getErrorMessages(selector);
-    return errorMessages[0] === undefined? null: errorMessages[0];
+    return errorMessages[0] === undefined ? null : errorMessages[0];
   };
 
   var getErrorMessages = function(selector) {
@@ -230,14 +233,14 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
       var isInvalid = element.getAttribute('data-invalid') === 'true';
-      if(isInvalid) errorMessages.push(_getErrorMessageForInput(element));
+      if (isInvalid) errorMessages.push(_getErrorMessageForInput(element));
     });
 
     return errorMessages;
 
   };
 
-  var getErrorMessagesAsMap = function(selector) {
+  var getErrorMessagesAsMap = function getErrorMessagesAsMap(selector) {
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -245,34 +248,38 @@ var core = function(rules, validation) {
 
     elementArray.forEach(function(element) {
       var isInvalid = element.getAttribute('data-invalid') === 'true';
-      if(isInvalid) errorMessageMap[element] = _getErrorMessageForInput(element);
+      if (isInvalid) errorMessageMap[element] = _getErrorMessageForInput(element);
     });
 
     return errorMessageMap;
 
   };
 
-  var showErrorMessages = function(selector, messageCallback) {
+  var showErrorMessages = function showErrorMessages(selector, messageCallback) {
 
     var elementArray = _getSelectorAsElementArray(selector);
     var messageCallbackProvided = messageCallback !== undefined;
 
-    for (var i = 0; i < elementArray.length; i++) {
+    var invalidElements = elementArray.reduce(function(accumulator, element) {
 
-      var element = elementArray[i];
-
-      var isValid = element.getAttribute('data-invalid') !== 'true';
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
 
       if (defaultOptions.messageCallback !== null || messageCallbackProvided) {
-        _handlemessageCallback(element, messageCallbackProvided? messageCallback : defaultOptions.messageCallback, !isValid);
+        _handlemessageCallback(element, messageCallbackProvided ? messageCallback : defaultOptions.messageCallback, isInvalid);
       } else {
         _removeErrorMessage(element); //Remove any previous old error messages
       }
 
-      if (isValid) continue;
+      if (isInvalid) accumulator.push(element);
 
-      var errorMessage = _getErrorMessageForInput(element);
-      var formGroup = _getClosestParentByClass(element, 'form-group');
+      return accumulator;
+
+    }, []);
+
+    invalidElements.forEach(function(invalidElement) {
+
+      var errorMessage = _getErrorMessageForInput(invalidElement);
+      var formGroup = _getClosestParentByClass(invalidElement, 'form-group');
 
       if (defaultOptions.useBootstrap3Stlying  && formGroup != null) {
 
@@ -303,25 +310,25 @@ var core = function(rules, validation) {
           span.className = 'help-block ritsu-error';
           span.appendChild(b);
 
-          element.parentElement.appendChild(span);
+          invalidElement.parentElement.appendChild(span);
         }
 
       } else {
 
-        var elementId = element.getAttribute('id');
+        var elementId = invalidElement.getAttribute('id');
 
         var label = document.createElement('label');
         label.className = 'error-label';
         label.htmlFor = elementId || '';
         label.innerHTML = errorMessage;
 
-        var errorContainer = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
+        var errorContainer = _getClosestParentByClass(invalidElement, 'form-group') === null ? invalidElement.parentElement : _getClosestParentByClass(invalidElement, 'form-group');
 
         errorContainer.appendChild(label);
 
       }
 
-    }
+    });
 
     return this;
   };
@@ -329,7 +336,7 @@ var core = function(rules, validation) {
   //Private Methods ************************************************************
 
   // Return an empty array if nothing is found
-  var _getSelectorAsElementArray = function(selector) {
+  var _getSelectorAsElementArray = function _getSelectorAsElementArray(selector) {
 
     var isJquery = jQueryIsPresent ? selector instanceof jQuery : false;
     if (isJquery) selector = selector.get();
@@ -364,7 +371,7 @@ var core = function(rules, validation) {
     return containerInputs;
   };
 
-  var _getClosestParentByClass = function(element, className) {
+  var _getClosestParentByClass = function _getClosestParentByClass(element, className) {
 
     while (element) {
 
@@ -381,30 +388,34 @@ var core = function(rules, validation) {
 
   };
 
-  var _removeErrorMessage = function(element) {
+  var _removeErrorMessage = function _removeErrorMessage(element) {
 
-    var parentElement = _getClosestParentByClass(element, 'form-group') === null ? element.parentElement : _getClosestParentByClass(element, 'form-group');
-    if (parentElement === null) return; //nothing to remove, just exit
+    var parentElement = _getClosestParentByClass(element, 'form-group'); // TODO: might interfere with non bootstrap pages that have the same class.
+    if (parentElement === null) parentElement = element.parentElement;
 
-    Array.prototype.slice.call(parentElement.querySelectorAll(defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label')).forEach(function(element) {
+    if (parentElement === null) return; //still nothing to remove, just exit
+
+    var querySelector = defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label';
+
+    Array.prototype.slice.call(parentElement.querySelectorAll(querySelector)).forEach(function(element) {
       element.parentElement.removeChild(element);
     });
 
   };
 
-  var _handlemessageCallback = function(element, messageCallback, invalidElement) {
-    var errorMessage = invalidElement? _getErrorMessageForInput(element): null;
+  var _handlemessageCallback = function _handlemessageCallback(element, messageCallback, invalidElement) {
+    var errorMessage = invalidElement ? _getErrorMessageForInput(element) : null;
     messageCallback(element, errorMessage);
   };
 
-  var _defaultmessageCallback = function(selector) {
+  var _defaultmessageCallback = function _defaultmessageCallback(selector) {
 
     if (defaultOptions.autoMarkInvalidFields) markInvalidFields(selector);
     if (defaultOptions.autoShowErrorMessages) showErrorMessages(selector);
 
   };
 
-  var _getErrorMessageForInput = function(element) {
+  var _getErrorMessageForInput = function _getErrorMessageForInput(element) {
 
     var isDropdown = element.nodeName === 'SELECT';
     if (isDropdown) return 'Please select an option'; //Selects do not have rules
@@ -425,7 +436,6 @@ var core = function(rules, validation) {
     if (rule !== null) errorMessage = rule.getErrorMessage(element);
 
     return errorMessage;
-
   };
 
   return {
