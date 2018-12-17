@@ -13,7 +13,7 @@
     "no-restricted-globals": ["error", "isNaN", "isFinite"],
     "no-restricted-syntax": ["error", "ForStatement", "ForInStatement", "ForOfStatement"],
     "keyword-spacing": ["error", { "before": true }],
-    "indent": ["error", 2],
+    "indent": ["error", 2, {"VariableDeclarator": 2, "MemberExpression": "off"}],
     "space-infix-ops": ["error", {"int32Hint": false}]
   },
   "env": {

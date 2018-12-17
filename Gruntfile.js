@@ -12,7 +12,7 @@ module.exports = function(grunt) {
                  '  throw new Error(\'ritsu.js requires jQuery or a jQuery-compatible API\');\n' +
                  '}\n',
     ritsuHeader: 'var ritsu = (function() {',
-    ritsuFooter: 'var r = rules(); return core(r, validation(r));\n' +
+    ritsuFooter: '\nvar r = rules(); return core(r, validation(r));\n' +
                  '})();',
     /* grunt stamp ************************************************************/
     stamp: {
@@ -39,11 +39,12 @@ module.exports = function(grunt) {
     cssmin: {
       options: {
         shorthandCompacting: false,
-        roundingPrecision: -1
+        roundingPrecision: -1,
+        sourceMap: true
       },
-      target: {
+      base: {
         files: {
-          'dist/min/ritsu.min.css': ['dist/ritsu.css']
+          'dist/ritsu.min.css': ['dist/ritsu.css']
         }
       }
     },
@@ -51,11 +52,16 @@ module.exports = function(grunt) {
     /* Uglify Task *************************************************************/
     uglify: {
       options: {
-        preserveComments: false
+        preserveComments: false,
+        sourceMap: {
+          includeSources: true
+        },
+        banner: '<%= ritsuHeader %>',
+        footer: '<%= ritsuFooter %>'
       },
       base: {
         files: {
-          'dist/min/ritsu.min.js': ['dist/ritsu.js']
+          'dist/ritsu.min.js': ['dist/ritsu.js']
         }
       }
     },
@@ -114,5 +120,5 @@ module.exports = function(grunt) {
 
   //Register dem tasks
   grunt.registerTask('default', ['watch']);
-  grunt.registerTask('build', ['copy', 'concat:dist', 'uglify', 'cssmin', 'stamp:js', 'stamp:css']);
+  grunt.registerTask('build', ['copy', 'concat:dist', 'cssmin', 'uglify', 'stamp:css']);
 };
