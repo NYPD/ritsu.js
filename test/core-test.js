@@ -842,7 +842,7 @@ describe('core', function() {
                                   '<div class="col-xs-8">' +
                                     '<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
                                   '</div>' +
-                                '</div>'+
+                                '</div>' +
                               '</form>');
 
       let formGroup = document.getElementsByTagName('div')[0];

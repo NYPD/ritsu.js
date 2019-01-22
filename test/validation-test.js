@@ -241,7 +241,7 @@ describe('validation', function() {
       var validElement = validation.validateElement(input);
       assert.isFalse(validElement);
 
-        input.setAttribute('data-simple-file-hash', 'coolHashBro');
+      input.setAttribute('data-simple-file-hash', 'coolHashBro');
 
       //Should pass since there is a data-simple-file-hash
       validElement = validation.validateElement(input);
