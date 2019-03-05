@@ -1,3 +1,10 @@
+/* ritsu.js v1.3.5 
+ * Created 2019-03-05
+ * Licensed under the MIT license
+ * Source code can be found here: https://github.com/NYPD/ritsu 
+ */
+
+var ritsu = (function() {
 var rules = function rules() {
 
   var _rules = [];
@@ -435,7 +442,7 @@ var validation = function validation(rules) {
 
 var core = function core(rules, validation) {
 
-  var version = '1.3.4';
+  var version = '1.3.5';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -898,3 +905,6 @@ var core = function core(rules, validation) {
 };
 
 
+
+var r = rules(); return core(r, validation(r));
+})();

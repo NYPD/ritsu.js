@@ -22,7 +22,7 @@ module.exports = function(grunt) {
           footer: '<%= ritsuFooter %>'
         },
         files: {
-          src: ['dist/**/*.js']
+          src: ['dist/**/ritsu.js']
         }
       },
       css: {
@@ -56,7 +56,7 @@ module.exports = function(grunt) {
         sourceMap: {
           includeSources: true
         },
-        banner: '<%= ritsuHeader %>',
+        banner: '<%= banner %>\n<%= ritsuHeader %>',
         footer: '<%= ritsuFooter %>'
       },
       base: {
@@ -120,5 +120,5 @@ module.exports = function(grunt) {
 
   //Register dem tasks
   grunt.registerTask('default', ['watch']);
-  grunt.registerTask('build', ['copy', 'concat:dist', 'cssmin', 'uglify', 'stamp:css']);
+  grunt.registerTask('build', ['copy', 'concat:dist', 'cssmin', 'uglify', 'stamp:css', 'stamp:js']);
 };
