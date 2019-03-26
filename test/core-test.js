@@ -2,6 +2,8 @@
 const chai = require('chai');
 const assert = chai.assert;
 const expect = chai.expect;
+// eslint-disable-next-line no-unused-vars
+const should = chai.should();
 
 const jsdom = require('jsdom').jsdom;
 const window = jsdom().defaultView;
@@ -714,35 +716,43 @@ describe('core', function() {
     });
 
   });
+  
+  describe('#getErrorMessagesAsObjects()', function() {
 
-  describe('#getErrorMessagesAsMap()', function() {
-
-    it('should get error message map from a single input', function() {
+    it('should get error message object array from a single input', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>');
 
       let input = document.getElementsByTagName('input')[0];
-      let errorMessageMap = core.getErrorMessagesAsMap(input);
-
-      expect(errorMessageMap.hasOwnProperty(input)).to.equal(true);
+      let errorMessageObjects = core.getErrorMessagesAsObjects(input);
+      
+      errorMessageObjects.should.have.lengthOf(1);
+      expect(errorMessageObjects[0]['input']).to.equal(input);
+      expect(errorMessageObjects[0]['errorMessage']).to.equal('Only letters, spaces, hypens, and periods are allowed');
 
     });
 
-    it('should get error message map for muliple inputs', function() {
+    it('should get an error message object array for muliple inputs', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
         '<input type="text" class="numeric numeric-whole" data-invalid="true" required/>');
 
-      let alphaInput = document.querySelector('.alpha');
-      let numericInput = document.querySelector('.numeric');
+      let errorMessageObjects = core.getErrorMessagesAsObjects('input');
 
-      let errorMessageMap = core.getErrorMessagesAsMap('input');
+      errorMessageObjects.should.have.lengthOf(2);
 
-      expect(errorMessageMap.hasOwnProperty(alphaInput)).to.equal(true);
-      expect(errorMessageMap.hasOwnProperty(numericInput)).to.equal(true);
+      let correctErrorMessageCount = 0;
 
-      var numericErrorMessage = errorMessageMap[numericInput];
-      assert.strictEqual(numericErrorMessage, 'Enter a whole number');
+      errorMessageObjects.forEach(function(errorMessageObject) {
+
+        let errorMessage = errorMessageObject['errorMessage'];
+
+        if (errorMessage === 'Only letters, spaces, hypens, and periods are allowed') correctErrorMessageCount++;
+        if (errorMessage === 'Enter a whole number') correctErrorMessageCount++;
+
+      });
+
+      expect(correctErrorMessageCount).to.equal(2);
 
     });
 
@@ -750,11 +760,9 @@ describe('core', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
 
-      let errorMessageMap = core.getErrorMessagesAsMap('input');
+      let errorMessageObjects = core.getErrorMessagesAsObjects('input');
 
-      var isEmptyMap = Object.keys(errorMessageMap).length === 0 && errorMessageMap.constructor === Object;
-
-      assert.strictEqual(isEmptyMap, true);
+      errorMessageObjects.should.have.lengthOf(0);
 
     });
 
@@ -1162,7 +1170,7 @@ describe('core', function() {
 
       core.initialize({
         useBootstrap3Stlying: true,
-        autoMarkInvalidFields: true
+        autoMarkInvalidFields: true 
       });
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" value="b3ans"/>');
