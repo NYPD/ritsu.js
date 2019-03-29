@@ -245,6 +245,11 @@ var core = function core(rules, validation) {
    */
   var getErrorMessagesAsMap = function getErrorMessagesAsMap(selector) {
 
+    // eslint-disable-next-line no-console
+    console.warn(
+      'getErrorMessagesAsMap has been deprecated since v1.4.0. Use getErrorMessagesAsObjects instead.'
+    );
+
     var elementArray = _getSelectorAsElementArray(selector);
 
     var errorMessageMap = {};
