@@ -73,7 +73,8 @@ module.exports = function(grunt) {
         process: function (src) {
           return src.replace(/^(module\.exports).*/gm, '')
                     .replace(/^(.*mocha_).*/gm, '')
-                    .replace(/\$\{version\}*/, grunt.file.readJSON('package.json').version);
+                    .replace(/\$\{version\}*/, grunt.file.readJSON('package.json').version)
+                    .replace('//For mocha tests temporarily', '');
         }
       },
       dist: {
