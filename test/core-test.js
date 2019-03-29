@@ -756,7 +756,7 @@ describe('core', function() {
 
     });
 
-    it('should return an empty map for a input that is not invalid', function() {
+    it('should return an empty array for an input that is valid', function() {
 
       global.document = jsdom('<input type="text" class="alpha alpha-only" data-invalid="false"/>');
 
