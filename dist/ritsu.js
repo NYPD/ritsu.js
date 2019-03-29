@@ -1,5 +1,5 @@
-/* ritsu.js v1.3.5 
- * Created 2019-03-05
+/* ritsu.js v1.4.0 
+ * Created 2019-03-29
  * Licensed under the MIT license
  * Source code can be found here: https://github.com/NYPD/ritsu 
  */
@@ -442,7 +442,7 @@ var validation = function validation(rules) {
 
 var core = function core(rules, validation) {
 
-  var version = '1.3.5';
+  var version = '1.4.0';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
@@ -682,7 +682,15 @@ var core = function core(rules, validation) {
 
   };
 
+  /**
+   * @deprecated since v1.4.0
+   */
   var getErrorMessagesAsMap = function getErrorMessagesAsMap(selector) {
+
+    // eslint-disable-next-line no-console
+    console.warn(
+      'getErrorMessagesAsMap has been deprecated since v1.4.0. Use getErrorMessagesAsObjects instead.'
+    );
 
     var elementArray = _getSelectorAsElementArray(selector);
 
@@ -694,6 +702,28 @@ var core = function core(rules, validation) {
     });
 
     return errorMessageMap;
+
+  };
+
+  var getErrorMessagesAsObjects = function getErrorMessagesAsMap(selector) {
+
+    var elementArray = _getSelectorAsElementArray(selector);
+
+    var invalidErrorObjects = elementArray.reduce(function(accumulator, element) {
+
+      var isInvalid = element.getAttribute('data-invalid') === 'true';
+      if (isInvalid) {
+        accumulator.push({
+          'input': element,
+          'errorMessage': _getErrorMessageForInput(element)
+        });
+      }
+
+      return accumulator;
+
+    }, []);
+
+    return invalidErrorObjects;
 
   };
 
@@ -898,7 +928,8 @@ var core = function core(rules, validation) {
     showErrorMessages: showErrorMessages,
     getErrorMessage: getErrorMessage,
     getErrorMessages: getErrorMessages,
-    getErrorMessagesAsMap: getErrorMessagesAsMap
+    getErrorMessagesAsMap: getErrorMessagesAsMap,
+    getErrorMessagesAsObjects: getErrorMessagesAsObjects
 
   };
 
