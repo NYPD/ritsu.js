@@ -4,6 +4,7 @@ var core = function core(rules, validation) {
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
     useBootstrap3Stlying: false,
+    useBootstrap4Stlying: false,
     autoMarkInvalidFields: true,
     autoShowErrorMessages: false,
     messageCallback: null
@@ -15,6 +16,7 @@ var core = function core(rules, validation) {
     if (invalidOptions) throw new Error('Invalid options to initialize ritsu.js');
 
     defaultOptions.useBootstrap3Stlying = options.useBootstrap3Stlying === undefined ? false : options.useBootstrap3Stlying;
+    defaultOptions.useBootstrap4Stlying = options.useBootstrap4Stlying === undefined ? false : options.useBootstrap4Stlying;
     defaultOptions.autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     defaultOptions.autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
 
@@ -311,18 +313,26 @@ var core = function core(rules, validation) {
       var errorMessage = _getErrorMessageForInput(invalidElement);
       var formGroup = _getClosestParentByClass(invalidElement, 'form-group');
 
-      if (defaultOptions.useBootstrap3Stlying  && formGroup != null) {
+      var useBootstrapStlying = defaultOptions.useBootstrap3Stlying || defaultOptions.useBootstrap4Stlying;
 
-        var helpBlock = formGroup.querySelector('.help-block');
+      if (useBootstrapStlying && formGroup != null) {
 
-        var hasHelpBlock = helpBlock !== null;
+        var helpText = null;
+        
+        if (defaultOptions.useBootstrap3Stlying)
+          helpText = formGroup.querySelector('.help-block');
+        else
+          helpText = formGroup.querySelector('.form-text');
+
+        var hasHelpText = helpText !== null;
 
         var em = document.createElement('em');
         em.innerHTML = errorMessage;
 
         var b = document.createElement('b');
 
-        if (hasHelpBlock) {
+        //If it already has a help text node, add the error message indide it without messing up what is already there
+        if (hasHelpText) {
 
           var br = document.createElement('br');
           br.className = 'ritsu-error';
@@ -331,16 +341,17 @@ var core = function core(rules, validation) {
           b.appendChild(em);
           b.appendChild(br);
 
-          helpBlock.insertBefore(b, helpBlock.firstChild);
+          helpText.insertBefore(b, helpText.firstChild);
         } else {
 
           b.appendChild(em);
 
-          var span = document.createElement('span');
-          span.className = 'help-block ritsu-error';
-          span.appendChild(b);
+          var helpTextNode = defaultOptions.useBootstrap3Stlying ? document.createElement('span') : document.createElement('small');
+          helpTextNode.className = 'ritsu-error';
+          helpTextNode.className += defaultOptions.useBootstrap3Stlying ? ' help-block' : ' form-text';
+          helpTextNode.appendChild(b);
 
-          invalidElement.parentElement.appendChild(span);
+          invalidElement.parentElement.appendChild(helpTextNode);
         }
 
       } else {

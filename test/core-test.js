@@ -815,7 +815,7 @@ describe('core', function() {
 
     });
 
-    it('should add an error message to a .form-group that has no .help-block when bootstrap is being used', function() {
+    it('should add an error message to a .form-group that had no .help-block when bootstrap 3 is being used', function() {
 
       core.initialize({
         useBootstrap3Stlying: true
@@ -838,7 +838,30 @@ describe('core', function() {
 
     });
 
-    it('should add an error message to a the .col div in a form-horizontal when bootstrap is being used', function() {
+    it('should add an error message to a .form-group that had no .form-text when bootstrap 4 is being used', function() {
+
+      core.initialize({
+        useBootstrap4Stlying: true
+      });
+
+      global.document = jsdom('<div class="form-group"><input type="text" class="alpha alpha-only" data-invalid="true" required/></div>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Check .help=block does not exist
+      var formTextExists = formGroup.querySelector('.form-text') !== null;
+      assert.isFalse(formTextExists);
+
+      core.showErrorMessages(input);
+
+      //Check .help=block does exist
+      formTextExists = formGroup.querySelector('.form-text') !== null;
+      assert.isTrue(formTextExists);
+
+    });
+
+    it('should add an error message to a the .col div in a form-horizontal when bootstrap 3 is being used', function() {
 
       core.initialize({
         useBootstrap3Stlying: true
@@ -868,7 +891,7 @@ describe('core', function() {
 
     });
 
-    it('should remove an error message from a .form-group that had no .help-block when bootstrap is being used', function() {
+    it('should not recieve an error message in a valid .form-froup with bootstrap 3', function() {
 
       core.initialize({
         useBootstrap3Stlying: true
@@ -876,7 +899,6 @@ describe('core', function() {
 
       global.document = jsdom('<div class="form-group">' +
         '<input type="text" class="alpha alpha-only" data-invalid="false"/>' +
-        '<span class="help-block ritsu-error"></span>' +
         '</div>');
 
       let formGroup = document.getElementsByTagName('div')[0];
@@ -884,7 +906,7 @@ describe('core', function() {
 
       //.help block should be there
       var helpBlockExists = formGroup.querySelector('.help-block') !== null;
-      assert.isTrue(helpBlockExists);
+      assert.isFalse(helpBlockExists);
 
       core.showErrorMessages(input);
 
@@ -894,7 +916,32 @@ describe('core', function() {
 
     });
 
-    it('should add a error message to a .form-group that already has a .help-block from bootstrap being used', function() {
+    it('should not recieve an error message in a valid .form-froup with bootstrap 4', function() {
+
+      core.initialize({
+        useBootstrap4Stlying: true
+      });
+
+      global.document = jsdom('<div class="form-group">' +
+        '<input type="text" class="alpha alpha-only" data-invalid="false"/>' +
+        '</div>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //.help block should be there
+      var formTextExists = formGroup.querySelector('.form-text') !== null;
+      assert.isFalse(formTextExists);
+
+      core.showErrorMessages(input);
+
+      //.help block should have been removed
+      formTextExists = formGroup.querySelector('.form-text') !== null;
+      assert.isFalse(formTextExists);
+
+    });
+
+    it('should add a error message to a .form-group that already has a bootstrap 3 .help-block', function() {
 
       core.initialize({
         useBootstrap3Stlying: true
@@ -925,7 +972,38 @@ describe('core', function() {
 
     });
 
-    it('should remove a error message from a .form-group that already had a .help-block from bootstrap being used', function() {
+    it('should add a error message to a .form-group that already has a bootstrap 4 .form-text', function() {
+
+      core.initialize({
+        useBootstrap4Stlying: true
+      });
+
+      global.document = jsdom('<div class="form-group">' +
+        '<input type="text" class="alpha alpha-only" data-invalid="true" required/>' +
+        '<small class="form-text"></small>' +
+        '</div>');
+
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is a help block but no ritsu-error <b>
+      var formTextExists = formGroup.querySelectorAll('.form-text').length === 1;
+      var ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
+      assert.isTrue(formTextExists);
+      assert.isFalse(ritsuErrorExists);
+
+      core.showErrorMessages(input);
+
+      //Make sure there is a help block and a ritsu-error <b>
+      formTextExists = formGroup.querySelectorAll('.form-text').length === 1;
+      ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
+      assert.isTrue(formTextExists);
+      assert.isTrue(ritsuErrorExists);
+
+    });
+
+    it('should remove a error message from a .form-group that already had a bootstrap 3 .help-block', function() {
 
       core.initialize({
         useBootstrap3Stlying: true
@@ -953,6 +1031,38 @@ describe('core', function() {
       helpBlockExists = formGroup.querySelectorAll('.help-block').length === 1;
       ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
       assert.isTrue(helpBlockExists);
+      assert.isFalse(ritsuErrorExists);
+
+    });
+
+    it('should remove a error message from a .form-group that already had a bootstrap 4 .form-text', function() {
+
+      core.initialize({
+        useBootstrap3Stlying: true
+      });
+
+      global.document = jsdom('<div class="form-group">' +
+        '<input type="text" class="alpha alpha-only" data-invalid="false"/>' +
+        '<small class="form-text">' +
+        '<b class="ritsu-error"><em>You goofed</em></b><br class="ritsu-error">' +
+        '</small>' +
+        '</div>');
+
+      let formGroup = document.getElementsByTagName('div')[0];
+      let input = document.getElementsByTagName('input')[0];
+
+      //Make sure there is a help block and a ritsu-error <b>
+      var formTextExists = formGroup.querySelectorAll('.form-text').length === 1;
+      var ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
+      assert.isTrue(formTextExists);
+      assert.isTrue(ritsuErrorExists);
+
+      core.showErrorMessages(input);
+
+      //Make sure there is a help block still but the ritsu-error <b> gone
+      formTextExists = formGroup.querySelectorAll('.form-text').length === 1;
+      ritsuErrorExists = formGroup.querySelectorAll('.ritsu-error').length > 0;
+      assert.isTrue(formTextExists);
       assert.isFalse(ritsuErrorExists);
 
     });
