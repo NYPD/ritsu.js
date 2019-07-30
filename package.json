@@ -34,7 +34,10 @@
     "name": "NYPD"
   },
   "contributors": [
-    {}
+    {
+      "name": "suchitha55",
+      "url": "https://github.com/suchitha55"
+    }
   ],
   "license": "MIT"
 }
