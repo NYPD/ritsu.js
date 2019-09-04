@@ -90,18 +90,19 @@ var validation = function validation(rules) {
   };
 
   var _validateAlphaField = function _validateAlphaField(element) {
+
     var validAlpha = true;
 
-    var validationPattern = element.getAttribute('pattern');
+    var isRequired = element.hasAttribute('required');
     var elementClassString = element.getAttribute('class');
-
-    var elementHasNoClasses = elementClassString === null || elementClassString === '';
-    if (elementHasNoClasses) return validAlpha; //No need to validate just exit early
-
     var elementClasses = elementClassString.split(' ');
 
     var rule = rules.getRuleByRuleClass(elementClasses);
-    if (rule === null) return validAlpha; //No rule found, so just exit
+    if (rule === null && !isRequired) return validAlpha; //No rule found and not required, so just exit
+    if (rule === null && isRequired) { //No rule found and IS required
+      console.warn('No ritsu rule found for the "alpha" input, add the appropriate alpha validation rule');
+      return false; 
+    }
 
     validAlpha = rule.validate(element);
 
@@ -112,11 +113,18 @@ var validation = function validation(rules) {
 
     var validNumeric = true;
 
+    var isRequired = element.hasAttribute('required');
     var elementClassString = element.getAttribute('class');
     var elementClasses = elementClassString ? elementClassString.split(' ') : ''; //In case there is no classes, make it empty strings for null safety
 
     var rule = rules.getRuleByRuleClass(elementClasses);
-    if (rule !== null) validNumeric = rule.validate(element);
+    if (rule === null && !isRequired) return validNumeric; //No rule found and not required, so just exit
+    if (rule === null && isRequired) { //No rule found and IS required
+      console.warn('No ritsu rule found for the "numeric" input, add the appropriate alpha validation rule');
+      return false; 
+    }
+    
+    validNumeric = rule.validate(element);
 
     //If it is still valid, check min and max if it has any
     if (validNumeric) {

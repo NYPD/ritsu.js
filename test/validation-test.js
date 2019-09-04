@@ -249,6 +249,33 @@ describe('validation', function() {
 
     });
 
+    it('should still a required alpha input invalid with no rule class', function() {
+
+      //ritsu should just make sure something
+      //Should fail
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'alpha';
+      input.setAttribute('required', true);
+
+      var validElement = validation.validateElement(input);
+      assert.isFalse(validElement);
+
+    });
+
+    it('should still a required numeric input invalid with no rule class', function() {
+
+      //ritsu should just make sure something
+      //Should fail
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'numeric';
+      input.setAttribute('required', true);
+
+      var validElement = validation.validateElement(input);
+      assert.isFalse(validElement);
+
+    });
 
   });
 
