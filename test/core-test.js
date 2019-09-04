@@ -7,6 +7,7 @@ const should = chai.should();
 
 const jsdom = require('jsdom').jsdom;
 const window = jsdom().defaultView;
+
 global.NodeList = window.NodeList;
 global.HTMLCollection = window.HTMLCollection;
 global.jQuery = require('jquery')(window); //need global for the jQueryIsPresent variable in core js
@@ -849,14 +850,14 @@ describe('core', function() {
       let formGroup = document.getElementsByTagName('div')[0];
       let input = document.getElementsByTagName('input')[0];
 
-      //Check .help=block does not exist
-      var formTextExists = formGroup.querySelector('.form-text') !== null;
+      //Check <small> does not exist
+      var formTextExists = formGroup.querySelector('small') !== null;
       assert.isFalse(formTextExists);
 
       core.showErrorMessages(input);
 
-      //Check .help=block does exist
-      formTextExists = formGroup.querySelector('.form-text') !== null;
+      //Check <small> does exist
+      formTextExists = formGroup.querySelector('small') !== null;
       assert.isTrue(formTextExists);
 
     });

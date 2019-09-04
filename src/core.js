@@ -3,6 +3,7 @@ var core = function core(rules, validation) {
   var version = '${version}';
   var jQueryIsPresent = typeof jQuery !== 'undefined';
   var defaultOptions = {
+    useBootstrap: false,
     useBootstrap3Stlying: false,
     useBootstrap4Stlying: false,
     autoMarkInvalidFields: true,
@@ -19,6 +20,8 @@ var core = function core(rules, validation) {
     defaultOptions.useBootstrap4Stlying = options.useBootstrap4Stlying === undefined ? false : options.useBootstrap4Stlying;
     defaultOptions.autoMarkInvalidFields = options.autoMarkInvalidFields === undefined ? true : options.autoMarkInvalidFields;
     defaultOptions.autoShowErrorMessages = options.autoShowErrorMessages === undefined ? false : options.autoShowErrorMessages;
+
+    defaultOptions.useBootstrap = defaultOptions.useBootstrap3Stlying || defaultOptions.useBootstrap4Stlying;
 
     if (options.messageCallback === undefined) {
       defaultOptions.messageCallback = null;
@@ -200,19 +203,27 @@ var core = function core(rules, validation) {
 
     elementArray.forEach(function(element) {
 
-      var errorElement = defaultOptions.useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
-
-      //If the user is using bootstrap and does not have the input in a form-group for some reason
-      if (errorElement === null)
-        errorElement = element;
-
       var isInvalid = element.getAttribute('data-invalid') === 'true';
+      var useBootstrap4Stlying = defaultOptions.useBootstrap4Stlying;
 
-      if (isInvalid)
-        errorElement.classList.add('has-error');
-      else
-        errorElement.classList.remove('has-error');
+      var errorElement = defaultOptions.useBootstrap3Stlying ? _getClosestParentByClass(element, 'form-group') : element;
+      //If the user is using bootstrap and does not have the input in a form-group for some reason
+      if (errorElement === null) errorElement = element;
+      //The error class is the same for Bootstrap 3 and vanilla
+      var errorElementClassToUse = defaultOptions.useBootstrap4Stlying ? 'is-invalid' : 'has-error';
 
+      //These two vars are used only for Bootstrap 4
+      var nextSibling  = element.nextElementSibling;
+      var hasNextSibling = nextSibling !== undefined && nextSibling !== null;
+
+      if (isInvalid) {
+        errorElement.classList.add(errorElementClassToUse);
+        if (useBootstrap4Stlying && hasNextSibling) nextSibling.classList.add('invalid-feedback');
+      }
+      else {
+        errorElement.classList.remove(errorElementClassToUse);
+        if (useBootstrap4Stlying && hasNextSibling) nextSibling.classList.remove('invalid-feedback');
+      }
     });
 
     return this;
@@ -317,41 +328,44 @@ var core = function core(rules, validation) {
 
       if (useBootstrapStlying && formGroup != null) {
 
-        var helpText = null;
-        
-        if (defaultOptions.useBootstrap3Stlying)
-          helpText = formGroup.querySelector('.help-block');
-        else
-          helpText = formGroup.querySelector('.form-text');
+        if (defaultOptions.useBootstrap4Stlying) {
 
-        var hasHelpText = helpText !== null;
+          var small = document.createElement('small');
+          small.innerHTML = errorMessage;
+          small.className = 'ritsu-error invalid-feedback';
+          formGroup.insertBefore(small, invalidElement.nextSibling);
 
-        var em = document.createElement('em');
-        em.innerHTML = errorMessage;
-
-        var b = document.createElement('b');
-
-        //If it already has a help text node, add the error message indide it without messing up what is already there
-        if (hasHelpText) {
-
-          var br = document.createElement('br');
-          br.className = 'ritsu-error';
-
-          b.className = 'ritsu-error';
-          b.appendChild(em);
-          b.appendChild(br);
-
-          helpText.insertBefore(b, helpText.firstChild);
         } else {
 
-          b.appendChild(em);
+          var helpBlock = formGroup.querySelector('.help-block');
+          var hasHelpBlock = helpBlock !== null;
 
-          var helpTextNode = defaultOptions.useBootstrap3Stlying ? document.createElement('span') : document.createElement('small');
-          helpTextNode.className = 'ritsu-error';
-          helpTextNode.className += defaultOptions.useBootstrap3Stlying ? ' help-block' : ' form-text';
-          helpTextNode.appendChild(b);
+          var em = document.createElement('em');
+          em.innerHTML = errorMessage;
 
-          invalidElement.parentElement.appendChild(helpTextNode);
+          var b = document.createElement('b');
+
+          //If it already has a help text node, add the error message indide it without messing up what is already there
+          if (hasHelpBlock) {
+
+            var br = document.createElement('br');
+            br.className = 'ritsu-error';
+
+            b.className = 'ritsu-error';
+            b.appendChild(em);
+            b.appendChild(br);
+
+            helpBlock.insertBefore(b, helpBlock.firstChild);
+          } else {
+
+            b.appendChild(em);
+
+            var helpTextNode = document.createElement('span');
+            helpTextNode.className = 'ritsu-error help-block';
+            helpTextNode.appendChild(b);
+
+            invalidElement.parentElement.appendChild(helpTextNode);
+          }
         }
 
       } else {
@@ -359,11 +373,12 @@ var core = function core(rules, validation) {
         var elementId = invalidElement.getAttribute('id');
 
         var label = document.createElement('label');
-        label.className = 'error-label';
+        label.className = 'error-label ritsu-error';
         label.htmlFor = elementId || '';
         label.innerHTML = errorMessage;
 
-        var errorContainer = _getClosestParentByClass(invalidElement, 'form-group') === null ? invalidElement.parentElement : _getClosestParentByClass(invalidElement, 'form-group');
+        var closestFormGroup = _getClosestParentByClass(invalidElement, 'form-group');
+        var errorContainer = closestFormGroup === null ? invalidElement.parentElement : closestFormGroup;
 
         errorContainer.appendChild(label);
 
@@ -412,14 +427,22 @@ var core = function core(rules, validation) {
     return containerInputs;
   };
 
-  var _getClosestParentByClass = function _getClosestParentByClass(element, className) {
+  var _getClosestParentByClass = function _getClosestParentByClass(element, className, subString) {
 
     while (element) {
 
       var parent = element.parentElement;
 
-      var isFormGroup = parent !== null && parent.classList.contains(className);
-      if (isFormGroup) return parent;
+      if (parent === null || parent.classList.length === 0) {
+        element = parent;
+        continue;
+      }
+
+      var isClassDesired = Array.from(parent.classList).some(function(clazz) {
+        return subString ? clazz.includes(className) : clazz === className;
+      });
+
+      if (isClassDesired) return parent;
 
       element = parent;
 
@@ -436,7 +459,7 @@ var core = function core(rules, validation) {
 
     if (parentElement === null) return; //still nothing to remove, just exit
 
-    var querySelector = defaultOptions.useBootstrap3Stlying ? '.ritsu-error' : '.error-label, .warning-label';
+    var querySelector = defaultOptions.useBootstrap ? '.ritsu-error' : '.error-label, .warning-label'; //TODO maybe eveything should be a ritsu-error
 
     Array.prototype.slice.call(parentElement.querySelectorAll(querySelector)).forEach(function(element) {
       element.parentElement.removeChild(element);
