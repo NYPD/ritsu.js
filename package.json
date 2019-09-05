@@ -1,23 +1,23 @@
 {
   "name": "ritsu.js",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "HTML form validation",
   "devDependencies": {
     "chai": "^3.5.0",
-    "grunt": "^1.0.3",
+    "eslint": "^6.1.0",
+    "grunt": "^1.0.4",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-cssmin": "^3.0.0",
-    "grunt-contrib-uglify": "^4.0.0",
+    "grunt-contrib-uglify": "^4.0.1",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-stamp": "^0.3.0",
-    "jquery": "^3.1.1",
+    "jquery": ">=3.4.0",
     "jquery-ui-dist": "^1.12.1",
-    "jsdom": "^9.9.1",
-    "mocha": "^5.2.0",
-    "eslint": "^5.12.1",
-    "stylelint": "^9.10.1",
-    "stylelint-config-recommended": "^2.1.0"
+    "jsdom": "^9.12.0",
+    "mocha": "^6.2.0",
+    "stylelint": "^10.1.0",
+    "stylelint-config-recommended": "^2.2.0"
   },
   "scripts": {
     "test": "mocha",
@@ -34,7 +34,10 @@
     "name": "NYPD"
   },
   "contributors": [
-    {}
+    {
+      "name": "suchitha55",
+      "url": "https://github.com/suchitha55"
+    }
   ],
   "license": "MIT"
 }
