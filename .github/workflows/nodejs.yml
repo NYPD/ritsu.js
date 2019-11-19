@@ -16,6 +16,7 @@ jobs:
         node-version: 10.x
     - name: npm test and grunt build
       run: |
+        npm install
         npm test
         grunt build
       env:
